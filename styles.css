@@ -1,10 +1,18 @@
+@font-face {
+  font-family: 'Boheme Floral';
+  src: url('fonts/boheme-floral.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ============================================================
    Disha & Rajat — Unified Design System
    Palette sampled from the approved swatches:
      Gold #C9A961 · Dark gray #3B3A37 · Smoke #C8BFB4
      Glacier #D4D5CE · Taupe #9F968A · Cream #DDCFBA
      Ink #1B1A17 · Ivory #FAF7F0 · White #FFFFFF
-   Fonts: Great Vibes (script accents) · Cinzel (headings)
+   Fonts: Boheme Floral (script accents) · Cinzel (headings)
           Montserrat (body)
    ============================================================ */
 :root {
@@ -30,7 +38,7 @@
   --text-sub: #9F968A;
 
   --font-serif: 'Cinzel', serif;
-  --font-script: 'Great Vibes', cursive;
+  --font-script: 'Boheme Floral', cursive;
   --font-sans: 'Montserrat', sans-serif;
 
   --shadow-soft: 0 10px 30px rgba(60, 50, 35, 0.10);
