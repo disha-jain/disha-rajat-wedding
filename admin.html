@@ -92,16 +92,44 @@
 
     <div class="card">
       <h3 class="gold-title">Loaded Guest Roster</h3>
+      <div class="roster-controls">
+        <input type="search" id="guest-search" placeholder="Search name, email, family, code, or tag\u2026" oninput="rosterQuery=this.value; renderRosterTable(getStoredGuestList())">
+      </div>
+      <div class="bulk-bar" id="bulk-bar" style="display:none;">
+        <span id="bulk-count" style="font-size:0.88rem; white-space:nowrap;"></span>
+        <input type="text" id="bulk-add-tags" placeholder="Tags to add (separate with ;)">
+        <input type="text" id="bulk-remove-tags" placeholder="Tags to remove">
+        <button class="btn-primary btn-sm" onclick="applyBulkTags()">Apply tags</button>
+        <button class="btn-gold-outline btn-sm" onclick="clearSelection()">Clear</button>
+      </div>
       <div id="guest-roster-table" style="margin-top: 15px; overflow-x: auto;">
         <p style="color: var(--text-sub);">No guests loaded yet. Upload a CSV above or add entries to localStorage / Firebase.</p>
       </div>
-      </div>
+    </div>
     </div>
   </div>
 
   <footer>
     DISHA & RAJAT • #RISHTA • 2027
   </footer>
+
+  <div class="modal-overlay" id="edit-modal" style="display:none;">
+    <div class="modal-card" role="dialog" aria-label="Edit guest">
+      <h3 class="gold-title">Edit guest</h3>
+      <p class="modal-sub" id="edit-modal-sub"></p>
+      <div class="form-group"><label for="edit-first">First name</label><input type="text" id="edit-first"></div>
+      <div class="form-group"><label for="edit-last">Last name</label><input type="text" id="edit-last"></div>
+      <div class="form-group"><label for="edit-email">Email</label><input type="email" id="edit-email"></div>
+      <div class="form-group"><label for="edit-tags">Tags (separate with ; )</label><input type="text" id="edit-tags" placeholder="india-guest; bride-side"></div>
+      <div class="form-group"><label for="edit-plus">Max additional guests</label><input type="number" id="edit-plus" min="0" step="1"></div>
+      <div class="form-group"><label for="edit-family-name">Family name</label><input type="text" id="edit-family-name"></div>
+      <div class="form-group"><label for="edit-family-code">Family code (invite code &mdash; cannot change)</label><input type="text" id="edit-family-code" disabled></div>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="saveEditModal()">Save changes</button>
+        <button class="btn-gold-outline" onclick="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // Navigation visibility for unlocked travel tabs
@@ -150,46 +178,189 @@
       renderRosterTable(families);
     }
 
+    // ---------- Guest roster: search, select, edit, bulk tags ----------
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    let rosterSelection = new Set();   // "FAMILYCODE::memberIndex"
+    let rosterQuery = '';
+    let editingKey = null;
+
+    function flatRoster(families) {
+      const rows = [];
+      (families || []).forEach(fam => {
+        (fam.members || []).forEach((m, idx) => rows.push({ fam, m, idx, key: fam.family_code + '::' + idx }));
+      });
+      return rows;
+    }
+
+    function rowMatches(row, q) {
+      if (!q || !q.trim()) return true;
+      const hay = [row.fam.family_code, row.fam.family_name, row.m.first_name, row.m.last_name,
+        row.m.email || '', ...((row.m.tags || []).map(String))].join(' ').toLowerCase();
+      return q.toLowerCase().split(/\s+/).filter(Boolean).every(tok => hay.includes(tok));
+    }
+
+    function persistFamilies(families) {
+      localStorage.setItem("wedding_guest_database", JSON.stringify(families));
+      if (typeof db !== 'undefined' && db !== null) {
+        families.forEach(fam => { db.collection("families").doc(fam.family_code).set(fam).catch(() => {}); });
+      }
+    }
+
+    function setAdminStatus(msg, isError) {
+      const el = document.getElementById('admin-status');
+      el.style.color = isError ? '#c44' : '#2e7d4f';
+      el.innerText = msg;
+    }
+
+    function parseTagsInput(str) {
+      return [...new Set(String(str || '').split(/[;,]/).map(x => x.trim().toLowerCase()).filter(Boolean))];
+    }
+
     function renderRosterTable(families) {
       const container = document.getElementById("guest-roster-table");
-      if (!families || families.length === 0) {
-        container.innerHTML = `<p style="color: var(--text-sub);">No guests currently loaded in local storage or database.</p>`;
+      const allRows = flatRoster(families);
+      const valid = new Set(allRows.map(r => r.key));
+      rosterSelection.forEach(k => { if (!valid.has(k)) rosterSelection.delete(k); });
+      const rows = allRows.filter(r => rowMatches(r, rosterQuery));
+
+      if (!rows.length) {
+        container.innerHTML = `<p style="color: var(--text-sub);">` +
+          (rosterQuery.trim() ? `No guests match &ldquo;${esc(rosterQuery)}&rdquo;.` : `No guests currently loaded in local storage or database.`) + `</p>`;
+        updateBulkBar();
         return;
       }
 
-      let html = `
-        <table style="width: 100%; border-collapse: collapse; color: var(--text-main); font-size: 0.85rem; text-align: left;">
-          <thead>
-            <tr style="border-bottom: 2px solid var(--border-gold); color: var(--gold-dark);">
-              <th style="padding: 8px;">Family Code</th>
-              <th style="padding: 8px;">Family Name</th>
-              <th style="padding: 8px;">Name</th>
-              <th style="padding: 8px;">Email</th>
-              <th style="padding: 8px;">Tags</th>
-              <th style="padding: 8px;">Plus Ones</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
+      let html = `<table class="roster-table"><thead><tr>
+        <th style="width:36px;"><input type="checkbox" id="select-all" title="Select all" aria-label="Select all"></th>
+        <th>Family</th><th>Name</th><th>Email</th><th>Tags</th><th title="Max additional guests">+1s</th><th></th>
+      </tr></thead><tbody>`;
 
-      families.forEach(fam => {
-        (fam.members || []).forEach(m => {
-          html += `
-            <tr style="border-bottom: 1px solid var(--line);">
-              <td style="padding: 8px;"><code>${fam.family_code}</code></td>
-              <td style="padding: 8px;">${fam.family_name}</td>
-              <td style="padding: 8px;">${m.first_name} ${m.last_name}</td>
-              <td style="padding: 8px;">${m.email || '-'}</td>
-              <td style="padding: 8px; color: var(--gold-dark); font-weight: 600;">${(m.tags || []).join(', ')}</td>
-              <td style="padding: 8px;">${m.max_plus_ones || 0}</td>
-            </tr>
-          `;
-        });
+      rows.forEach(r => {
+        const checked = rosterSelection.has(r.key) ? 'checked' : '';
+        const chips = (r.m.tags || []).map(tag => `<span class="tag-chip">${esc(tag)}</span>`).join('')
+          || '<span style="color:var(--taupe);">&mdash;</span>';
+        html += `<tr>
+          <td><input type="checkbox" data-key="${esc(r.key)}" ${checked} onchange="toggleSelect(this)" aria-label="Select ${esc(r.m.first_name)} ${esc(r.m.last_name)}"></td>
+          <td><code>${esc(r.fam.family_code)}</code><div style="font-size:0.78rem;color:var(--taupe);">${esc(r.fam.family_name)}</div></td>
+          <td style="font-weight:600;white-space:nowrap;">${esc(r.m.first_name)} ${esc(r.m.last_name)}</td>
+          <td style="font-size:0.85rem;">${esc(r.m.email || '\u2014')}</td>
+          <td>${chips}</td>
+          <td>${r.m.max_plus_ones || 0}</td>
+          <td><button class="edit-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="openEditModal(this)">Edit</button></td>
+        </tr>`;
       });
 
-      html += `</tbody></table>`;
-      container.innerHTML = html;
+      container.innerHTML = html + `</tbody></table>`;
+
+      const sa = document.getElementById('select-all');
+      if (sa) {
+        const keys = rows.map(r => r.key);
+        sa.checked = keys.length > 0 && keys.every(k => rosterSelection.has(k));
+        sa.onchange = () => {
+          keys.forEach(k => { sa.checked ? rosterSelection.add(k) : rosterSelection.delete(k); });
+          renderRosterTable(getStoredGuestList());
+        };
+      }
+      updateBulkBar();
     }
+
+    function toggleSelect(cb) {
+      if (cb.checked) rosterSelection.add(cb.dataset.key); else rosterSelection.delete(cb.dataset.key);
+      renderRosterTable(getStoredGuestList());
+    }
+
+    function clearSelection() {
+      rosterSelection.clear();
+      renderRosterTable(getStoredGuestList());
+    }
+
+    function updateBulkBar() {
+      const bar = document.getElementById('bulk-bar');
+      if (!bar) return;
+      const n = rosterSelection.size;
+      bar.style.display = n ? 'flex' : 'none';
+      document.getElementById('bulk-count').innerHTML = `<strong>${n}</strong> guest${n === 1 ? '' : 's'} selected`;
+    }
+
+    function applyBulkTags() {
+      const add = parseTagsInput(document.getElementById('bulk-add-tags').value);
+      const remove = new Set(parseTagsInput(document.getElementById('bulk-remove-tags').value));
+      if (!add.length && !remove.size) { setAdminStatus('Enter tags to add and/or remove first.', true); return; }
+      if (!rosterSelection.size) { setAdminStatus('Select at least one guest first.', true); return; }
+      const families = getStoredGuestList();
+      let changed = 0;
+      families.forEach(fam => {
+        (fam.members || []).forEach((m, idx) => {
+          const key = fam.family_code + '::' + idx;
+          if (!rosterSelection.has(key)) return;
+          const tags = new Set((m.tags || []).map(x => String(x).toLowerCase()));
+          remove.forEach(x => tags.delete(x));
+          add.forEach(x => tags.add(x));
+          m.tags = [...tags];
+          changed++;
+        });
+      });
+      persistFamilies(families);
+      rosterSelection.clear();
+      document.getElementById('bulk-add-tags').value = '';
+      document.getElementById('bulk-remove-tags').value = '';
+      setAdminStatus(`Tags updated for ${changed} guest${changed === 1 ? '' : 's'}.`, false);
+      loadDashboardData();
+    }
+
+    function openEditModal(btn) {
+      const famCode = btn.dataset.fam, idx = parseInt(btn.dataset.idx, 10);
+      const fam = getStoredGuestList().find(f => f.family_code === famCode);
+      if (!fam || !fam.members[idx]) return;
+      const m = fam.members[idx];
+      editingKey = famCode + '::' + idx;
+      document.getElementById('edit-modal-sub').textContent = fam.family_name + ' \u00B7 ' + famCode;
+      document.getElementById('edit-first').value = m.first_name || '';
+      document.getElementById('edit-last').value = m.last_name || '';
+      document.getElementById('edit-email').value = m.email || '';
+      document.getElementById('edit-tags').value = (m.tags || []).join('; ');
+      document.getElementById('edit-plus').value = m.max_plus_ones || 0;
+      document.getElementById('edit-family-name').value = fam.family_name || '';
+      document.getElementById('edit-family-code').value = fam.family_code || '';
+      document.getElementById('edit-modal').style.display = 'flex';
+      document.getElementById('edit-first').focus();
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+      editingKey = null;
+    }
+
+    function saveEditModal() {
+      if (!editingKey) return;
+      const parts = editingKey.split('::');
+      const idx = parseInt(parts.pop(), 10);
+      const famCode = parts.join('::');
+      const families = getStoredGuestList();
+      const fam = families.find(f => f.family_code === famCode);
+      if (!fam || !fam.members[idx]) { closeEditModal(); return; }
+      const m = fam.members[idx];
+      const first = document.getElementById('edit-first').value.trim();
+      const last = document.getElementById('edit-last').value.trim();
+      if (!first || !last) { alert('First and last name are required.'); return; }
+      m.first_name = first;
+      m.last_name = last;
+      m.email = document.getElementById('edit-email').value.trim();
+      m.tags = parseTagsInput(document.getElementById('edit-tags').value);
+      m.max_plus_ones = Math.max(0, parseInt(document.getElementById('edit-plus').value, 10) || 0);
+      const famName = document.getElementById('edit-family-name').value.trim();
+      if (famName) fam.family_name = famName;
+      persistFamilies(families);
+      closeEditModal();
+      setAdminStatus(`Saved changes for ${first} ${last}.`, false);
+      loadDashboardData();
+    }
+
+    // modal: close on overlay click / Escape
+    document.getElementById('edit-modal').addEventListener('click', e => {
+      if (e.target.id === 'edit-modal') closeEditModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditModal(); });
 
     function handleAdminCSVUpload(e) {
       const file = e.target.files[0];
