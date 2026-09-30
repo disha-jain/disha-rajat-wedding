@@ -4,22 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Schedule — Disha & Rajat (#rishta)</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="css/schedule.css">
+  <style>
+    body { background: #f6f1e8; color: #2b2b2b; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .lights-overlay { display:none; }
+    nav { background: rgba(10,10,12,0.92); }
+    .schedule-wrap { max-width: 420px; margin: 0 auto; padding: 24px 18px 50px; position: relative; }
+    .wedding-kicker { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 36px; letter-spacing: 1px; color: #1a1a1a; }
+    .schedule-script { font-family: 'Great Vibes', cursive; font-size: 52px; color: #8a6d3b; margin: -12px 0 20px; }
+    .timeline { position: relative; margin-top: 10px; }
+    .timeline-item { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-icon { width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: #fff; border: 1px solid #e8ddd0; display:flex; align-items:center; justify-content:center; font-size:20px; }
+    .timeline-time { font-weight: 800; font-size: 15px; color: #1a1a1a; letter-spacing: 0.3px; }
+    .timeline-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #6b5d4f; margin-top: 2px; }
+    .timeline-date { font-size: 12px; color: #8a7a68; margin-top: 6px; }
+    .floral { position: absolute; right: -10px; bottom: 20px; width: 140px; opacity: 0.9; pointer-events:none; }
+    footer { background:#1e1a16; color:#d8cfbd; border-top:none; }
+  </style>
 </head>
 <body>
+  <script src="js/guest-auth.js"></script>
   <script>
-    if (sessionStorage.getItem("site_unlocked") !== "true") {
-      window.location.href = "index.html";
+    if (!window.GuestAuth.requireUnlock()) {} else {
+      document.addEventListener('DOMContentLoaded', () => { window.GuestAuth.renderNav(); renderSchedule(); });
     }
   </script>
-
-  <div class="lights-overlay"></div>
 
   <nav>
     <a href="home.html">Home</a>
@@ -30,9 +45,17 @@
     <a href="admin.html">Host Admin</a>
   </nav>
 
-  <div class="container">
-    <h2 class="section-title">Schedule of Events</h2>
-    <div id="events-container"></div>
+  <div class="schedule-wrap">
+    <div class="wedding-kicker">WEDDING</div>
+    <div class="schedule-script">Schedule</div>
+
+    <div class="timeline" id="timeline"></div>
+
+    <svg class="floral" viewBox="0 0 100 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 10 C60 40 75 60 50 80 C25 60 40 40 50 10Z" stroke="#8a6d3b" stroke-width="1.2" fill="#f9f3e8"/>
+      <path d="M50 80 C62 100 70 120 50 150 C30 120 38 100 50 80Z" stroke="#8a6d3b" stroke-width="1.2" fill="#f1e6d2"/>
+      <circle cx="50" cy="80" r="4" fill="#8a6d3b"/>
+    </svg>
   </div>
 
   <footer>
@@ -41,39 +64,35 @@
 
   <script>
     const masterEvents = [
-      { id: 'e1', title: 'Welcome Lunch & Mehendi', date: 'March 13, 2027', time: 'Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
-      { id: 'e2', title: "Disha's Tel Ban", date: 'March 13, 2027', time: 'Late Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
-      { id: 'e3', title: 'Sangeet', date: 'March 13, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
-      { id: 'e4', title: "Rajat's Tel Haldi", date: 'March 14, 2027', time: 'Morning', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'groom-side'] },
-      { id: 'e5', title: "Disha's Gaur Puja & Phoolon Ki Haldi", date: 'March 14, 2027', time: 'Morning', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
-      { id: 'e6', title: 'Shaadi (Wedding Ceremony)', date: 'March 14, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
-      { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', time: '6:00 PM - 12:00 AM', location: 'The Bellevue, Chantilly, Virginia', tags: ['us-guest'] }
+      { id: 'e1', title: 'Wedding Ceremony', date: 'March 14, 2027', time: '3:30 PM', icon: '💒', tags: ['india-guest'] },
+      { id: 'e2', title: 'Photo Hour', date: 'March 14, 2027', time: '5:30 PM', icon: '📸', tags: ['india-guest'] },
+      { id: 'e3', title: 'Cocktail Hour', date: 'March 14, 2027', time: '6:30 PM', icon: '🍸', tags: ['india-guest'] },
+      { id: 'e4', title: 'Dance Party', date: 'March 14, 2027', time: '8:00 PM', icon: '💃', tags: ['india-guest'] },
+      { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', time: '6:00 PM', icon: '🥂', tags: ['us-guest'] },
+      { id: 'e1b', title: 'Welcome Lunch & Mehendi', date: 'March 13, 2027', time: '12:00 PM', icon: '🌿', tags: ['india-guest'] },
+      { id: 'e3b', title: 'Sangeet', date: 'March 13, 2027', time: '7:00 PM', icon: '🎶', tags: ['india-guest'] }
     ];
 
-    const tags = JSON.parse(sessionStorage.getItem("guest_tags") || '["india-guest", "us-guest"]');
-    const storedTags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-    if (storedTags.includes("us-guest")) {
-      const el = document.getElementById("nav-travel-us");
-      if (el) el.style.display = "inline-block";
+    function renderSchedule() {
+      const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '["india-guest","us-guest"]');
+      const allowed = masterEvents.filter(e => e.tags.some(t => tags.includes(t)));
+      const container = document.getElementById('timeline');
+      if (!allowed.length) {
+        container.innerHTML = '<p style="text-align:center; color:#8a7a68;">Details coming soon.</p>';
+        return;
+      }
+      // Sort by date/time roughly as defined
+      container.innerHTML = allowed.map(evt => `
+        <div class="timeline-item">
+          <div class="timeline-icon">${evt.icon}</div>
+          <div>
+            <div class="timeline-time">${evt.time}</div>
+            <div class="timeline-label">${evt.title}</div>
+            <div class="timeline-date">${evt.date}</div>
+          </div>
+        </div>
+      `).join('');
     }
-    if (storedTags.includes("india-guest")) {
-      const el = document.getElementById("nav-travel-india");
-      if (el) el.style.display = "inline-block";
-    }
-
-    const container = document.getElementById("events-container");
-    const allowed = masterEvents.filter(e => e.tags.some(t => tags.includes(t)));
-
-    allowed.forEach(evt => {
-      const card = document.createElement("div");
-      card.className = "card event-card";
-      card.innerHTML = `
-        <h3 class="gold-title">${evt.title}</h3>
-        <p class="event-time">${evt.date} • ${evt.time}</p>
-        <p class="event-location">${evt.location}</p>
-      `;
-      container.appendChild(card);
-    });
   </script>
 </body>
 </html>
