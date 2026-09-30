@@ -1,292 +1,78 @@
-/* 
-  Disha & Rajat Wedding - RSVP styling Overrides
-  File Location: css/rsvp.css
-  
-  SUPER READABILITY EDITION:
-  Forces pure, opaque high-contrast backgrounds and rich black typography 
-  on all form elements to ensure perfect legibility.
-*/
+body {
+      background:
+        radial-gradient(circle at 20% 10%, rgba(201,169,97,0.12), transparent 45%),
+        radial-gradient(circle at 80% 90%, rgba(201,169,97,0.08), transparent 45%),
+        var(--ivory);
+      min-height: 100vh;
+      font-family: var(--font-sans);
+    }
+    .cursive-header { color: var(--gold-dark) !important; text-shadow: none !important; }
+    .sub-header { color: var(--dark-gray) !important; text-shadow: none !important; }
+    .rsvp-card { border: 1px solid var(--line) !important; box-shadow: var(--shadow-soft) !important; }
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    .rsvp-photo-frame {
+      width: 110px; height: 140px; margin: 20px auto 4px auto;
+      border-radius: 50% / 42%; border: 3px solid var(--gold-primary);
+      overflow: hidden; box-shadow: var(--shadow-soft); background: var(--white);
+    }
+    .rsvp-photo-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 25%; }
 
-/* Center phone mockup/responsive form wrapper */
-.phone-wrapper {
-    max-width: 380px;
-    width: 100%;
-    margin: 40px auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    box-sizing: border-box;
-    padding: 0 10px;
-}
+    .rsvp-wrap { max-width: 620px; margin: 0 auto; padding: 34px 16px 60px; }
+    .family-greeting { text-align: center; color: var(--taupe); font-size: 0.95rem; margin-bottom: 26px; }
+    .family-greeting strong { color: var(--dark-gray); }
 
-/* OUTSIDE THE CARD: High-visibility White Text with soft dropshadows */
-.cursive-header {
-    font-family: 'Boheme Floral', cursive !important;
-    font-size: 38px !important;
-    color: #ffffff !important;
-    font-weight: 400 !important;
-    margin: 0 0 10px 0 !important;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6) !important;
-    letter-spacing: 1px !important;
-}
+    .event-card {
+      background: var(--white); border: 1px solid var(--line); border-radius: 16px;
+      box-shadow: var(--shadow-soft); padding: 22px 20px; margin-bottom: 18px;
+    }
+    .event-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 6px; }
+    .event-icon {
+      width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%;
+      background: var(--ivory); border: 1px solid var(--border-gold);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .event-title { font-family: var(--font-serif); font-size: 1.15rem; letter-spacing: 1px; color: var(--dark-gray); }
+    .event-sub { font-size: 0.85rem; color: var(--taupe); margin-top: 3px; line-height: 1.55; }
+    .event-sub strong { color: var(--dark-gray); }
+    .quick-links { display: flex; gap: 14px; margin: 10px 0 12px; }
+    .link-btn {
+      background: none; border: none; padding: 0; cursor: pointer;
+      color: var(--gold-dark); font-size: 0.8rem; font-weight: 700; text-decoration: underline;
+      font-family: var(--font-sans);
+    }
+    .person-label { display: flex; align-items: center; gap: 4px; }
+    .person-kind {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--taupe); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; margin-left: 8px;
+    }
+    .checkbox-pill:has(input:checked) .person-kind { color: var(--gold-light); border-color: rgba(255,255,255,0.35); }
 
-.sub-header {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 21px !important;
-    font-weight: 700 !important;
-    color: #ffffff !important;
-    margin: 0 0 28px 0 !important;
-    line-height: 1.35 !important;
-    letter-spacing: -0.3px !important;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6) !important;
-}
+    .extra-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .extra-row input { flex: 1; }
+    .extra-remove {
+      flex-shrink: 0; width: 44px; border-radius: 10px; border: 1.5px solid var(--line);
+      background: var(--white); font-size: 1.2rem; cursor: pointer; color: var(--taupe);
+    }
+    .extra-remove:hover { border-color: #c44; color: #c44; }
+    .add-extra-btn {
+      width: 100%; padding: 11px; border-radius: 10px; border: 1.5px dashed var(--gold-primary);
+      background: transparent; color: var(--gold-dark); font-weight: 700; font-size: 0.88rem; cursor: pointer;
+      font-family: var(--font-sans);
+    }
+    .add-extra-btn:disabled { opacity: 0.45; cursor: default; }
+    .limit-note { font-size: 0.82rem; color: var(--taupe); margin-bottom: 14px; line-height: 1.6; }
 
-/* 
-  RSVP Solid Container Card
-  Using pure, opaque white (#ffffff) to guarantee no background details bleed through.
-*/
-.rsvp-card {
-    background-color: #ffffff !important; /* Pure Solid White - No opacity leaks */
-    border: 1px solid #dcdcdc !important;
-    border-radius: 24px !important;
-    padding: 30px 24px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
-    text-align: left;
-}
+    .section-card {
+      background: var(--white); border: 1px solid var(--line); border-radius: 16px;
+      box-shadow: var(--shadow-soft); padding: 22px 20px; margin-bottom: 18px;
+    }
+    .section-card h3 { font-family: var(--font-serif); letter-spacing: 1px; color: var(--dark-gray); margin-bottom: 6px; }
 
-/* INSIDE THE CARD: Strict, absolute black elements */
-.rsvp-card *, 
-form#rsvp-form *,
-form#rsvp-form label,
-form#rsvp-form span,
-form#rsvp-form p {
-    color: #000000 !important; /* Forces solid black text for absolute readability */
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-}
-
-/* Title inside the card */
-.rsvp-title {
-    font-size: 24px !important;
-    font-weight: 800 !important;
-    color: #000000 !important;
-    margin: 0 0 22px 0 !important;
-    letter-spacing: -0.5px !important;
-}
-
-/* Form Layout Group spacing */
-.form-group {
-    margin-bottom: 20px !important;
-    box-sizing: border-box !important;
-}
-
-.form-label {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: #000000 !important;
-    margin-bottom: 8px !important;
-    display: block !important;
-}
-
-/* Styled text input fields */
-.text-input,
-form input[type="text"],
-form input[type="email"],
-form textarea {
-    width: 100% !important;
-    padding: 12px 14px !important;
-    border: 1.5px solid #a0a0a0 !important; /* Strong dark border for clear field edges */
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    color: #000000 !important; /* Solid dark text inside inputs */
-    box-sizing: border-box !important;
-    outline: none !important;
-    transition: border-color 0.2s, box-shadow 0.2s !important;
-    background-color: #ffffff !important; /* Pure white background inside inputs */
-}
-
-.text-input::placeholder,
-form input::placeholder {
-    color: #555555 !important; /* Easily legible placeholder text */
-    opacity: 1 !important;
-}
-
-.text-input:focus,
-form input[type="text"]:focus {
-    border-color: #000000 !important;
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Option wrappers as custom blocks */
-.option-pill,
-.checkbox-pill,
-form .radio-option,
-form .checkbox-option {
-    display: block !important;
-    background-color: #f2f2f2 !important; /* Easily legible background contrast */
-    padding: 12px 16px !important;
-    border-radius: 10px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #000000 !important; /* Crisp black option text */
-    cursor: pointer !important;
-    transition: background-color 0.2s, color 0.2s !important;
-    user-select: none !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    border: 1px solid #dcdcdc !important;
-}
-
-/* Hide native inputs cleanly inside the custom styled container pills */
-.option-pill input,
-.checkbox-pill input,
-form .radio-option input,
-form .checkbox-option input {
-    position: absolute !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    pointer-events: none !important;
-}
-
-.option-pill:hover,
-.checkbox-pill:hover,
-form .radio-option:hover,
-form .checkbox-option:hover {
-    background-color: #e5e5e2 !important; /* Subtle contrast change on hover */
-}
-
-/* 
-  Active/Selected states for Option wrappers
-  Turns selected option background to pure black, and text/labels inside to crisp white.
-*/
-.option-pill:has(input:checked),
-form .radio-option:has(input:checked),
-.checkbox-pill:has(input:checked),
-form .checkbox-option:has(input:checked) {
-    background-color: #000000 !important; /* Pure black selection */
-}
-
-.option-pill:has(input:checked) *,
-form .radio-option:has(input:checked) *,
-.checkbox-pill:has(input:checked) *,
-form .checkbox-option:has(input:checked) * {
-    color: #ffffff !important; /* High contrast selected white text */
-}
-
-/* Custom Checkbox Squares */
-.checkbox-icon {
-    width: 16px !important;
-    height: 16px !important;
-    border: 2px solid #555555 !important; /* Strong contrast border */
-    border-radius: 4px !important;
-    margin-right: 12px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background-color: #ffffff !important;
-    transition: all 0.2s !important;
-    box-sizing: border-box !important;
-    flex-shrink: 0 !important;
-    vertical-align: middle !important;
-}
-
-.checkbox-pill:has(input:checked) .checkbox-icon,
-form .checkbox-option:has(input:checked) .checkbox-icon {
-    background-color: #ffffff !important;
-    border-color: #ffffff !important;
-}
-
-.checkbox-pill:has(input:checked) .checkbox-icon::after,
-form .checkbox-option:has(input:checked) .checkbox-icon::after {
-    content: "" !important;
-    width: 4px !important;
-    height: 8px !important;
-    border: solid #000000 !important; /* Dark tick mark inside white box */
-    border-width: 0 2px 2px 0 !important;
-    transform: rotate(45deg) !important;
-    margin-bottom: 2px !important;
-    display: block !important;
-}
-
-/* Symmetrical guest count selection rows */
-.guests-row {
-    display: flex !important;
-    gap: 8px !important;
-    box-sizing: border-box !important;
-}
-
-.guest-pill,
-form .guest-option {
-    flex: 1 !important;
-    display: block !important;
-    background-color: #f2f2f2 !important;
-    padding: 10px 0 !important;
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    color: #000000 !important; /* Dark unselected numbers */
-    cursor: pointer !important;
-    text-align: center !important;
-    transition: background-color 0.2s, color 0.2s !important;
-    user-select: none !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    border: 1px solid #dcdcdc !important;
-}
-
-.guest-pill input,
-form .guest-option input {
-    position: absolute !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    pointer-events: none !important;
-}
-
-.guest-pill:hover,
-form .guest-option:hover {
-    background-color: #e5e5e2 !important;
-}
-
-.guest-pill:has(input:checked),
-form .guest-option:has(input:checked) {
-    background-color: #000000 !important;
-    color: #ffffff !important; /* High contrast white text on selection */
-}
-
-.guest-pill:has(input:checked) * {
-    color: #ffffff !important;
-}
-
-/* Submit Response button */
-.submit-btn,
-form button[type="submit"] {
-    background-color: #000000 !important; /* Opaque solid black button */
-    color: #ffffff !important; /* High contrast solid white text */
-    border: none !important;
-    padding: 12px 24px !important;
-    border-radius: 8px !important;
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    transition: background-color 0.2s !important;
-    width: 60% !important;
-    text-align: center !important;
-    display: inline-block !important;
-    box-sizing: border-box !important;
-    margin-top: 10px !important;
-}
-
-.submit-btn:hover,
-form button[type="submit"]:hover {
-    background-color: #222222 !important;
-}
+    .submit-wrap { text-align: center; margin-top: 8px; }
+    .submit-wrap .submit-btn { width: 100% !important; max-width: 340px; border-radius: 999px !important; padding: 14px 24px !important; font-size: 15px !important; letter-spacing: 2px !important; }
+    .form-error {
+      display: none; background: #fbeeea; border: 1px solid #f0c9bd; color: #b3402e;
+      border-radius: 10px; padding: 12px 16px; font-size: 0.88rem; margin-bottom: 18px;
+    }
+    #rsvp-success { display: none; text-align: center; padding: 30px 10px; }
+    #rsvp-success .big { font-family: var(--font-script); font-size: 3rem; color: var(--gold-dark); }
