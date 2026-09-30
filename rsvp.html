@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/rsvp.css">
@@ -28,15 +28,76 @@
     .cursive-header { color: var(--gold-dark) !important; text-shadow: none !important; }
     .sub-header { color: var(--dark-gray) !important; text-shadow: none !important; }
     .rsvp-card { border: 1px solid var(--line) !important; box-shadow: var(--shadow-soft) !important; }
+
+    .rsvp-wrap { max-width: 620px; margin: 0 auto; padding: 34px 16px 60px; }
+    .family-greeting { text-align: center; color: var(--taupe); font-size: 0.95rem; margin-bottom: 26px; }
+    .family-greeting strong { color: var(--dark-gray); }
+
+    .event-card {
+      background: var(--white); border: 1px solid var(--line); border-radius: 16px;
+      box-shadow: var(--shadow-soft); padding: 22px 20px; margin-bottom: 18px;
+    }
+    .event-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 6px; }
+    .event-icon {
+      width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%;
+      background: var(--ivory); border: 1px solid var(--border-gold);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .event-title { font-family: var(--font-serif); font-size: 1.15rem; letter-spacing: 1px; color: var(--dark-gray); }
+    .event-sub { font-size: 0.85rem; color: var(--taupe); margin-top: 3px; line-height: 1.55; }
+    .event-sub strong { color: var(--dark-gray); }
+    .quick-links { display: flex; gap: 14px; margin: 10px 0 12px; }
+    .link-btn {
+      background: none; border: none; padding: 0; cursor: pointer;
+      color: var(--gold-dark); font-size: 0.8rem; font-weight: 700; text-decoration: underline;
+      font-family: var(--font-sans);
+    }
+    .person-label { display: flex; align-items: center; gap: 4px; }
+    .person-kind {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--taupe); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; margin-left: 8px;
+    }
+    .checkbox-pill:has(input:checked) .person-kind { color: var(--gold-light); border-color: rgba(255,255,255,0.35); }
+
+    .extra-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .extra-row input { flex: 1; }
+    .extra-remove {
+      flex-shrink: 0; width: 44px; border-radius: 10px; border: 1.5px solid var(--line);
+      background: var(--white); font-size: 1.2rem; cursor: pointer; color: var(--taupe);
+    }
+    .extra-remove:hover { border-color: #c44; color: #c44; }
+    .add-extra-btn {
+      width: 100%; padding: 11px; border-radius: 10px; border: 1.5px dashed var(--gold-primary);
+      background: transparent; color: var(--gold-dark); font-weight: 700; font-size: 0.88rem; cursor: pointer;
+      font-family: var(--font-sans);
+    }
+    .add-extra-btn:disabled { opacity: 0.45; cursor: default; }
+    .limit-note { font-size: 0.82rem; color: var(--taupe); margin-bottom: 14px; line-height: 1.6; }
+
+    .section-card {
+      background: var(--white); border: 1px solid var(--line); border-radius: 16px;
+      box-shadow: var(--shadow-soft); padding: 22px 20px; margin-bottom: 18px;
+    }
+    .section-card h3 { font-family: var(--font-serif); letter-spacing: 1px; color: var(--dark-gray); margin-bottom: 6px; }
+
+    .submit-wrap { text-align: center; margin-top: 8px; }
+    .submit-wrap .submit-btn { width: 100% !important; max-width: 340px; border-radius: 999px !important; padding: 14px 24px !important; font-size: 15px !important; letter-spacing: 2px !important; }
+    .form-error {
+      display: none; background: #fbeeea; border: 1px solid #f0c9bd; color: #b3402e;
+      border-radius: 10px; padding: 12px 16px; font-size: 0.88rem; margin-bottom: 18px;
+    }
+    #rsvp-success { display: none; text-align: center; padding: 30px 10px; }
+    #rsvp-success .big { font-family: var(--font-script); font-size: 3rem; color: var(--gold-dark); }
   </style>
 </head>
 <body>
   <script src="js/guest-auth.js"></script>
+  <script src="js/events.js"></script>
   <script>
     if (!window.GuestAuth.requireUnlock()) {
       // redirecting
     } else {
-      document.addEventListener('DOMContentLoaded', () => window.GuestAuth.renderNav());
+      document.addEventListener('DOMContentLoaded', () => { window.GuestAuth.renderNav(); initRsvp(); });
     }
   </script>
 
@@ -49,60 +110,52 @@
     <a href="admin.html">Host Admin</a>
   </nav>
 
-  <div class="phone-wrapper">
-    <div class="cursive-header">Can't wait to party?</div>
-    <div class="sub-header">Fill out the RSVP<br>form below and let us<br>know</div>
+  <div class="rsvp-wrap">
+    <div class="cursive-header" style="text-align:center;">Can't wait to party?</div>
+    <div class="sub-header" style="text-align:center;">Tell us who's coming<br>to each event</div>
 
-    <div class="rsvp-card">
-      <div class="rsvp-title">RSVP</div>
+    <p class="family-greeting" id="family-greeting"></p>
+    <div class="form-error" id="form-error"></div>
 
-      <form id="rsvp-form" onsubmit="handleRSVPSubmit(event)">
-        <div class="form-group">
-          <label class="form-label" for="rsvp-name">Your name</label>
-          <input class="text-input" type="text" id="rsvp-name" placeholder="" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Are you coming?</label>
-          <label class="option-pill"><input type="radio" name="attending" value="yes" required><span>Absolutely, wouldn't miss it!</span></label>
-          <div style="height:8px"></div>
-          <label class="option-pill"><input type="radio" name="attending" value="no" required><span>Can't make it this time.</span></label>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Number of Guests Attending</label>
-          <div class="guests-row">
-            <label class="guest-pill"><input type="radio" name="guest_count" value="1" checked><span>1</span></label>
-            <label class="guest-pill"><input type="radio" name="guest_count" value="2"><span>2</span></label>
-            <label class="guest-pill"><input type="radio" name="guest_count" value="3"><span>3</span></label>
-            <label class="guest-pill"><input type="radio" name="guest_count" value="4"><span>4</span></label>
-            <label class="guest-pill"><input type="radio" name="guest_count" value="5+"><span>5+</span></label>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Meal Preference</label>
-          <label class="checkbox-pill"><input type="checkbox" name="meal" value="vegetarian" checked><span class="checkbox-icon"></span><span>Vegetarian</span></label>
-          <div style="height:8px"></div>
-          <label class="checkbox-pill"><input type="checkbox" name="meal" value="non-vegetarian"><span class="checkbox-icon"></span><span>Non-Vegetarian</span></label>
-          <div style="height:8px"></div>
-          <label class="checkbox-pill"><input type="checkbox" name="meal" value="no-preference"><span class="checkbox-icon"></span><span>No Preference</span></label>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="rsvp-wishes">Leave your wishes for the couple</label>
-          <input class="text-input" type="text" id="rsvp-wishes" placeholder="">
-        </div>
-
-        <div style="text-align:center;">
-          <button class="submit-btn" type="submit">Send Response</button>
-        </div>
-      </form>
-
-      <div id="rsvp-success" style="display:none; text-align:center; padding:20px 0;">
-        <div style="font-size:20px; font-weight:800; margin-bottom:10px;">Thank you!</div>
-        <div style="font-size:14px;">Your response has been saved.<br>We can't wait to celebrate with you!</div>
+    <div id="rsvp-body">
+      <div class="section-card" id="party-card">
+        <h3>Your party</h3>
+        <p class="limit-note">Everyone below can be RSVP'd for each event. Tick who's attending.</p>
+        <div id="member-list"></div>
       </div>
+
+      <div class="section-card" id="additional-card" style="display:none;">
+        <h3>Additional guests</h3>
+        <p class="limit-note" id="additional-note"></p>
+        <div id="additional-list"></div>
+        <button class="add-extra-btn" id="add-extra-btn" type="button">+ Add a guest</button>
+      </div>
+
+      <div id="events-list"></div>
+
+      <div class="section-card">
+        <h3>Dietary needs</h3>
+        <p class="limit-note">Anything we should know (vegetarian, allergies…)? List the person it applies to.</p>
+        <div class="form-group" style="margin-bottom:0;">
+          <textarea id="dietary-notes" rows="3" placeholder="e.g. Priya — vegetarian"></textarea>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>Wishes for the couple</h3>
+        <div class="form-group" style="margin-bottom:0;">
+          <textarea id="wishes" rows="2" placeholder="Leave your wishes…"></textarea>
+        </div>
+      </div>
+
+      <div class="submit-wrap">
+        <button class="submit-btn" type="button" id="submit-rsvp" onclick="handleSubmit()">Send RSVP</button>
+      </div>
+    </div>
+
+    <div id="rsvp-success">
+      <div class="big">Thank you!</div>
+      <p style="color:var(--taupe);">Your RSVP has been saved.<br>We can't wait to celebrate with you!</p>
     </div>
   </div>
 
@@ -111,72 +164,264 @@
   </footer>
 
   <script>
-    const masterEvents = [
-      { id: 'e1', title: 'Welcome Lunch & Mehendi', date: 'March 13, 2027', tags: ['india-guest'] },
-      { id: 'e2', title: "Disha's Tel Ban", date: 'March 13, 2027', tags: ['india-guest', 'bride-side'] },
-      { id: 'e3', title: 'Sangeet', date: 'March 13, 2027', tags: ['india-guest'] },
-      { id: 'e4', title: "Rajat's Tel Haldi", date: 'March 14, 2027', tags: ['india-guest', 'groom-side'] },
-      { id: 'e5', title: "Disha's Gaur Puja & Phoolon Ki Haldi", date: 'March 14, 2027', tags: ['india-guest', 'bride-side'] },
-      { id: 'e6', title: 'Shaadi (Wedding Ceremony)', date: 'March 14, 2027', tags: ['india-guest'] },
-      { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', tags: ['us-guest'] }
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const fullName = m => `${m.first_name} ${m.last_name}`.trim();
+
+    let family = null;
+    let familyEvents = [];
+    let additional = [];          // [{id, first, last}]
+    let attendance = {};          // {eventId: {personKey: true}}
+    let plusOneLimit = 0;
+    let extraSeq = 0;
+
+    const memberKey = m => 'm:' + fullName(m).toLowerCase();
+    const extraKey = x => 'a:' + x.id;
+    const personLabel = (key) => {
+      if (key.startsWith('m:')) {
+        const m = family.members.find(m => memberKey(m) === key);
+        return m ? { name: fullName(m), kind: 'family' } : null;
+      }
+      const x = additional.find(x => extraKey(x) === key);
+      return x ? { name: `${x.first} ${x.last}`.trim(), kind: 'guest' } : null;
+    };
+    const partyKeys = () => [
+      ...family.members.map(memberKey),
+      ...additional.filter(x => x.first.trim() && x.last.trim()).map(extraKey)
     ];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const famName = sessionStorage.getItem('family_name') || '';
-      const code = sessionStorage.getItem('family_code') || '';
+    function showError(msg) {
+      const el = document.getElementById('form-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function initRsvp() {
+      const code = sessionStorage.getItem('family_code');
       const db = window.GuestAuth.getGuestDatabase();
-      const fam = db.find(f => f.family_code === code);
-      if (fam && fam.members && fam.members.length === 1) {
-        document.getElementById('rsvp-name').value = fam.members[0].first_name + ' ' + fam.members[0].last_name;
-      } else if (famName) {
-        document.getElementById('rsvp-name').value = famName.replace(' Family','');
-      }
-    });
+      family = db.find(f => f.family_code === code);
+      if (!family) { showError("We couldn't find your invitation. Please sign in again."); return; }
 
-    function handleRSVPSubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById('rsvp-name').value.trim();
-      const attending = document.querySelector('input[name="attending"]:checked');
-      const guestCount = document.querySelector('input[name="guest_count"]:checked');
-      const meals = [...document.querySelectorAll('input[name="meal"]:checked')].map(i => i.value);
-      const wishes = document.getElementById('rsvp-wishes').value.trim();
-
-      if (!name || !attending) return;
-
-      const familyCode = sessionStorage.getItem('family_code') || 'GUEST';
-      const familyName = sessionStorage.getItem('family_name') || name;
       const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
-      const allowedEvents = masterEvents.filter(ev => ev.tags.some(t => tags.includes(t)));
+      familyEvents = eventsForTags(tags);
+      plusOneLimit = (family.members || []).reduce((n, m) => n + (parseInt(m.max_plus_ones) || 0), 0);
 
-      const status = attending.value === 'yes' ? 'attending' : 'declining';
-      const dietary = meals.join(', ') + (wishes ? ' | Wishes: ' + wishes : '');
+      document.getElementById('family-greeting').innerHTML =
+        `RSVP for the <strong>${esc(family.family_name)}</strong>`;
 
-      const existing = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]');
+      // members
+      document.getElementById('member-list').innerHTML =
+        family.members.map(m => `
+          <label class="checkbox-pill" style="margin-bottom:8px; cursor:default;">
+            <span class="checkbox-icon" style="visibility:hidden;"></span>
+            <span class="person-label">${esc(fullName(m))}<span class="person-kind">family</span></span>
+          </label>`).join('');
+
+      // additional guests
+      if (plusOneLimit > 0) {
+        document.getElementById('additional-card').style.display = 'block';
+        document.getElementById('additional-note').textContent =
+          `You may add up to ${plusOneLimit} additional guest${plusOneLimit === 1 ? '' : 's'}. Please give each guest's full name.`;
+        document.getElementById('add-extra-btn').addEventListener('click', addExtraRow);
+      }
+
+      restorePrevious();
+      renderEvents();
+      updateAddButton();
+    }
+
+    function addExtraRow(first = '', last = '') {
+      if (additional.length >= plusOneLimit) return;
+      const x = { id: 'x' + (++extraSeq) + Date.now().toString(36), first, last };
+      additional.push(x);
+      const row = document.createElement('div');
+      row.className = 'extra-row';
+      row.dataset.id = x.id;
+      row.innerHTML = `
+        <input type="text" placeholder="First name" value="${esc(first)}" aria-label="Additional guest first name">
+        <input type="text" placeholder="Last name" value="${esc(last)}" aria-label="Additional guest last name">
+        <button type="button" class="extra-remove" aria-label="Remove guest">×</button>`;
+      const [fi, li] = row.querySelectorAll('input');
+      fi.addEventListener('input', () => { x.first = fi.value; renderEvents(); });
+      li.addEventListener('input', () => { x.last = li.value; renderEvents(); });
+      row.querySelector('.extra-remove').addEventListener('click', () => {
+        additional = additional.filter(a => a.id !== x.id);
+        row.remove();
+        renderEvents();
+        updateAddButton();
+      });
+      document.getElementById('additional-list').appendChild(row);
+      updateAddButton();
+      fi.focus();
+    }
+
+    function updateAddButton() {
+      const btn = document.getElementById('add-extra-btn');
+      if (btn) btn.disabled = additional.length >= plusOneLimit;
+    }
+
+    function renderEvents() {
+      const wrap = document.getElementById('events-list');
+      if (!familyEvents.length) {
+        wrap.innerHTML = `<div class="section-card"><p class="limit-note" style="margin:0;">No events to RSVP for yet — check back soon.</p></div>`;
+        return;
+      }
+      const keys = partyKeys();
+      wrap.innerHTML = familyEvents.map(e => {
+        const att = attendance[e.id] || {};
+        const rows = keys.map(k => {
+          const p = personLabel(k);
+          if (!p || !p.name) return '';
+          const checked = att[k] ? 'checked' : '';
+          return `
+            <label class="checkbox-pill" style="margin-bottom:8px;">
+              <input type="checkbox" data-event="${esc(e.id)}" data-person="${esc(k)}" ${checked}>
+              <span class="checkbox-icon"></span>
+              <span class="person-label">${esc(p.name)}<span class="person-kind">${p.kind}</span></span>
+            </label>`;
+        }).join('');
+        return `
+          <div class="event-card">
+            <div class="event-head">
+              <div class="event-icon">${e.icon || '✦'}</div>
+              <div>
+                <div class="event-title">${esc(e.title)}</div>
+                <div class="event-sub">${esc(e.dateLabel)} · ${esc(e.time)}<br>${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}` : ''}</div>
+              </div>
+            </div>
+            <div class="quick-links">
+              <button type="button" class="link-btn" data-all="1" data-event="${esc(e.id)}">Everyone attending</button>
+              <button type="button" class="link-btn" data-all="0" data-event="${esc(e.id)}">No one</button>
+            </div>
+            ${rows || '<p class="limit-note">Add guests above to RSVP for them.</p>'}
+          </div>`;
+      }).join('');
+
+      wrap.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const { event, person } = cb.dataset;
+          attendance[event] = attendance[event] || {};
+          attendance[event][person] = cb.checked;
+        });
+      });
+      wrap.querySelectorAll('.link-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = btn.dataset.all === '1';
+          attendance[btn.dataset.event] = attendance[btn.dataset.event] || {};
+          partyKeys().forEach(k => { attendance[btn.dataset.event][k] = val; });
+          renderEvents();
+        });
+      });
+    }
+
+    function snapshotKey() { return 'wedding_rsvp_family_' + family.family_code; }
+
+    function restorePrevious() {
+      try {
+        const snap = JSON.parse(localStorage.getItem(snapshotKey()) || 'null');
+        if (snap) {
+          (snap.additional || []).slice(0, plusOneLimit).forEach(g => addExtraRow(g.first || '', g.last || ''));
+          attendance = snap.attendance || {};
+          document.getElementById('dietary-notes').value = snap.dietary || '';
+          document.getElementById('wishes').value = snap.wishes || '';
+          return;
+        }
+      } catch (e) {}
+      // fallback: scan legacy per-guest records
+      try {
+        const recs = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]')
+          .filter(r => r.family_code === family.family_code);
+        const memberNames = new Set(family.members.map(m => fullName(m).toLowerCase()));
+        const extrasSeen = new Map();
+        recs.forEach(r => {
+          const nm = (r.guest_name || '').trim();
+          if (!nm) return;
+          let key;
+          if (memberNames.has(nm.toLowerCase())) key = 'm:' + nm.toLowerCase();
+          else {
+            if (!extrasSeen.has(nm.toLowerCase()) && extrasSeen.size < plusOneLimit) {
+              const parts = nm.split(/\s+/);
+              const x = { id: 'x' + (++extraSeq) + 'r', first: parts[0] || '', last: parts.slice(1).join(' ') || '' };
+              additional.push(x);
+              extrasSeen.set(nm.toLowerCase(), extraKey(x));
+            }
+            key = extrasSeen.get(nm.toLowerCase());
+          }
+          if (!key) return;
+          attendance[r.event_id] = attendance[r.event_id] || {};
+          if (r.status === 'attending') attendance[r.event_id][key] = true;
+        });
+        additional.forEach(x => {
+          // render rows for restored extras (without stealing focus)
+          const row = document.createElement('div');
+          row.className = 'extra-row'; row.dataset.id = x.id;
+          row.innerHTML = `<input type="text" placeholder="First name" value="${esc(x.first)}"><input type="text" placeholder="Last name" value="${esc(x.last)}"><button type="button" class="extra-remove">×</button>`;
+          const [fi, li] = row.querySelectorAll('input');
+          fi.addEventListener('input', () => { x.first = fi.value; renderEvents(); });
+          li.addEventListener('input', () => { x.last = li.value; renderEvents(); });
+          row.querySelector('.extra-remove').addEventListener('click', () => {
+            additional = additional.filter(a => a.id !== x.id);
+            row.remove(); renderEvents(); updateAddButton();
+          });
+          document.getElementById('additional-list').appendChild(row);
+        });
+        const withDiet = recs.find(r => r.dietary_notes);
+        if (withDiet) document.getElementById('dietary-notes').value = withDiet.dietary_notes.replace(/ \| Wishes:.*$/, '');
+      } catch (e) {}
+    }
+
+    function handleSubmit() {
+      document.getElementById('form-error').style.display = 'none';
+
+      // validate named additional guests
+      for (const x of additional) {
+        const f = x.first.trim(), l = x.last.trim();
+        if ((f || l) && !(f && l)) { showError('Please give both a first and last name for each additional guest.'); return; }
+      }
+      const namedExtras = additional.filter(x => x.first.trim() && x.last.trim());
+      const keys = [...family.members.map(memberKey), ...namedExtras.map(extraKey)];
+      if (!keys.length) { showError('Your party is empty.'); return; }
+
+      const dietary = document.getElementById('dietary-notes').value.trim();
+      const wishes = document.getElementById('wishes').value.trim();
       const timestamp = new Date().toISOString();
 
-      const eventsToSave = allowedEvents.length ? allowedEvents : [{id:'general', title:'General'}];
-      eventsToSave.forEach(evt => {
-        const record = {
-          family_code: familyCode,
-          family_name: familyName,
-          guest_name: name,
-          event_id: evt.id,
-          event_title: evt.title,
-          status: status,
-          guest_count: guestCount ? guestCount.value : '1',
-          dietary_notes: dietary,
-          timestamp
-        };
-        existing.push(record);
-        if (typeof db !== 'undefined' && db !== null) {
-          db.collection('rsvps').add(record).catch(()=>{});
-        }
-      });
-      localStorage.setItem('wedding_rsvps_database', JSON.stringify(existing));
+      // structured snapshot for pre-fill
+      localStorage.setItem(snapshotKey(), JSON.stringify({
+        additional: namedExtras.map(x => ({ first: x.first.trim(), last: x.last.trim() })),
+        attendance, dietary, wishes, timestamp
+      }));
 
-      document.getElementById('rsvp-form').style.display = 'none';
+      // per-event per-person records (keeps admin export working)
+      const db_records = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]')
+        .filter(r => r.family_code !== family.family_code);
+      const newRecords = [];
+      familyEvents.forEach(e => {
+        keys.forEach(k => {
+          const p = personLabel(k);
+          const attending = !!(attendance[e.id] && attendance[e.id][k]);
+          newRecords.push({
+            family_code: family.family_code,
+            family_name: family.family_name,
+            guest_name: p.name,
+            guest_type: p.kind,
+            event_id: e.id,
+            event_title: e.title,
+            status: attending ? 'attending' : 'declining',
+            dietary_notes: dietary + (wishes ? ' | Wishes: ' + wishes : ''),
+            timestamp
+          });
+        });
+      });
+      localStorage.setItem('wedding_rsvps_database', JSON.stringify([...db_records, ...newRecords]));
+
+      if (typeof db !== 'undefined' && db !== null) {
+        newRecords.forEach(r => { db.collection('rsvps').add(r).catch(() => {}); });
+      }
+
+      document.getElementById('rsvp-body').style.display = 'none';
       document.getElementById('rsvp-success').style.display = 'block';
-      window.scrollTo({top:0, behavior:'smooth'});
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   </script>
 </body>
