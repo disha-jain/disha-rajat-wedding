@@ -4,13 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome — Disha & Rajat (#rishta)</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-  
+
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/passcode.css">
+  <style>
+    .invite-divider { text-align:center; color: var(--text-sub); margin: 18px 0; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; }
+    .invite-row { display:flex; gap:10px; }
+    .invite-row .form-group { flex:1; }
+  </style>
 </head>
 <body class="passcode-body">
   <div class="lights-overlay"></div>
@@ -19,38 +24,105 @@
     <div class="card passcode-card">
       <div class="hero-script-heading">#rishta</div>
       <h2 class="gold-title">Welcome</h2>
-      <p class="passcode-sub">Please enter the site passcode to access our wedding invitation.</p>
-      
-      <form onsubmit="handlePasscodeSubmit(event)">
+      <p class="passcode-sub">Enter the invite code from your invitation, or your name, to open your invite.</p>
+
+      <div id="invite-error" class="error-msg" style="display:none;"></div>
+
+      <form id="code-form" onsubmit="handleCodeSubmit(event)">
         <div class="form-group">
-          <input type="password" id="site-passcode-input" placeholder="Enter Passcode..." autocomplete="off" style="text-align: center; letter-spacing: 2px;" required>
+          <input type="text" id="invite-code-input" placeholder="Invite code (e.g. FAM01)" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-align:center; letter-spacing:2px; text-transform:uppercase;">
         </div>
-        <button type="submit" class="btn-gold-outline" style="width: 100%;">Enter Site</button>
+        <button type="submit" class="btn-gold-outline" style="width:100%;">Continue</button>
       </form>
-      
-      <div id="passcode-error" class="error-msg" style="display: none;">
-        Incorrect passcode. Please try again.
-      </div>
+
+      <div class="invite-divider">or</div>
+
+      <form id="name-form" onsubmit="handleNameSubmit(event)">
+        <div class="invite-row">
+          <div class="form-group">
+            <input type="text" id="invite-first" placeholder="First name" autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <input type="text" id="invite-last" placeholder="Last name" autocomplete="family-name">
+          </div>
+        </div>
+        <button type="submit" class="btn-gold-outline" style="width:100%; border-color: rgba(212,175,55,0.5);">Find by name</button>
+      </form>
+
+      <p class="passcode-sub" style="margin-top:20px; font-size:0.8rem;">No tabs are visible until your invite is unlocked.</p>
     </div>
   </div>
 
+  <script src="js/guest-auth.js"></script>
   <script>
-    if (sessionStorage.getItem("site_unlocked") === "true") {
-      window.location.href = "home.html";
+    function showError(msg) {
+      const el = document.getElementById('invite-error');
+      el.textContent = msg;
+      el.style.display = 'block';
     }
 
-    function handlePasscodeSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById("site-passcode-input").value.trim();
-      const err = document.getElementById("passcode-error");
-      
-      if (input === "rishta2027") {
-        sessionStorage.setItem("site_unlocked", "true");
-        window.location.href = "home.html";
-      } else {
-        err.style.display = "block";
+    function trySignInWithCode(code) {
+      code = (code || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (!code) { showError('Please enter your invite code.'); return; }
+      const fam = window.GuestAuth.findFamilyByCode(code);
+      if (!fam) {
+        showError("We couldn't find that invite code. Please check it and try again.");
+        return;
       }
+      window.GuestAuth.signInFamily(fam);
+      window.location.href = 'home.html';
     }
+
+    function handleCodeSubmit(e) {
+      e.preventDefault();
+      trySignInWithCode(document.getElementById('invite-code-input').value);
+    }
+
+    function handleNameSubmit(e) {
+      e.preventDefault();
+      const first = document.getElementById('invite-first').value.trim();
+      const last = document.getElementById('invite-last').value.trim();
+      if (!first || !last) { showError('Please enter both your first and last name.'); return; }
+      const result = window.GuestAuth.findFamilyByName(first, last);
+      if (!result) {
+        showError("We couldn't find that name. Try the name on your invitation, or use your invite code.");
+        return;
+      }
+      if (result.ambiguous) {
+        showError('More than one guest has that name. Please use the invite code from your invitation.');
+        return;
+      }
+      window.GuestAuth.signInFamily(result);
+      window.location.href = 'home.html';
+    }
+
+    (function init() {
+      // Personal invite links like ?invite=FAM01
+      const params = new URLSearchParams(location.search);
+      if (params.has('invite')) {
+        const code = params.get('invite').trim().toUpperCase();
+        const fam = window.GuestAuth.findFamilyByCode(code);
+        if (fam) {
+          window.GuestAuth.signInFamily(fam);
+          history.replaceState(null, '', location.pathname);
+          window.location.href = 'home.html';
+          return;
+        }
+      }
+      // Already unlocked
+      if (window.GuestAuth.isUnlocked()) {
+        window.location.href = 'home.html';
+        return;
+      }
+      const stored = window.GuestAuth.getStoredCode();
+      if (stored) {
+        const fam = window.GuestAuth.findFamilyByCode(stored);
+        if (fam) {
+          window.GuestAuth.signInFamily(fam);
+          window.location.href = 'home.html';
+        }
+      }
+    })();
   </script>
 </body>
 </html>
