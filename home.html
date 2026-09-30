@@ -27,7 +27,9 @@
     if (!window.GuestAuth.requireUnlock()) {
       // redirecting to index.html
     } else {
-      document.addEventListener('DOMContentLoaded', initPage);
+      // NB: wrap in a closure — initPage is defined in a later script block,
+      // so referencing it directly here would throw ReferenceError.
+      document.addEventListener('DOMContentLoaded', () => initPage());
     }
   </script>
 
@@ -609,9 +611,10 @@ function initScrollSpy() {
   links.forEach(a => obs.observe(document.getElementById(a.dataset.section)));
 }
 
-function initPage() {
+async function initPage() {
   window.GuestAuth.renderNav();
   applyTagSections();
+  try { if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
   updateCountdown();
   setInterval(updateCountdown, 1000);
   renderSchedule();
