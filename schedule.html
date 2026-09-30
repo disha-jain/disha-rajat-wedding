@@ -3,101 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Schedule — Disha & Rajat (#rishta)</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="styles.css?v=20260930c">
-  <style>
-    body { font-family: var(--font-sans); }
-    .schedule-wrap { max-width: 620px; margin: 0 auto; padding: 44px 20px 50px; text-align: center; }
-    .wedding-kicker { font-family: var(--font-serif); font-weight: 600; font-size: 34px; letter-spacing: 3px; color: var(--dark-gray); }
-    .schedule-script { font-family: var(--font-script); font-size: 52px; color: var(--gold-dark); margin: -10px 0 8px; }
-    .schedule-note { color: var(--taupe); font-size: 0.9rem; margin-bottom: 24px; }
-    .day-group { margin-bottom: 26px; text-align: left; }
-    .day-label {
-      font-family: var(--font-serif); font-size: 1rem; letter-spacing: 2px;
-      color: var(--gold-dark); text-transform: uppercase;
-      border-bottom: 2px solid var(--border-gold);
-      padding-bottom: 8px; margin-bottom: 4px;
-    }
-    .timeline { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-soft); padding: 6px 22px; }
-    .timeline-item { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--line); }
-    .timeline-item:last-child { border-bottom: none; }
-    .timeline-icon { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; background: var(--ivory); border: 1px solid var(--border-gold); display:flex; align-items:center; justify-content:center; font-size:20px; }
-    .timeline-time { font-weight: 700; font-size: 15px; color: var(--dark-gray); letter-spacing: 0.3px; }
-    .timeline-label { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-dark); margin-top: 2px; }
-    .timeline-meta { font-size: 13px; color: var(--taupe); margin-top: 6px; line-height: 1.6; }
-    .timeline-meta strong { color: var(--dark-gray); font-weight: 600; }
-    .empty-note { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px; color: var(--taupe); }
-  </style>
+  <title>Events — Disha & Rajat (#rishta)</title>
 </head>
 <body>
-  <script src="js/guest-auth.js"></script>
-  <script src="js/events.js"></script>
+  <p style="font-family:sans-serif;text-align:center;margin-top:80px;color:#666;">Taking you there&hellip; <a href="home.html#events">continue</a></p>
   <script>
-    if (!window.GuestAuth.requireUnlock()) {} else {
-      document.addEventListener('DOMContentLoaded', () => { window.GuestAuth.renderNav(); renderSchedule(); });
-    }
-  </script>
-
-  <nav>
-    <a href="home.html">Home</a>
-    <a href="schedule.html" class="active">Events</a>
-    <a href="rsvp.html">RSVP</a>
-    <a href="travel-us.html" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
-    <a href="travel-india.html" id="nav-travel-india" style="display:none;">India Travel</a>
-    <a href="admin.html">Host Admin</a>
-  </nav>
-
-  <div class="schedule-wrap">
-    <div class="wedding-kicker">WEDDING</div>
-    <div class="schedule-script">Schedule</div>
-    <p class="schedule-note">The events you're invited to</p>
-    <div id="schedule-groups"></div>
-  </div>
-
-  <footer>
-    DISHA & RAJAT • #RISHTA • 2027
-  </footer>
-
-  <script>
-    function esc(s) {
-      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
-
-    function renderSchedule() {
-      const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
-      const events = eventsForTags(tags);
-      const container = document.getElementById('schedule-groups');
-
-      if (!events.length) {
-        container.innerHTML = '<div class="empty-note">Details coming soon.</div>';
-        return;
-      }
-
-      container.innerHTML = groupEventsByDate(events).map(g => `
-        <div class="day-group">
-          <div class="day-label">${esc(g.dateLabel)}</div>
-          <div class="timeline">
-            ${g.events.map(e => `
-              <div class="timeline-item">
-                <div class="timeline-icon">${e.icon || '✦'}</div>
-                <div>
-                  <div class="timeline-time">${esc(e.time)}</div>
-                  <div class="timeline-label">${esc(e.title)}</div>
-                  <div class="timeline-meta">
-                    ${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}
-                    ${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}` : ''}
-                    ${e.notes ? `<br>${esc(e.notes)}` : ''}
-                  </div>
-                </div>
-              </div>`).join('')}
-          </div>
-        </div>`).join('');
-    }
+    // The site is now one scrolling page; home.html enforces the invite gate.
+    window.location.replace('home.html#events');
   </script>
 </body>
 </html>
