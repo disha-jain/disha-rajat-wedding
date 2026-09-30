@@ -27,8 +27,9 @@ CSS variables live in `styles.css` (`--gold-primary`, `--gold-dark`, `--ink`,
 new palette so older markup keeps working.
 
 ## Font scheme
-- **Great Vibes** (script) — decorative accents only: "The Venue", "Can't wait
-  to party?", hero script lines. Never for body text.
+- **Boheme Floral** (script) — decorative accents only: "The Venue", "Can't wait
+  to party?", hero script lines. Never for body text. Self-hosted in `fonts/`
+  via `@font-face` in `styles.css`.
 - **Cinzel** (serif) — all headings: page titles, card titles, nav links,
   buttons, dates.
 - **Montserrat** (sans) — body copy, form inputs, labels.
@@ -49,3 +50,22 @@ new palette so older markup keeps working.
 `index.html` (invite code or name lookup) → `home.html`. Until unlocked no tabs
 exist; `js/guest-auth.js` (`requireUnlock` / `renderNav`) enforces this on every
 protected page.
+
+## Schedule config
+`js/events.js` (`WEDDING_EVENTS`) is the single source of truth for the
+schedule. Edit dates, times, venues, venue details, dress codes, notes, and
+tags there — `schedule.html` and `rsvp.html` both read from it.
+
+Tag visibility: an event shows to a guest if ANY event tag matches ANY of the
+guest's tags. Current tags: `india-guest`, `us-guest`, `bride-side`
+(Disha-specific), `groom-side` (Rajat-specific). Add more (e.g. `family-only`)
+in `js/events.js` and assign them to guests via the admin CSV.
+
+## RSVP model
+- One RSVP per family: members RSVP for every event their tags unlock.
+- Checkboxes per person per event (checked = attending).
+- Additional guests: named (first + last required), capped at the family's
+  `max_plus_ones` total from the guest CSV. Families with a 0 limit see no
+  add-guest UI.
+- Saved per event per person to `wedding_rsvps_database` (localStorage) and
+  Firestore `rsvps`, so the admin CSV export keeps working.
