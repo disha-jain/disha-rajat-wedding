@@ -29,6 +29,13 @@
     .sub-header { color: var(--dark-gray) !important; text-shadow: none !important; }
     .rsvp-card { border: 1px solid var(--line) !important; box-shadow: var(--shadow-soft) !important; }
 
+    .rsvp-photo-frame {
+      width: 110px; height: 140px; margin: 20px auto 4px auto;
+      border-radius: 50% / 42%; border: 3px solid var(--gold-primary);
+      overflow: hidden; box-shadow: var(--shadow-soft); background: var(--white);
+    }
+    .rsvp-photo-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 25%; }
+
     .rsvp-wrap { max-width: 620px; margin: 0 auto; padding: 34px 16px 60px; }
     .family-greeting { text-align: center; color: var(--taupe); font-size: 0.95rem; margin-bottom: 26px; }
     .family-greeting strong { color: var(--dark-gray); }
@@ -113,6 +120,10 @@
   <div class="rsvp-wrap">
     <div class="cursive-header" style="text-align:center;">Can't wait to party?</div>
     <div class="sub-header" style="text-align:center;">Tell us who's coming<br>to each event</div>
+
+    <div class="rsvp-photo-frame">
+      <img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach">
+    </div>
 
     <p class="family-greeting" id="family-greeting"></p>
     <div class="form-error" id="form-error"></div>
