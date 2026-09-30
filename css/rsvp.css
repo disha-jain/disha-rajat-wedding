@@ -7,7 +7,7 @@
   on all form elements to ensure perfect legibility.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 /* Center phone mockup/responsive form wrapper */
 .phone-wrapper {
@@ -25,7 +25,7 @@
 
 /* OUTSIDE THE CARD: High-visibility White Text with soft dropshadows */
 .cursive-header {
-    font-family: 'Great Vibes', cursive !important;
+    font-family: 'Boheme Floral', cursive !important;
     font-size: 38px !important;
     color: #ffffff !important;
     font-weight: 400 !important;
