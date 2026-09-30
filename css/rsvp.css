@@ -1,32 +1,253 @@
-.rsvp-lookup-card {
-  max-width: 500px;
-  margin: 0 auto;
-  text-align: center;
+/* 
+  Disha & Rajat Wedding - RSVP Styling with Glassmorphism Blur
+  File Location: css/rsvp.css
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* Center phone mockup wrapper */
+.phone-wrapper {
+    max-width: 380px;
+    width: 100%;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-sizing: border-box;
 }
 
-.event-rsvp-block {
-  margin-bottom: 25px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+/* Calligraphy Header at the top */
+.cursive-header {
+    font-family: 'Great Vibes', cursive;
+    font-size: 38px;
+    color: #ffffff;
+    font-weight: 400;
+    margin: 0 0 10px 0;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+    letter-spacing: 1px;
 }
 
-.member-option-row {
-  margin: 12px 0;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 4px;
+/* Sub-header text */
+.sub-header {
+    font-size: 21px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 28px 0;
+    line-height: 1.35;
+    letter-spacing: -0.3px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
 }
 
-.radio-group {
-  margin-top: 8px;
-  display: flex;
-  gap: 20px;
+/* 
+  Elegant RSVP Card with Backdrop Blur (Glassmorphism)
+*/
+.rsvp-card {
+    background-color: rgba(255, 255, 255, 0.9); /* Translucent white */
+    backdrop-filter: blur(12px);                /* Modern background blur */
+    -webkit-backdrop-filter: blur(12px);        /* Safari compatibility */
+    border: 1px solid rgba(255, 255, 255, 0.25); /* Ultra-soft glass edge */
+    border-radius: 24px;
+    padding: 30px 24px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25); /* Slightly softer shadow to accent the blur */
+    text-align: left;
 }
 
-.radio-group label {
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.88rem;
+.rsvp-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #000000;
+    margin: 0 0 22px 0;
+    letter-spacing: -0.5px;
+}
+
+/* Field Group layouts */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Standard Inputs */
+.text-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    color: #000000;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #ffffff;
+}
+
+.text-input:focus {
+    border-color: #000000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Interactive Stacked Option Pills */
+.option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.option-pill {
+    display: block;
+    background-color: rgba(234, 234, 234, 0.95); /* Slight opacity matching theme */
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.option-pill input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.option-pill:hover {
+    background-color: #e2e2e2;
+}
+
+/* Selection state (pills turn black, text turns white) */
+.option-pill:has(input:checked) {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+/* Horizontal Row for Guest Count */
+.guests-row {
+    display: flex;
+    gap: 8px;
+}
+
+.guest-pill {
+    flex: 1;
+    display: block;
+    background-color: rgba(234, 234, 234, 0.95);
+    padding: 10px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a1a;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s, color 0.2s;
+    user-select: none;
+}
+
+.guest-pill input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.guest-pill:hover {
+    background-color: #e2e2e2;
+}
+
+.guest-pill:has(input:checked) {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+/* Custom Checkbox Pill Options */
+.checkbox-pill {
+    display: flex;
+    align-items: center;
+    background-color: rgba(234, 234, 234, 0.95);
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    user-select: none;
+}
+
+.checkbox-pill input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkbox-pill:hover {
+    background-color: #e2e2e2;
+}
+
+/* Standalone checkbox box style */
+.checkbox-icon {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #a0a0a0;
+    border-radius: 4px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    transition: all 0.2s;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+/* Active checked checkbox box style */
+.checkbox-pill:has(input:checked) .checkbox-icon {
+    background-color: #1a1a1a;
+    border-color: #1a1a1a;
+}
+
+.checkbox-pill:has(input:checked) .checkbox-icon::after {
+    content: "";
+    width: 4px;
+    height: 8px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+/* Submit Response button */
+.submit-btn {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 60%;
+    text-align: center;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+.submit-btn:hover {
+    background-color: #333333;
 }
