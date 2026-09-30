@@ -70,7 +70,10 @@
 
   <script>
     const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-    if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
+    if (tags.includes("india-guest")) {
+      const el = document.getElementById("nav-travel-india");
+      if (el) el.style.display = "inline-block";
+    }
   </script>
 </body>
 </html>

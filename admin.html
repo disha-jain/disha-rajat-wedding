@@ -84,18 +84,28 @@
 
   <script>
     // Navigation visibility for unlocked travel tabs
-    const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-    if (sessionStorage.getItem("rsvp_submitted") === "true") {
-      if (tags.includes("us-guest")) document.getElementById("nav-travel-us").style.display = "inline-block";
-      if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
+    const storedTags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
+    if (storedTags.includes("us-guest")) {
+      const el = document.getElementById("nav-travel-us");
+      if (el) el.style.display = "inline-block";
     }
+    if (storedTags.includes("india-guest")) {
+      const el = document.getElementById("nav-travel-india");
+      if (el) el.style.display = "inline-block";
+    }
+
+    // Fallback database matching rsvp.html
+    const fallbackDatabase = [
+      { family_code: 'FAM01', family_name: 'Khanna Family', members: [{ first_name: 'Rajat', last_name: 'Khanna', email: 'rajat@example.com', tags: ['india-guest', 'us-guest', 'groom-side'], max_plus_ones: 1 }] },
+      { family_code: 'FAM02', family_name: 'Jain Family', members: [{ first_name: 'Disha', last_name: 'Jain', email: 'disha@example.com', tags: ['india-guest', 'us-guest', 'bride-side'], max_plus_ones: 2 }] }
+    ];
 
     // Load and refresh stats on page load
     window.addEventListener("DOMContentLoaded", loadDashboardData);
 
     function getStoredGuestList() {
       const stored = localStorage.getItem("wedding_guest_database");
-      return stored ? JSON.parse(stored) : [];
+      return stored ? JSON.parse(stored) : fallbackDatabase;
     }
 
     function getStoredRSVPs() {

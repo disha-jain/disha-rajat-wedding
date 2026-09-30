@@ -57,7 +57,10 @@
 
   <script>
     const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-    if (tags.includes("us-guest")) document.getElementById("nav-travel-us").style.display = "inline-block";
+    if (tags.includes("us-guest")) {
+      const el = document.getElementById("nav-travel-us");
+      if (el) el.style.display = "inline-block";
+    }
   </script>
 </body>
 </html>

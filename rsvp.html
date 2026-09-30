@@ -66,7 +66,7 @@
 
       <div id="rsvp-success-message" style="display:none; text-align:center; margin-top: 20px; color: #51cf66;">
         <h3 style="color: #51cf66;">RSVP Confirmed!</h3>
-        <p>Your response has been saved. Travel pages are now unlocked in the menu!</p>
+        <p>Your response has been saved. We can't wait to celebrate with you!</p>
       </div>
     </div>
   </div>
@@ -129,12 +129,27 @@
       }
     }
 
+    function updateTravelNav(tags) {
+      if (tags.includes("us-guest")) {
+        const el = document.getElementById("nav-travel-us");
+        if (el) el.style.display = "inline-block";
+      }
+      if (tags.includes("india-guest")) {
+        const el = document.getElementById("nav-travel-india");
+        if (el) el.style.display = "inline-block";
+      }
+    }
+
+    // Check tags on load
+    updateTravelNav(JSON.parse(sessionStorage.getItem("guest_tags") || "[]"));
+
     function renderFamilyRSVPForm(family) {
       document.getElementById('lookup-card').style.display = 'none';
       document.getElementById('rsvp-form-card').style.display = 'block';
 
       const combinedTags = [...new Set(family.members.flatMap(m => m.tags))];
       sessionStorage.setItem("guest_tags", JSON.stringify(combinedTags));
+      updateTravelNav(combinedTags);
       const allowedEvents = masterEvents.filter(e => e.tags.some(t => combinedTags.includes(t)));
 
       document.getElementById('family-header').innerHTML = `
@@ -176,22 +191,34 @@
       sessionStorage.setItem("rsvp_submitted", "true");
       
       const dietary = document.getElementById("dietary-notes").value;
-      const rsvpRecord = {
-        family_code: currentActiveFamily.family_code,
-        family_name: currentActiveFamily.family_name,
-        guest_name: currentActiveFamily.members.map(m => m.first_name + ' ' + m.last_name).join(', '),
-        status: 'Submitted',
-        dietary_notes: dietary,
-        timestamp: new Date().toISOString()
-      };
-
+      const combinedTags = [...new Set(currentActiveFamily.members.flatMap(m => m.tags))];
+      const allowedEvents = masterEvents.filter(evt => evt.tags.some(t => combinedTags.includes(t)));
       const existingRSVPs = JSON.parse(localStorage.getItem("wedding_rsvps_database") || "[]");
-      existingRSVPs.push(rsvpRecord);
-      localStorage.setItem("wedding_rsvps_database", JSON.stringify(existingRSVPs));
 
-      const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-      if (tags.includes("us-guest")) document.getElementById("nav-travel-us").style.display = "inline-block";
-      if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
+      allowedEvents.forEach(evt => {
+        currentActiveFamily.members.forEach((m, idx) => {
+          const radio = document.querySelector(`input[name="att_${evt.id}_${idx}"]:checked`);
+          const status = radio ? radio.value : "attending";
+          const rsvpRecord = {
+            family_code: currentActiveFamily.family_code,
+            family_name: currentActiveFamily.family_name,
+            guest_name: `${m.first_name} ${m.last_name}`,
+            event_id: evt.id,
+            event_title: evt.title,
+            status: status,
+            dietary_notes: dietary,
+            timestamp: new Date().toISOString()
+          };
+          existingRSVPs.push(rsvpRecord);
+
+          if (typeof db !== 'undefined' && db !== null) {
+            db.collection("rsvps").add(rsvpRecord);
+          }
+        });
+      });
+
+      localStorage.setItem("wedding_rsvps_database", JSON.stringify(existingRSVPs));
+      updateTravelNav(combinedTags);
 
       document.getElementById('rsvp-form').style.display = 'none';
       document.getElementById('rsvp-success-message').style.display = 'block';

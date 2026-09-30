@@ -66,11 +66,13 @@ nav a {
   font-size: 0.82rem;
   letter-spacing: 2px;
   text-transform: uppercase;
-  transition: color 0.3s;
+  transition: all 0.3s;
+  border-bottom: 2px solid transparent;
 }
 
 nav a:hover, nav a.active {
   color: var(--gold-primary);
+  border-bottom-color: var(--gold-primary);
 }
 
 .container {
@@ -156,4 +158,25 @@ footer {
   color: var(--text-sub);
   font-size: 0.8rem;
   letter-spacing: 2px;
+}
+
+@media (max-width: 768px) {
+  nav {
+    padding: 10px 4px;
+    gap: 2px;
+  }
+  nav a {
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+  }
+  .container {
+    padding: 30px 15px;
+  }
+  .section-title {
+    font-size: 1.8rem;
+  }
+  .card {
+    padding: 20px 16px;
+  }
 }

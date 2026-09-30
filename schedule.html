@@ -51,9 +51,14 @@
     ];
 
     const tags = JSON.parse(sessionStorage.getItem("guest_tags") || '["india-guest", "us-guest"]');
-    if (sessionStorage.getItem("rsvp_submitted") === "true") {
-      if (tags.includes("us-guest")) document.getElementById("nav-travel-us").style.display = "inline-block";
-      if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
+    const storedTags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
+    if (storedTags.includes("us-guest")) {
+      const el = document.getElementById("nav-travel-us");
+      if (el) el.style.display = "inline-block";
+    }
+    if (storedTags.includes("india-guest")) {
+      const el = document.getElementById("nav-travel-india");
+      if (el) el.style.display = "inline-block";
     }
 
     const container = document.getElementById("events-container");
