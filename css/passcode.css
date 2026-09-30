@@ -1,38 +1,79 @@
+/* Entry / invite-lookup page — light ivory theme */
 .passcode-body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(rgba(10, 10, 12, 0.85), rgba(10, 10, 12, 0.95)),
-              url('../NYCEngagementPhotographer-222.jpg') center 65%/cover no-repeat;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(201,169,97,0.14), transparent 45%),
+    radial-gradient(circle at 80% 85%, rgba(201,169,97,0.10), transparent 45%),
+    var(--ivory);
   padding: 20px;
 }
 
 .passcode-container {
-  max-width: 440px;
+  max-width: 460px;
   width: 100%;
 }
 
 .passcode-card {
   text-align: center;
-  backdrop-filter: blur(10px);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  padding: 36px 30px;
 }
 
 .hero-script-heading {
   font-family: var(--font-script);
-  font-size: 3.5rem;
-  color: var(--gold-light);
+  font-size: 3.4rem;
+  color: var(--gold-dark);
   margin-bottom: -5px;
+  line-height: 1;
+}
+
+.passcode-card .gold-title {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
 }
 
 .passcode-sub {
-  color: var(--text-sub);
+  color: var(--taupe);
   font-size: 0.9rem;
-  margin: 15px 0 25px 0;
+  margin: 14px 0 22px 0;
+  line-height: 1.6;
 }
 
+.invite-divider {
+  text-align: center;
+  color: var(--smoke);
+  margin: 18px 0;
+  font-size: 0.78rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.invite-divider::before,
+.invite-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.invite-row { display: flex; gap: 10px; }
+.invite-row .form-group { flex: 1; }
+
 .error-msg {
-  color: #ff6b6b;
-  margin-top: 15px;
+  color: #b3402e;
+  background: #fbeeea;
+  border: 1px solid #f0c9bd;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 0 16px 0;
   font-size: 0.85rem;
 }
