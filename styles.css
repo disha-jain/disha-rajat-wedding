@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disha Jain & Rajat Khanna — #rishta</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --gold-primary: #D4AF37;
+      --gold-light: #F3E5AB;
+      --gold-dark: #AA7C11;
+      --border-gold: #D4AF37;
+      --bg-dark: #0d0d0f;
+      --bg-card: rgba(18, 18, 22, 0.88);
+      --text-main: #FFFFFF;
+      --text-sub: #D1D1D6;
+      --font-serif: 'Cinzel', serif;
+      --font-script: 'Great Vibes', cursive;
+      --font-sans: 'Montserrat', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Top String Lights Decoration Overlay */
+    .lights-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: radial-gradient(circle at 10% 20px, #FFF5C0 3px, transparent 4px),
+                  radial-gradient(circle at 25% 35px, #FFF5C0 4px, transparent 5px),
+                  radial-gradient(circle at 40% 15px, #FFF5C0 3px, transparent 4px),
+                  radial-gradient(circle at 55% 30px, #FFF5C0 4px, transparent 5px),
+                  radial-gradient(circle at 70% 18px, #FFF5C0 3px, transparent 4px),
+                  radial-gradient(circle at 85% 32px, #FFF5C0 4px, transparent 5px),
+                  radial-gradient(circle at 95% 15px, #FFF5C0 3px, transparent 4px);
+      filter: drop-shadow(0 0 8px rgba(255, 245, 192, 0.9));
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* Navigation Bar */
+    nav {
+      background: rgba(10, 10, 12, 0.9);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 12px 10px;
+      backdrop-filter: blur(8px);
+    }
+
+    nav a {
+      color: #E2E2E8;
+      text-decoration: none;
+      padding: 6px 16px;
+      font-family: var(--font-serif);
+      font-size: 0.82rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+
+    nav a:hover, nav a.active {
+      color: var(--gold-primary);
+    }
+
+    /* Hero Landing Page matching design image */
+    .hero {
+      position: relative;
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.85)),
+                  url('NYCEngagementPhotographer-222.jpg') center top / cover no-repeat;
+    }
+
+    .hero-container {
+      max-width: 650px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-script-heading {
+      font-family: var(--font-script);
+      font-size: 4.8rem;
+      color: var(--gold-light);
+      margin-bottom: -10px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      font-weight: 400;
+    }
+
+    .hero-lead-text {
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      color: #E5E5EA;
+      text-transform: uppercase;
+      margin-bottom: 25px;
+    }
+
+    .hero-names {
+      font-family: var(--font-serif);
+      font-size: 3.4rem;
+      color: #FFFFFF;
+      letter-spacing: 2px;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .hero-invite-text {
+      font-family: var(--font-serif);
+      font-size: 0.82rem;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    /* Date Frame Box */
+    .date-frame {
+      border-top: 2px solid var(--border-gold);
+      border-bottom: 2px solid var(--border-gold);
+      padding: 22px 15px;
+      margin: 20px auto 30px auto;
+      max-width: 520px;
+      background: rgba(10, 10, 12, 0.4);
+    }
+
+    .date-line-primary {
+      font-family: var(--font-serif);
+      font-size: 1.85rem;
+      color: #FFFFFF;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+    }
+
+    .date-line-secondary {
+      font-family: var(--font-serif);
+      font-size: 1.55rem;
+      color: #FFFFFF;
+      letter-spacing: 2px;
+    }
+
+    .date-line-sub {
+      font-family: var(--font-serif);
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      letter-spacing: 1px;
+    }
+
+    /* Rings Symbol */
+    .rings-icon {
+      margin: 20px 0;
+      width: 55px;
+      height: 35px;
+      display: inline-block;
+      background: radial-gradient(circle at 35% 50%, transparent 12px, var(--gold-primary) 13px, var(--gold-primary) 16px, transparent 17px),
+                  radial-gradient(circle at 65% 50%, transparent 12px, var(--gold-primary) 13px, var(--gold-primary) 16px, transparent 17px);
+    }
+
+    /* Couple Oval Photo Frame */
+    .couple-photo-frame {
+      width: 170px;
+      height: 120px;
+      margin: 15px auto 25px auto;
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .couple-photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+    }
+
+    /* Save the date & Countdown */
+    .save-the-date-title {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      letter-spacing: 4px;
+      color: #FFFFFF;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    .countdown-timer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      font-family: var(--font-serif);
+    }
+
+    .time-block {
+      text-align: center;
+    }
+
+    .time-num {
+      font-size: 2.2rem;
+      color: #FFFFFF;
+      line-height: 1;
+    }
+
+    .time-label {
+      font-size: 0.65rem;
+      color: var(--text-sub);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .timer-colon {
+      font-size: 1.8rem;
+      color: #FFFFFF;
+      margin-top: -15px;
+    }
+
+    /* Styled Gold Outline Button matching image */
+    .btn-gold-outline {
+      border: 1.5px solid var(--gold-primary);
+      background: transparent;
+      color: #FFFFFF;
+      font-family: var(--font-serif);
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      padding: 12px 36px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-gold-outline:hover {
+      background: var(--gold-primary);
+      color: #000000;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+    }
+
+    /* Inner Sections Container */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 50px 20px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      color: var(--gold-primary);
+      text-align: center;
+      margin-bottom: 30px;
+      letter-spacing: 2px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 25px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+
+    .card h3 {
+      font-family: var(--font-serif);
+      color: var(--gold-light);
+      font-size: 1.35rem;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    /* Login & Forms */
+    .login-box {
+      max-width: 480px;
+      margin: 20px auto;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--gold-light);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: #FFFFFF;
+      font-family: var(--font-sans);
+      border-radius: 3px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      color: var(--text-sub);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- String Lights Header Ornament -->
+  <div class="lights-overlay"></div>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <a href="#home" onclick="showSection('home')">Home</a>
+    <a href="#schedule" id="nav-schedule" style="display:none;" onclick="showSection('schedule')">Events</a>
+    <a href="#rsvp" id="nav-rsvp" style="display:none;" onclick="showSection('rsvp')">RSVP</a>
+    <a href="#travel-us" id="nav-travel-us" style="display:none;" onclick="showSection('travel-us')">Travel & Lodging</a>
+    <a href="#travel-india" id="nav-travel-india" style="display:none;" onclick="showSection('travel-india')">India Travel</a>
+    <a href="#admin" onclick="showSection('admin')">Admin</a>
+  </nav>
+
+  <!-- Hero Landing Section matching design mockup -->
+  <section id="home" class="section active">
+    <header class="hero">
+      <div class="hero-container">
+        <div class="hero-script-heading">We Do</div>
+        <div class="hero-lead-text">TOGETHER WITH THEIR LOVED ONES</div>
+        
+        <h1 class="hero-names">Disha & Rajat</h1>
+        
+        <div class="hero-invite-text">
+          JOYFULLY INVITE YOU TO<br>
+          CELEBRATE THE BEGINNING OF THEIR FOREVER.
+        </div>
+
+        <!-- Gold Border Date Box -->
+        <div class="date-frame">
+          <div class="date-line-primary">MARCH 13 & 14, 2027</div>
+          <div class="date-line-secondary">MARCH 27, 2027</div>
+          <div class="date-line-sub">(for Chantilly, VA)</div>
+        </div>
+
+        <!-- Double Rings Icon -->
+        <div class="rings-icon"></div>
+
+        <!-- Couple Oval Frame -->
+        <div class="couple-photo-frame">
+          <img src="NYCEngagementPhotographer-222.jpg" alt="Disha and Rajat">
+        </div>
+
+        <div class="save-the-date-title">SAVE THE DATE</div>
+
+        <!-- Countdown Timer -->
+        <div class="countdown-timer">
+          <div class="time-block">
+            <div class="time-num" id="cd-days">00</div>
+            <div class="time-label">DAYS</div>
+          </div>
+          <div class="timer-colon">:</div>
+          <div class="time-block">
+            <div class="time-num" id="cd-hours">00</div>
+            <div class="time-label">HOURS</div>
+          </div>
+          <div class="timer-colon">:</div>
+          <div class="time-block">
+            <div class="time-num" id="cd-minutes">00</div>
+            <div class="time-label">MINUTES</div>
+          </div>
+          <div class="timer-colon">:</div>
+          <div class="time-block">
+            <div class="time-num" id="cd-seconds">00</div>
+            <div class="time-label">SECONDS</div>
+          </div>
+        </div>
+
+        <a href="#welcome-login" class="btn-gold-outline" onclick="showSection('welcome-login')">RSVP NOW</a>
+      </div>
+    </header>
+  </section>
+
+  <div class="container">
+
+    <!-- Guest Portal Login Check-in -->
+    <section id="welcome-login" class="section">
+      <div class="login-box card">
+        <h3>Guest Invitation Portal</h3>
+        <p>Please enter your email address to unlock your personalized schedule, travel guides, and RSVP form.</p>
+        <br>
+        <div class="form-group">
+          <input type="email" id="guest-email" placeholder="Enter your email address...">
+        </div>
+        <button class="btn-gold-outline" style="width:100%;" onclick="checkGuestAccess()">Access Invitation</button>
+        <div id="login-error" style="color: #ff6b6b; margin-top: 15px; display: none;">
+          Email not found on guest list. Please contact Disha or Rajat.
+        </div>
+      </div>
+    </section>
+
+    <!-- Event Schedule Page (Access Restricted) -->
+    <section id="schedule" class="section">
+      <h2 class="section-title">Events Schedule</h2>
+      <div id="events-container"></div>
+    </section>
+
+    <!-- RSVP Submission Page (Access Restricted) -->
+    <section id="rsvp" class="section">
+      <h2 class="section-title">RSVP</h2>
+      <div class="card">
+        <form id="rsvp-form" onsubmit="submitRSVP(event)">
+          <div id="family-members-container"></div>
+          <div class="form-group" style="margin-top: 20px;">
+            <label for="dietary-notes">Dietary Restrictions or Special Notes:</label>
+            <textarea id="dietary-notes" rows="3" placeholder="Let us know if anyone in your party has dietary restrictions..."></textarea>
+          </div>
+          <button type="submit" class="btn-gold-outline">Submit Response</button>
+        </form>
+        <div id="rsvp-success" style="display:none; color: #51cf66; margin-top: 15px; text-align:center;">
+          Thank you! Your RSVP has been submitted successfully.
+        </div>
+      </div>
+    </section>
+
+    <!-- US Travel & Lodging Page (Tag: us-guest) -->
+    <section id="travel-us" class="section">
+      <h2 class="section-title">Travel & Lodging (US)</h2>
+      <div class="card">
+        <h3>Venue Location</h3>
+        <p><strong>The Bellevue</strong></p>
+        <p>Chantilly, Virginia, USA</p>
+        <br>
+        <p><strong>Nearest Airport:</strong> Washington Dulles International Airport (IAD)</p>
+        <p><strong>Local Transport:</strong> Ride-share apps (Uber & Lyft) operate extensively throughout the area for travel to and from the venue and airport.</p>
+      </div>
+
+      <div class="card">
+        <h3>Recommended Hotels Nearby</h3>
+        <p><em>(Note: Rooms are subject to availability as formal room blocks are not reserved)</em></p>
+        <br>
+        <p><strong>1. Westfields Marriott Washington Dulles</strong><br>14750 Conference Center Dr, Chantilly, VA</p>
+        <br>
+        <p><strong>2. Hyatt Place Chantilly Dulles Airport South</strong><br>4994 Avion Pkwy, Chantilly, VA</p>
+        <br>
+        <p><strong>3. Courtyard by Marriott Dulles Airport Chantilly</strong><br>3935 Centerview Dr, Chantilly, VA</p>
+      </div>
+    </section>
+
+    <!-- India Travel Page (Tag: india-guest) -->
+    <section id="travel-india" class="section">
+      <h2 class="section-title">India Travel Details</h2>
+      <div class="card">
+        <h3>Wedding Venue</h3>
+        <p><strong>Chomu Palace Hotel</strong></p>
+        <p>Chomu, District Jaipur, Rajasthan, India</p>
+      </div>
+
+      <div class="card">
+        <h3>Travel & Transfers</h3>
+        <p><strong>Nearest Airport:</strong> Jaipur International Airport (JAI) — approximately 45 km / 1 hour drive to Chomu Palace.</p>
+        <p><strong>Nearest Train Station:</strong> Jaipur Junction (JP).</p>
+        <p><strong>Airport Pickups:</strong> Updates and driver coordination contact details will be posted here as we get closer to the dates.</p>
+      </div>
+    </section>
+
+    <!-- Admin Panel -->
+    <section id="admin" class="section">
+      <h2 class="section-title">Admin Dashboard</h2>
+      <div class="card">
+        <h3>Upload Guest CSV</h3>
+        <p>Headers required: <code>family_id,first_name,last_name,email,tags,max_plus_ones</code></p>
+        <br>
+        <input type="file" id="csv-file-input" accept=".csv" onchange="handleCSVUpload(event)">
+        <div id="upload-status" style="margin-top: 12px; color: var(--gold-light);"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    DISHA & RAJAT • #RISHTA • 2027
+  </footer>
+
+  <script>
+    // -------------------------------------------------------------
+    // 1. FIREBASE CONFIGURATION (Replace values below with your keys)
+    // -------------------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY_HERE",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    let db = null;
+    if (firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    }
+
+    // -------------------------------------------------------------
+    // 2. EVENTS DATA & LOCAL MOCK DB
+    // -------------------------------------------------------------
+    const eventsData = [
+      { id: 'e1', title: 'Welcome Lunch & Mehendi', date: 'March 13, 2027', time: 'Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
+      { id: 'e2', title: "Disha's Tel Ban", date: 'March 13, 2027', time: 'Late Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
+      { id: 'e3', title: 'Sangeet', date: 'March 13, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
+      { id: 'e4', title: "Rajat's Tel Haldi", date: 'March 14, 2027', time: 'Morning', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'groom-side'] },
+      { id: 'e5', title: "Disha's Gaur Puja & Phoolon Ki Haldi", date: 'March 14, 2027', time: 'Morning', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
+      { id: 'e6', title: 'Shaadi (Wedding Ceremony)', date: 'March 14, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
+      { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', time: '6:00 PM - 12:00 AM', location: 'The Bellevue, Chantilly, Virginia', tags: ['us-guest'] }
+    ];
+
+    let currentGuest = null;
+    let mockGuests = [
+      { email: 'guest@example.com', family_id: 'FAM01', first_name: 'Sample', last_name: 'Guest', tags: ['us-guest', 'india-guest', 'groom-side'], max_plus_ones: 1 }
+    ];
+
+    // Navigation Switcher
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(sectionId);
+      if (target) target.classList.add('active');
+    }
+
+    // Countdown Timer logic targeting March 13, 2027
+    const targetDate = new Date('March 13, 2027 00:00:00').getTime();
+    setInterval(() => {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+      if (diff > 0) {
+        document.getElementById('cd-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+        document.getElementById('cd-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+        document.getElementById('cd-minutes').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+        document.getElementById('cd-seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+      }
+    }, 1000);
+
+    // Guest Portal Tag Checks
+    function checkGuestAccess() {
+      const emailInput = document.getElementById('guest-email').value.trim().toLowerCase();
+      const errorEl = document.getElementById('login-error');
+      
+      const found = mockGuests.find(g => g.email.toLowerCase() === emailInput);
+      if (found) {
+        currentGuest = found;
+        errorEl.style.display = 'none';
+        setupGuestExperience(found);
+      } else {
+        errorEl.style.display = 'block';
+      }
+    }
+
+    function setupGuestExperience(guest) {
+      const tags = guest.tags || [];
+
+      document.getElementById('nav-schedule').style.display = 'inline-block';
+      document.getElementById('nav-rsvp').style.display = 'inline-block';
+      
+      if (tags.includes('us-guest')) document.getElementById('nav-travel-us').style.display = 'inline-block';
+      if (tags.includes('india-guest')) document.getElementById('nav-travel-india').style.display = 'inline-block';
+
+      const eventsContainer = document.getElementById('events-container');
+      eventsContainer.innerHTML = '';
+      
+      const allowedEvents = eventsData.filter(evt => evt.tags.some(t => tags.includes(t)));
+
+      allowedEvents.forEach(evt => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <h3>${evt.title}</h3>
+          <p><strong>Date:</strong> ${evt.date}</p>
+          <p><strong>Time:</strong> ${evt.time}</p>
+          <p><strong>Location:</strong> ${evt.location}</p>
+        `;
+        eventsContainer.appendChild(div);
+      });
+
+      renderRSVPForm(allowedEvents, guest);
+      showSection('schedule');
+    }
+
+    function renderRSVPForm(events, guest) {
+      const container = document.getElementById('family-members-container');
+      container.innerHTML = `
+        <h3 style="color:var(--gold-light);">Invited Party: ${guest.first_name} ${guest.last_name}</h3>
+        <p style="color: var(--text-sub); margin-bottom: 20px;">Please check who will be joining us for each event:</p>
+      `;
+
+      events.forEach(evt => {
+        const evtDiv = document.createElement('div');
+        evtDiv.style.marginBottom = '20px';
+        evtDiv.style.paddingBottom = '15px';
+        evtDiv.style.borderBottom = '1px solid rgba(212, 175, 55, 0.3)';
+
+        let optionsHTML = `
+          <label><input type="checkbox" name="${evt.id}_attendee" value="${guest.first_name} ${guest.last_name}"> ${guest.first_name} ${guest.last_name}</label>
+        `;
+
+        if (guest.max_plus_ones > 0) {
+          for (let i = 1; i <= guest.max_plus_ones; i++) {
+            optionsHTML += `
+              <div style="margin-top: 8px;">
+                <label>Plus One #${i} Name: <input type="text" placeholder="Full Name" name="${evt.id}_plusone_${i}"></label>
+              </div>
+            `;
+          }
+        }
+
+        evtDiv.innerHTML = `
+          <p style="color: var(--gold-primary); font-weight: 600; font-family: var(--font-serif);">${evt.title} (${evt.date})</p>
+          ${optionsHTML}
+        `;
+        container.appendChild(evtDiv);
+      });
+    }
+
+    function submitRSVP(e) {
+      e.preventDefault();
+      document.getElementById('rsvp-success').style.display = 'block';
+    }
+
+    function handleCSVUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        const lines = text.split('\n');
+        let count = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          if (!lines[i].trim()) continue;
+          const cols = lines[i].split(',');
+          if (cols.length >= 5) {
+            mockGuests.push({
+              family_id: cols[0].trim(),
+              first_name: cols[1].trim(),
+              last_name: cols[2].trim(),
+              email: cols[3].trim(),
+              tags: cols[4].replace(/"/g, '').split(';').map(t => t.trim()),
+              max_plus_ones: parseInt(cols[5] || '0')
+            });
+            count++;
+          }
+        }
+        document.getElementById('upload-status').innerText = `Loaded ${count} guests from CSV.`;
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
