@@ -92,6 +92,7 @@
 
     <div class="card">
       <h3 class="gold-title">Loaded Guest Roster</h3>
+      <p id="guest-sync-note" style="font-size:0.82rem;color:var(--taupe);margin:-4px 0 10px;"></p>
       <div class="roster-controls">
         <input type="search" id="guest-search" placeholder="Search name, email, family, code, or tag\u2026" oninput="rosterQuery=this.value; renderRosterTable(getStoredGuestList())">
       </div>
@@ -149,8 +150,49 @@
       { family_code: 'FAM02', family_name: 'Jain Family', members: [{ first_name: 'Disha', last_name: 'Jain', email: 'disha@example.com', tags: ['india-guest', 'us-guest', 'bride-side'], max_plus_ones: 2 }] }
     ];
 
+    // Sync the guest list with Firestore (the shared source of truth), then render.
+    // - Cloud has families -> adopt them (keeps every device consistent).
+    // - Cloud empty but this device has a saved list -> upload it (one-time migration).
+    async function syncGuestDatabaseFromCloud() {
+      const KEY = "wedding_guest_database";
+      const note = document.getElementById('guest-sync-note');
+      const setNote = (msg) => { if (note) note.textContent = msg; };
+      if (typeof db === 'undefined' || db === null) {
+        setNote('Cloud sync is off — showing this device\u2019s saved list.');
+        return;
+      }
+      try {
+        const snap = await db.collection("families").get();
+        const remote = [];
+        snap.forEach(doc => { const f = doc.data(); if (f && f.family_code) remote.push(f); });
+        if (remote.length) {
+          localStorage.setItem(KEY, JSON.stringify(remote));
+          setNote(`Synced ${remote.length} ${remote.length === 1 ? 'family' : 'families'} from the cloud.`);
+        } else {
+          const raw = localStorage.getItem(KEY);
+          const local = raw ? JSON.parse(raw) : [];
+          if (local.length) {
+            for (const fam of local) {
+              try { await db.collection("families").doc(fam.family_code).set(fam); } catch (e) {}
+            }
+            const check = await db.collection("families").get();
+            setNote(check.size
+              ? `Uploaded ${local.length} ${local.length === 1 ? 'family' : 'families'} to the cloud.`
+              : 'Could not reach the cloud database — showing this device\u2019s saved list.');
+          } else {
+            setNote('No guests yet — upload a CSV above.');
+          }
+        }
+      } catch (e) {
+        setNote('Could not reach the cloud database — showing this device\u2019s saved list.');
+      }
+    }
+
     // Load and refresh stats on page load
-    window.addEventListener("DOMContentLoaded", loadDashboardData);
+    window.addEventListener("DOMContentLoaded", async () => {
+      await syncGuestDatabaseFromCloud();
+      loadDashboardData();
+    });
 
     function getStoredGuestList() {
       const stored = localStorage.getItem("wedding_guest_database");
@@ -600,6 +642,9 @@
         const statusEl = document.getElementById('admin-auth-status');
         if (statusEl) statusEl.style.color = '';
         updateAdminUI();
+        if (user) {
+          syncGuestDatabaseFromCloud().then(() => loadDashboardData());
+        }
       });
       updateAdminUI();
     }
