@@ -45,6 +45,60 @@ body {
       font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
       color: var(--taupe); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; margin-left: 8px;
     }
+    /* RSVP person rows: vertically-aligned custom checkbox + separator lines */
+    .checkbox-pill {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      margin: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+    .checkbox-pill:last-child { border-bottom: none; }
+
+    /* native input stays accessible; the gold box below is its visual */
+    .checkbox-pill input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      margin: 0;
+    }
+    .checkbox-icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      border: 1.5px solid var(--gold-primary);
+      border-radius: 6px;
+      background: var(--white);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .checkbox-pill:has(input:checked) .checkbox-icon {
+      background: var(--gold-primary);
+      border-color: var(--gold-primary);
+    }
+    .checkbox-pill:has(input:checked) .checkbox-icon::after {
+      content: '\2713';
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .checkbox-pill:has(input:focus-visible) .checkbox-icon {
+      outline: 2px solid var(--gold-dark);
+      outline-offset: 2px;
+    }
+
+    /* checked row: dark pill, light text */
+    .checkbox-pill:has(input:checked) { background: var(--ink); }
+    .checkbox-pill:has(input:checked) .person-label { color: var(--white); }
     .checkbox-pill:has(input:checked) .person-kind { color: var(--gold-light); border-color: rgba(255,255,255,0.35); }
 
     .extra-row { display: flex; gap: 8px; margin-bottom: 10px; }
