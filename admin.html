@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/admin.css">
@@ -47,8 +47,8 @@
       <p style="color: var(--text-sub); margin: 10px 0; font-size: 0.9rem;">
         This dashboard is protected. Sign in with a Google account that is listed as an admin.
       </p>
-      <div id="admin-auth-status" style="margin: 12px 0; color: var(--gold-light); font-size: 0.9rem;"></div>
-      <button id="google-signin-btn" class="btn-gold-outline" onclick="handleGoogleSignIn()">Sign in with Google</button>
+      <div id="admin-auth-status" style="margin: 12px 0; color: var(--gold-dark); font-size: 0.9rem;"></div>
+      <button id="google-signin-btn" class="btn-primary" onclick="handleGoogleSignIn()">Sign in with Google</button>
       <button id="google-signout-btn" class="btn-gold-outline" style="display:none; margin-left:10px;" onclick="handleGoogleSignOut()">Sign out</button>
       <div id="admin-setup-hint" style="display:none; margin-top:12px; font-size:0.85rem; color: var(--text-sub);">
         Firebase is not configured yet. Add your keys to <code>firebase-config.js</code> and list admin emails in <code>adminEmails</code> to enable Google sign-in.
@@ -67,9 +67,9 @@
       <br>
       <input type="file" id="csv-file-input" accept=".csv" onchange="handleAdminCSVUpload(event)">
       <br><br>
-      <button class="btn-gold-outline" onclick="exportRSVPDataCSV()">📥 Export RSVPs to CSV</button>
-      <button class="btn-gold-outline" style="margin-left:10px; border-color:#ff6b6b; color:#ff6b6b;" onclick="clearGuestDatabase()">🗑️ Clear Uploaded Guests</button>
-      <div id="admin-status" style="margin-top: 15px; color: var(--gold-light); font-weight: 500;"></div>
+      <button class="btn-primary" onclick="exportRSVPDataCSV()">📥 Export RSVPs to CSV</button>
+      <button class="btn-danger-outline" style="margin-left:10px;" onclick="clearGuestDatabase()">🗑️ Clear Uploaded Guests</button>
+      <div id="admin-status" style="margin-top: 15px; color: var(--gold-dark); font-weight: 500;"></div>
     </div>
 
     <div class="card">
@@ -158,9 +158,9 @@
       }
 
       let html = `
-        <table style="width: 100%; border-collapse: collapse; color: #FFF; font-size: 0.85rem; text-align: left;">
+        <table style="width: 100%; border-collapse: collapse; color: var(--text-main); font-size: 0.85rem; text-align: left;">
           <thead>
-            <tr style="border-bottom: 1px solid var(--border-gold); color: var(--gold-light);">
+            <tr style="border-bottom: 2px solid var(--border-gold); color: var(--gold-dark);">
               <th style="padding: 8px;">Family Code</th>
               <th style="padding: 8px;">Family Name</th>
               <th style="padding: 8px;">Name</th>
@@ -175,12 +175,12 @@
       families.forEach(fam => {
         (fam.members || []).forEach(m => {
           html += `
-            <tr style="border-bottom: 1px solid rgba(212,175,55,0.15);">
+            <tr style="border-bottom: 1px solid var(--line);">
               <td style="padding: 8px;"><code>${fam.family_code}</code></td>
               <td style="padding: 8px;">${fam.family_name}</td>
               <td style="padding: 8px;">${m.first_name} ${m.last_name}</td>
               <td style="padding: 8px;">${m.email || '-'}</td>
-              <td style="padding: 8px; color: var(--gold-light);">${(m.tags || []).join(', ')}</td>
+              <td style="padding: 8px; color: var(--gold-dark); font-weight: 600;">${(m.tags || []).join(', ')}</td>
               <td style="padding: 8px;">${m.max_plus_ones || 0}</td>
             </tr>
           `;
