@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="styles.css?v=20260930d">
   <link rel="stylesheet" href="css/home.css?v=20260930d">
   <link rel="stylesheet" href="css/schedule.css?v=20260930d">
-  <link rel="stylesheet" href="css/rsvp.css?v=20260930d">
+  <link rel="stylesheet" href="css/rsvp.css?v=20260930e">
   <link rel="stylesheet" href="css/travel.css?v=20260930d">
 
   <!-- Firebase SDKs (RSVP writes) -->
@@ -375,7 +375,7 @@ function updateCountdown() {
       // members
       document.getElementById('member-list').innerHTML =
         family.members.map(m => `
-          <label class="checkbox-pill" style="margin-bottom:8px; cursor:default;">
+          <label class="checkbox-pill" style="cursor:default;">
             <span class="checkbox-icon" style="visibility:hidden;"></span>
             <span class="person-label">${esc(fullName(m))}<span class="person-kind">family</span></span>
           </label>`).join('');
@@ -437,7 +437,7 @@ function updateCountdown() {
           if (!p || !p.name) return '';
           const checked = att[k] ? 'checked' : '';
           return `
-            <label class="checkbox-pill" style="margin-bottom:8px;">
+            <label class="checkbox-pill">
               <input type="checkbox" data-event="${esc(e.id)}" data-person="${esc(k)}" ${checked}>
               <span class="checkbox-icon"></span>
               <span class="person-label">${esc(p.name)}<span class="person-kind">${p.kind}</span></span>
