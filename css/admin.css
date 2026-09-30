@@ -1,3 +1,4 @@
+/* Admin dashboard — light ivory theme */
 .admin-stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -6,15 +7,17 @@
 }
 
 .stat-card {
-  background: rgba(0,0,0,0.4);
-  padding: 15px;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 4px;
+  background: var(--ivory);
+  padding: 18px 15px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
   text-align: center;
 }
 
 .stat-num {
-  font-size: 1.8rem;
-  color: var(--gold-light);
+  font-size: 2rem;
+  color: var(--gold-dark);
   font-family: var(--font-serif);
 }
+
+.stat-card p { color: var(--taupe) !important; }
