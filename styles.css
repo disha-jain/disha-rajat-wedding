@@ -1,52 +1,60 @@
+/* ============================================================
+   Disha & Rajat — Unified Design System
+   Palette sampled from the approved swatches:
+     Gold #C9A961 · Dark gray #3B3A37 · Smoke #C8BFB4
+     Glacier #D4D5CE · Taupe #9F968A · Cream #DDCFBA
+     Ink #1B1A17 · Ivory #FAF7F0 · White #FFFFFF
+   Fonts: Great Vibes (script accents) · Cinzel (headings)
+          Montserrat (body)
+   ============================================================ */
 :root {
-  --gold-primary: #D4AF37;
-  --gold-light: #F3E5AB;
-  --gold-dark: #AA7C11;
-  --border-gold: #D4AF37;
-  --bg-dark: #0d0d0f;
-  --bg-card: rgba(18, 18, 22, 0.90);
-  --text-main: #FFFFFF;
-  --text-sub: #D1D1D6;
+  --gold-primary: #C9A961;
+  --gold-light: #E7D6AC;
+  --gold-dark: #A5813F;
+  --border-gold: #E3D5B8;
+  --ink: #1B1A17;
+  --dark-gray: #3B3A37;
+  --smoke: #C8BFB4;
+  --taupe: #9F968A;
+  --glacier: #D4D5CE;
+  --warm-gray: #D4CCC2;
+  --cream: #DDCFBA;
+  --ivory: #FAF7F0;
+  --white: #FFFFFF;
+  --line: #E7DCC8;
+
+  /* legacy aliases (kept so older markup keeps working) */
+  --bg-dark: #1B1A17;
+  --bg-card: #FFFFFF;
+  --text-main: #3B3A37;
+  --text-sub: #9F968A;
+
   --font-serif: 'Cinzel', serif;
   --font-script: 'Great Vibes', cursive;
   --font-sans: 'Montserrat', sans-serif;
+
+  --shadow-soft: 0 10px 30px rgba(60, 50, 35, 0.10);
+  --radius: 14px;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background-color: var(--bg-dark);
+  background-color: var(--ivory);
   color: var(--text-main);
   font-family: var(--font-sans);
   line-height: 1.6;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-.lights-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 60px;
-  background: radial-gradient(circle at 10% 20px, #FFF5C0 3px, transparent 4px),
-              radial-gradient(circle at 25% 35px, #FFF5C0 4px, transparent 5px),
-              radial-gradient(circle at 40% 15px, #FFF5C0 3px, transparent 4px),
-              radial-gradient(circle at 55% 30px, #FFF5C0 4px, transparent 5px),
-              radial-gradient(circle at 70% 18px, #FFF5C0 3px, transparent 4px),
-              radial-gradient(circle at 85% 32px, #FFF5C0 4px, transparent 5px),
-              radial-gradient(circle at 95% 15px, #FFF5C0 3px, transparent 4px);
-  filter: drop-shadow(0 0 8px rgba(255, 245, 192, 0.9));
-  z-index: 10;
-  pointer-events: none;
-}
+/* dark-theme fairy lights are retired in the light theme */
+.lights-overlay { display: none; }
 
+/* ---------------- nav ---------------- */
 nav {
-  background: rgba(10, 10, 12, 0.92);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  background: var(--ink);
+  border-bottom: 2px solid var(--gold-primary);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -55,18 +63,17 @@ nav {
   align-items: center;
   flex-wrap: wrap;
   padding: 14px 10px;
-  backdrop-filter: blur(8px);
 }
 
 nav a {
-  color: #E2E2E8;
+  color: var(--warm-gray);
   text-decoration: none;
   padding: 6px 16px;
   font-family: var(--font-serif);
   font-size: 0.82rem;
   letter-spacing: 2px;
   text-transform: uppercase;
-  transition: all 0.3s;
+  transition: color 0.25s;
   border-bottom: 2px solid transparent;
 }
 
@@ -75,6 +82,7 @@ nav a:hover, nav a.active {
   border-bottom-color: var(--gold-primary);
 }
 
+/* ---------------- layout ---------------- */
 .container {
   max-width: 900px;
   margin: 0 auto;
@@ -83,40 +91,85 @@ nav a:hover, nav a.active {
 
 .section-title {
   font-family: var(--font-serif);
-  font-size: 2.2rem;
-  color: var(--gold-primary);
+  font-size: 2.1rem;
+  color: var(--dark-gray);
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 8px;
   letter-spacing: 2px;
 }
 
+.section-sub {
+  text-align: center;
+  color: var(--taupe);
+  font-size: 0.95rem;
+  margin-bottom: 30px;
+}
+
+.script-heading {
+  font-family: var(--font-script);
+  font-size: 3.2rem;
+  color: var(--gold-dark);
+  text-align: center;
+  line-height: 1;
+}
+
+.eyebrow {
+  font-family: var(--font-serif);
+  font-size: 0.75rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--taupe);
+  text-align: center;
+}
+
+/* ---------------- cards ---------------- */
 .card {
-  background: var(--bg-card);
-  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: var(--white);
+  border: 1px solid var(--line);
   padding: 28px;
   margin-bottom: 22px;
-  border-radius: 4px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
 }
 
 .gold-title {
   font-family: var(--font-serif);
-  color: var(--gold-light);
+  color: var(--gold-dark);
   letter-spacing: 1.5px;
 }
+
+/* ---------------- buttons ---------------- */
+.btn-primary {
+  background: var(--ink);
+  color: var(--white);
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  padding: 13px 38px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  border-radius: 999px;
+  transition: background 0.25s ease, transform 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary:hover { background: #000; transform: translateY(-1px); }
 
 .btn-gold-outline {
   border: 1.5px solid var(--gold-primary);
   background: transparent;
-  color: #FFFFFF;
+  color: var(--gold-dark);
   font-family: var(--font-serif);
   font-size: 0.9rem;
   letter-spacing: 3px;
   padding: 12px 36px;
   text-transform: uppercase;
   cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.3s ease;
+  border-radius: 999px;
+  transition: all 0.25s ease;
   text-decoration: none;
   display: inline-block;
   text-align: center;
@@ -124,59 +177,87 @@ nav a:hover, nav a.active {
 
 .btn-gold-outline:hover {
   background: var(--gold-primary);
-  color: #000000;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+  color: var(--white);
 }
 
-.form-group {
-  margin-bottom: 20px;
-  text-align: left;
+.btn-danger-outline {
+  border: 1.5px solid #d66;
+  background: transparent;
+  color: #c44;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  padding: 12px 28px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.25s ease;
+}
+
+.btn-danger-outline:hover { background: #c44; color: #fff; }
+
+/* ---------------- forms ---------------- */
+.form-group { margin-bottom: 20px; text-align: left; }
+
+.form-group label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--dark-gray);
+  margin-bottom: 8px;
 }
 
 input[type="text"],
 input[type="email"],
 input[type="password"],
-textarea {
+input[type="search"],
+textarea,
+select {
   width: 100%;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(212, 175, 55, 0.4);
-  color: #FFFFFF;
+  padding: 12px 14px;
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  color: var(--dark-gray);
   font-family: var(--font-sans);
-  border-radius: 3px;
+  font-size: 0.95rem;
+  border-radius: 10px;
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--gold-primary);
+  box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.18);
 }
 
+input::placeholder, textarea::placeholder { color: var(--smoke); }
+
+code {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  padding: 1px 7px;
+  border-radius: 5px;
+  font-size: 0.85em;
+  color: var(--gold-dark);
+}
+
+/* ---------------- footer ---------------- */
 footer {
   text-align: center;
   padding: 40px 20px;
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
-  color: var(--text-sub);
-  font-size: 0.8rem;
+  background: var(--ink);
+  color: var(--smoke);
+  font-size: 0.78rem;
   letter-spacing: 2px;
+  margin-top: 40px;
 }
 
+/* ---------------- responsive ---------------- */
 @media (max-width: 768px) {
-  nav {
-    padding: 10px 4px;
-    gap: 2px;
-  }
-  nav a {
-    padding: 6px 10px;
-    font-size: 0.72rem;
-    letter-spacing: 1px;
-  }
-  .container {
-    padding: 30px 15px;
-  }
-  .section-title {
-    font-size: 1.8rem;
-  }
-  .card {
-    padding: 20px 16px;
-  }
+  nav { padding: 10px 4px; gap: 2px; }
+  nav a { padding: 6px 10px; font-size: 0.72rem; letter-spacing: 1px; }
+  .container { padding: 30px 15px; }
+  .section-title { font-size: 1.7rem; }
+  .script-heading { font-size: 2.6rem; }
+  .card { padding: 20px 16px; }
 }
