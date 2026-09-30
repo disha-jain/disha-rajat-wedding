@@ -17,9 +17,17 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
   <style>
-    body { background: linear-gradient(rgba(20,15,10,0.55), rgba(20,15,10,0.75)), url('NYCEngagementPhotographer-222.jpg') center 30%/cover no-repeat fixed; min-height: 100vh; }
-    .lights-overlay { display:none; }
-    nav { background: rgba(10,10,12,0.92); }
+    body {
+      background:
+        radial-gradient(circle at 20% 10%, rgba(201,169,97,0.12), transparent 45%),
+        radial-gradient(circle at 80% 90%, rgba(201,169,97,0.08), transparent 45%),
+        var(--ivory);
+      min-height: 100vh;
+      font-family: var(--font-sans);
+    }
+    .cursive-header { color: var(--gold-dark) !important; text-shadow: none !important; }
+    .sub-header { color: var(--dark-gray) !important; text-shadow: none !important; }
+    .rsvp-card { border: 1px solid var(--line) !important; box-shadow: var(--shadow-soft) !important; }
   </style>
 </head>
 <body>
