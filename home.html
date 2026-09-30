@@ -4,36 +4,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Disha Jain & Rajat Khanna — #rishta</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="styles.css?v=20260930c">
-  <link rel="stylesheet" href="css/home.css?v=20260930c">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css?v=20260930d">
+  <link rel="stylesheet" href="css/home.css?v=20260930d">
+  <link rel="stylesheet" href="css/schedule.css?v=20260930d">
+  <link rel="stylesheet" href="css/rsvp.css?v=20260930d">
+  <link rel="stylesheet" href="css/travel.css?v=20260930d">
+
+  <!-- Firebase SDKs (RSVP writes) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
 </head>
 <body>
   <script src="js/guest-auth.js"></script>
+  <script src="js/events.js"></script>
   <script>
     if (!window.GuestAuth.requireUnlock()) {
       // redirecting to index.html
     } else {
-      document.addEventListener('DOMContentLoaded', () => window.GuestAuth.renderNav());
+      document.addEventListener('DOMContentLoaded', initPage);
     }
   </script>
 
   <div class="lights-overlay"></div>
 
   <nav>
-    <a href="home.html" class="active">Home</a>
-    <a href="schedule.html">Events</a>
-    <a href="rsvp.html">RSVP</a>
-    <a href="travel-us.html" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
-    <a href="travel-india.html" id="nav-travel-india" style="display:none;">India Travel</a>
+    <a href="#home" data-section="home" class="active">Home</a>
+    <a href="#events" data-section="events">Events</a>
+    <a href="#rsvp" data-section="rsvp">RSVP</a>
+    <a href="#travel-us" data-section="travel-us" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
+    <a href="#travel-india" data-section="travel-india" id="nav-travel-india" style="display:none;">India Travel</a>
     <a href="admin.html">Host Admin</a>
   </nav>
 
-  <header class="hero">
+  <section id="home" class="page-section">
+<header class="hero">
     <div class="hero-container">
       <div class="hero-script-heading">We Do</div>
       <div class="hero-lead-text">TOGETHER WITH THEIR LOVED ONES</div>
@@ -83,11 +93,10 @@
         </div>
       </div>
 
-      <a href="rsvp.html" class="btn-primary">RSVP Now</a>
+      <a href="#rsvp" class="btn-primary">RSVP Now</a>
     </div>
   </header>
-
-  <section class="moments-section">
+<section class="moments-section">
     <div class="moments-container">
       <div class="moments-script">Captured</div>
       <h2 class="moments-title">MOMENTS</h2>
@@ -103,35 +112,512 @@
       </div>
     </div>
   </section>
+  </section>
+
+  <section id="events" class="page-section">
+<div class="schedule-wrap">
+    <div class="wedding-kicker">WEDDING</div>
+    <div class="schedule-script">Schedule</div>
+    <p class="schedule-note">The events you're invited to</p>
+    <div id="schedule-groups"></div>
+  </div>
+  </section>
+
+  <section id="rsvp" class="page-section">
+<div class="rsvp-wrap">
+    <div class="cursive-header" style="text-align:center;">Can't wait to party?</div>
+    <div class="sub-header" style="text-align:center;">Tell us who's coming<br>to each event</div>
+
+    <div class="rsvp-photo-frame">
+      <img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach">
+    </div>
+
+    <p class="family-greeting" id="family-greeting"></p>
+    <div class="form-error" id="form-error"></div>
+
+    <div id="rsvp-body">
+      <div class="section-card" id="party-card">
+        <h3>Your party</h3>
+        <p class="limit-note">Everyone below can be RSVP'd for each event. Tick who's attending.</p>
+        <div id="member-list"></div>
+      </div>
+
+      <div class="section-card" id="additional-card" style="display:none;">
+        <h3>Additional guests</h3>
+        <p class="limit-note" id="additional-note"></p>
+        <div id="additional-list"></div>
+        <button class="add-extra-btn" id="add-extra-btn" type="button">+ Add a guest</button>
+      </div>
+
+      <div id="events-list"></div>
+
+      <div class="section-card">
+        <h3>Dietary needs</h3>
+        <p class="limit-note">Anything we should know (vegetarian, allergies…)? List the person it applies to.</p>
+        <div class="form-group" style="margin-bottom:0;">
+          <textarea id="dietary-notes" rows="3" placeholder="e.g. Priya — vegetarian"></textarea>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>Wishes for the couple</h3>
+        <div class="form-group" style="margin-bottom:0;">
+          <textarea id="wishes" rows="2" placeholder="Leave your wishes…"></textarea>
+        </div>
+      </div>
+
+      <div class="submit-wrap">
+        <button class="submit-btn" type="button" id="submit-rsvp" onclick="handleSubmit()">Send RSVP</button>
+      </div>
+    </div>
+
+    <div id="rsvp-success">
+      <div class="big">Thank you!</div>
+      <p style="color:var(--taupe);">Your RSVP has been saved.<br>We can't wait to celebrate with you!</p>
+    </div>
+  </div>
+  </section>
+
+  <section id="travel-us" class="page-section" style="display:none;">
+<div class="travel-wrap">
+    <div class="travel-script">The</div>
+    <h2 class="travel-title">VENUE</h2>
+    <p class="travel-lede">
+      Our reception will take place at The Bellevue in Chantilly, Virginia — an elegant
+      ballroom space. Expect candlelight, a full dance floor, and lots of golden hour glow.
+    </p>
+
+    <div class="venue-card">
+      <div class="venue-name">The Bellevue</div>
+      <div class="venue-address">Chantilly, Virginia, USA</div>
+      <div class="map-links">
+        <a class="btn-map" href="https://maps.google.com/?q=The+Bellevue+Chantilly+VA" target="_blank" rel="noopener">Open in Google Maps</a>
+        <a class="btn-map-sm" href="https://maps.apple.com/?q=The+Bellevue+Chantilly+VA" target="_blank" rel="noopener">Apple Maps</a>
+      </div>
+    </div>
+
+    <div class="travel-dark-panel">
+      <div class="panel-script">Parking & Directions</div>
+      <p>
+        Free parking is available on site, with designated areas for elderly and senior guests.
+        If you need special assistance or a drop-off closer to the entrance, let us know.
+      </p>
+      <p>
+        <strong>Airport:</strong> Washington Dulles International Airport (IAD) — about 15 minutes away.<br>
+        <strong>Ride-share:</strong> Uber and Lyft operate extensively across Northern Virginia and IAD.
+      </p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h4>Where to Stay</h4>
+        <p><strong>Westfields Marriott Washington Dulles</strong><br>14750 Conference Center Dr, Chantilly, VA</p>
+        <div class="map-links" style="justify-content:flex-start;">
+          <a class="btn-map-sm" href="https://maps.google.com/?q=Westfields+Marriott+Chantilly+VA" target="_blank" rel="noopener">Google Maps</a>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4>More Options</h4>
+        <p><strong>Hyatt Place Chantilly Dulles Airport South</strong><br>4994 Avion Pkwy, Chantilly, VA</p>
+        <div class="map-links" style="justify-content:flex-start;">
+          <a class="btn-map-sm" href="https://maps.google.com/?q=Hyatt+Place+Chantilly+VA" target="_blank" rel="noopener">Google Maps</a>
+        </div>
+        <p class="fine">Subject to availability — no room blocks reserved.</p>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <section id="travel-india" class="page-section" style="display:none;">
+<div class="travel-wrap">
+    <div class="travel-script">The</div>
+    <h2 class="travel-title">VENUE</h2>
+    <p class="travel-lede">
+      Our wedding celebrations will take place at Chomu Palace in Chomu, Rajasthan — a
+      heritage palace venue. Expect open courtyards, festive lights, and lots of golden hour glow.
+    </p>
+
+    <div class="venue-card">
+      <div class="venue-name">Chomu Palace Hotel</div>
+      <div class="venue-address">Chomu, District Jaipur, Rajasthan, India</div>
+      <div class="map-links">
+        <a class="btn-map" href="https://maps.google.com/?q=Chomu+Palace+Hotel+Jaipur+Rajasthan" target="_blank" rel="noopener">Open in Google Maps</a>
+        <a class="btn-map-sm" href="https://maps.apple.com/?q=Chomu+Palace+Hotel+Jaipur+Rajasthan" target="_blank" rel="noopener">Apple Maps</a>
+      </div>
+    </div>
+
+    <div class="travel-dark-panel">
+      <div class="panel-script">Arrival & Transfers</div>
+      <p>
+        <strong>Nearest airport:</strong> Jaipur International Airport (JAI) — about 45 km / 1 hour drive.<br>
+        <strong>Train station:</strong> Jaipur Junction (JP).
+      </p>
+      <p>
+        Driver contacts and airport pickup coordination details will be published here closer to
+        March 2027. If you need special assistance, let us know.
+      </p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h4>Getting There</h4>
+        <p>Pre-paid taxis and ride-shares run from Jaipur airport to Chomu. We recommend arranging a pickup in advance for late-night arrivals.</p>
+      </div>
+      <div class="info-card">
+        <h4>Good to Know</h4>
+        <p>March in Rajasthan is warm during the day and cool in the evening — bring a light layer for outdoor events.</p>
+        <p class="fine">More lodging details coming soon.</p>
+      </div>
+    </div>
+  </div>
+  </section>
 
   <footer>
     DISHA & RAJAT • #RISHTA • 2027
   </footer>
 
-  <script>
-    const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-    if (tags.includes("us-guest")) {
-      const el = document.getElementById("nav-travel-us");
-      if (el) el.style.display = "inline-block";
-    }
-    if (tags.includes("india-guest")) {
-      const el = document.getElementById("nav-travel-india");
-      if (el) el.style.display = "inline-block";
+<script>
+/* ---------- single-page shared ---------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* countdown (home hero) */
+const targetDate = new Date('March 13, 2027 00:00:00').getTime();
+function updateCountdown() {
+  const now = new Date().getTime();
+  const diff = targetDate - now;
+  if (diff > 0) {
+    document.getElementById('cd-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+    document.getElementById('cd-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+    document.getElementById('cd-minutes').innerText = String(Math.floor((diff % (1000 * 60)) / (1000 * 60))).padStart(2, '0');
+    document.getElementById('cd-seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+  }
+}
+
+/* ----- schedule ----- */
+    function renderSchedule() {
+      const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
+      const events = eventsForTags(tags);
+      const container = document.getElementById('schedule-groups');
+
+      if (!events.length) {
+        container.innerHTML = '<div class="empty-note">Details coming soon.</div>';
+        return;
+      }
+
+      container.innerHTML = groupEventsByDate(events).map(g => `
+        <div class="day-group">
+          <div class="day-label">${esc(g.dateLabel)}</div>
+          <div class="timeline">
+            ${g.events.map(e => `
+              <div class="timeline-item">
+                <div class="timeline-icon">${e.icon || '✦'}</div>
+                <div>
+                  <div class="timeline-time">${esc(e.time)}</div>
+                  <div class="timeline-label">${esc(e.title)}</div>
+                  <div class="timeline-meta">
+                    ${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}
+                    ${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}` : ''}
+                    ${e.notes ? `<br>${esc(e.notes)}` : ''}
+                  </div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>`).join('');
     }
 
-    const targetDate = new Date('March 13, 2027 00:00:00').getTime();
-    function updateCountdown() {
-      const now = new Date().getTime();
-      const diff = targetDate - now;
-      if (diff > 0) {
-        document.getElementById('cd-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
-        document.getElementById('cd-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-        document.getElementById('cd-minutes').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-        document.getElementById('cd-seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+/* ----- rsvp ----- */
+    const fullName = m => `${m.first_name} ${m.last_name}`.trim();
+
+    let family = null;
+    let familyEvents = [];
+    let additional = [];          // [{id, first, last}]
+    let attendance = {};          // {eventId: {personKey: true}}
+    let plusOneLimit = 0;
+    let extraSeq = 0;
+
+    const memberKey = m => 'm:' + fullName(m).toLowerCase();
+    const extraKey = x => 'a:' + x.id;
+    const personLabel = (key) => {
+      if (key.startsWith('m:')) {
+        const m = family.members.find(m => memberKey(m) === key);
+        return m ? { name: fullName(m), kind: 'family' } : null;
       }
+      const x = additional.find(x => extraKey(x) === key);
+      return x ? { name: `${x.first} ${x.last}`.trim(), kind: 'guest' } : null;
+    };
+    const partyKeys = () => [
+      ...family.members.map(memberKey),
+      ...additional.filter(x => x.first.trim() && x.last.trim()).map(extraKey)
+    ];
+
+    function showError(msg) {
+      const el = document.getElementById('form-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-  </script>
+
+    function initRsvp() {
+      const code = sessionStorage.getItem('family_code');
+      const db = window.GuestAuth.getGuestDatabase();
+      family = db.find(f => f.family_code === code);
+      if (!family) { showError("We couldn't find your invitation. Please sign in again."); return; }
+
+      const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
+      familyEvents = eventsForTags(tags);
+      plusOneLimit = (family.members || []).reduce((n, m) => n + (parseInt(m.max_plus_ones) || 0), 0);
+
+      document.getElementById('family-greeting').innerHTML =
+        `RSVP for the <strong>${esc(family.family_name)}</strong>`;
+
+      // members
+      document.getElementById('member-list').innerHTML =
+        family.members.map(m => `
+          <label class="checkbox-pill" style="margin-bottom:8px; cursor:default;">
+            <span class="checkbox-icon" style="visibility:hidden;"></span>
+            <span class="person-label">${esc(fullName(m))}<span class="person-kind">family</span></span>
+          </label>`).join('');
+
+      // additional guests
+      if (plusOneLimit > 0) {
+        document.getElementById('additional-card').style.display = 'block';
+        document.getElementById('additional-note').textContent =
+          `You may add up to ${plusOneLimit} additional guest${plusOneLimit === 1 ? '' : 's'}. Please give each guest's full name.`;
+        document.getElementById('add-extra-btn').addEventListener('click', addExtraRow);
+      }
+
+      restorePrevious();
+      renderEvents();
+      updateAddButton();
+    }
+
+    function addExtraRow(first = '', last = '') {
+      if (additional.length >= plusOneLimit) return;
+      const x = { id: 'x' + (++extraSeq) + Date.now().toString(36), first, last };
+      additional.push(x);
+      const row = document.createElement('div');
+      row.className = 'extra-row';
+      row.dataset.id = x.id;
+      row.innerHTML = `
+        <input type="text" placeholder="First name" value="${esc(first)}" aria-label="Additional guest first name">
+        <input type="text" placeholder="Last name" value="${esc(last)}" aria-label="Additional guest last name">
+        <button type="button" class="extra-remove" aria-label="Remove guest">×</button>`;
+      const [fi, li] = row.querySelectorAll('input');
+      fi.addEventListener('input', () => { x.first = fi.value; renderEvents(); });
+      li.addEventListener('input', () => { x.last = li.value; renderEvents(); });
+      row.querySelector('.extra-remove').addEventListener('click', () => {
+        additional = additional.filter(a => a.id !== x.id);
+        row.remove();
+        renderEvents();
+        updateAddButton();
+      });
+      document.getElementById('additional-list').appendChild(row);
+      updateAddButton();
+      fi.focus();
+    }
+
+    function updateAddButton() {
+      const btn = document.getElementById('add-extra-btn');
+      if (btn) btn.disabled = additional.length >= plusOneLimit;
+    }
+
+    function renderEvents() {
+      const wrap = document.getElementById('events-list');
+      if (!familyEvents.length) {
+        wrap.innerHTML = `<div class="section-card"><p class="limit-note" style="margin:0;">No events to RSVP for yet — check back soon.</p></div>`;
+        return;
+      }
+      const keys = partyKeys();
+      wrap.innerHTML = familyEvents.map(e => {
+        const att = attendance[e.id] || {};
+        const rows = keys.map(k => {
+          const p = personLabel(k);
+          if (!p || !p.name) return '';
+          const checked = att[k] ? 'checked' : '';
+          return `
+            <label class="checkbox-pill" style="margin-bottom:8px;">
+              <input type="checkbox" data-event="${esc(e.id)}" data-person="${esc(k)}" ${checked}>
+              <span class="checkbox-icon"></span>
+              <span class="person-label">${esc(p.name)}<span class="person-kind">${p.kind}</span></span>
+            </label>`;
+        }).join('');
+        return `
+          <div class="event-card">
+            <div class="event-head">
+              <div class="event-icon">${e.icon || '✦'}</div>
+              <div>
+                <div class="event-title">${esc(e.title)}</div>
+                <div class="event-sub">${esc(e.dateLabel)} · ${esc(e.time)}<br>${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}` : ''}</div>
+              </div>
+            </div>
+            <div class="quick-links">
+              <button type="button" class="link-btn" data-all="1" data-event="${esc(e.id)}">Everyone attending</button>
+              <button type="button" class="link-btn" data-all="0" data-event="${esc(e.id)}">No one</button>
+            </div>
+            ${rows || '<p class="limit-note">Add guests above to RSVP for them.</p>'}
+          </div>`;
+      }).join('');
+
+      wrap.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const { event, person } = cb.dataset;
+          attendance[event] = attendance[event] || {};
+          attendance[event][person] = cb.checked;
+        });
+      });
+      wrap.querySelectorAll('.link-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = btn.dataset.all === '1';
+          attendance[btn.dataset.event] = attendance[btn.dataset.event] || {};
+          partyKeys().forEach(k => { attendance[btn.dataset.event][k] = val; });
+          renderEvents();
+        });
+      });
+    }
+
+    function snapshotKey() { return 'wedding_rsvp_family_' + family.family_code; }
+
+    function restorePrevious() {
+      try {
+        const snap = JSON.parse(localStorage.getItem(snapshotKey()) || 'null');
+        if (snap) {
+          (snap.additional || []).slice(0, plusOneLimit).forEach(g => addExtraRow(g.first || '', g.last || ''));
+          attendance = snap.attendance || {};
+          document.getElementById('dietary-notes').value = snap.dietary || '';
+          document.getElementById('wishes').value = snap.wishes || '';
+          return;
+        }
+      } catch (e) {}
+      // fallback: scan legacy per-guest records
+      try {
+        const recs = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]')
+          .filter(r => r.family_code === family.family_code);
+        const memberNames = new Set(family.members.map(m => fullName(m).toLowerCase()));
+        const extrasSeen = new Map();
+        recs.forEach(r => {
+          const nm = (r.guest_name || '').trim();
+          if (!nm) return;
+          let key;
+          if (memberNames.has(nm.toLowerCase())) key = 'm:' + nm.toLowerCase();
+          else {
+            if (!extrasSeen.has(nm.toLowerCase()) && extrasSeen.size < plusOneLimit) {
+              const parts = nm.split(/\s+/);
+              const x = { id: 'x' + (++extraSeq) + 'r', first: parts[0] || '', last: parts.slice(1).join(' ') || '' };
+              additional.push(x);
+              extrasSeen.set(nm.toLowerCase(), extraKey(x));
+            }
+            key = extrasSeen.get(nm.toLowerCase());
+          }
+          if (!key) return;
+          attendance[r.event_id] = attendance[r.event_id] || {};
+          if (r.status === 'attending') attendance[r.event_id][key] = true;
+        });
+        additional.forEach(x => {
+          // render rows for restored extras (without stealing focus)
+          const row = document.createElement('div');
+          row.className = 'extra-row'; row.dataset.id = x.id;
+          row.innerHTML = `<input type="text" placeholder="First name" value="${esc(x.first)}"><input type="text" placeholder="Last name" value="${esc(x.last)}"><button type="button" class="extra-remove">×</button>`;
+          const [fi, li] = row.querySelectorAll('input');
+          fi.addEventListener('input', () => { x.first = fi.value; renderEvents(); });
+          li.addEventListener('input', () => { x.last = li.value; renderEvents(); });
+          row.querySelector('.extra-remove').addEventListener('click', () => {
+            additional = additional.filter(a => a.id !== x.id);
+            row.remove(); renderEvents(); updateAddButton();
+          });
+          document.getElementById('additional-list').appendChild(row);
+        });
+        const withDiet = recs.find(r => r.dietary_notes);
+        if (withDiet) document.getElementById('dietary-notes').value = withDiet.dietary_notes.replace(/ \| Wishes:.*$/, '');
+      } catch (e) {}
+    }
+
+    function handleSubmit() {
+      document.getElementById('form-error').style.display = 'none';
+
+      // validate named additional guests
+      for (const x of additional) {
+        const f = x.first.trim(), l = x.last.trim();
+        if ((f || l) && !(f && l)) { showError('Please give both a first and last name for each additional guest.'); return; }
+      }
+      const namedExtras = additional.filter(x => x.first.trim() && x.last.trim());
+      const keys = [...family.members.map(memberKey), ...namedExtras.map(extraKey)];
+      if (!keys.length) { showError('Your party is empty.'); return; }
+
+      const dietary = document.getElementById('dietary-notes').value.trim();
+      const wishes = document.getElementById('wishes').value.trim();
+      const timestamp = new Date().toISOString();
+
+      // structured snapshot for pre-fill
+      localStorage.setItem(snapshotKey(), JSON.stringify({
+        additional: namedExtras.map(x => ({ first: x.first.trim(), last: x.last.trim() })),
+        attendance, dietary, wishes, timestamp
+      }));
+
+      // per-event per-person records (keeps admin export working)
+      const db_records = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]')
+        .filter(r => r.family_code !== family.family_code);
+      const newRecords = [];
+      familyEvents.forEach(e => {
+        keys.forEach(k => {
+          const p = personLabel(k);
+          const attending = !!(attendance[e.id] && attendance[e.id][k]);
+          newRecords.push({
+            family_code: family.family_code,
+            family_name: family.family_name,
+            guest_name: p.name,
+            guest_type: p.kind,
+            event_id: e.id,
+            event_title: e.title,
+            status: attending ? 'attending' : 'declining',
+            dietary_notes: dietary + (wishes ? ' | Wishes: ' + wishes : ''),
+            timestamp
+          });
+        });
+      });
+      localStorage.setItem('wedding_rsvps_database', JSON.stringify([...db_records, ...newRecords]));
+
+      if (typeof db !== 'undefined' && db !== null) {
+        newRecords.forEach(r => { db.collection('rsvps').add(r).catch(() => {}); });
+      }
+
+      document.getElementById('rsvp-body').style.display = 'none';
+      document.getElementById('rsvp-success').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+/* show/hide travel sections per guest tags */
+function applyTagSections() {
+  const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
+  document.getElementById('travel-us').style.display = tags.includes('us-guest') ? '' : 'none';
+  document.getElementById('travel-india').style.display = tags.includes('india-guest') ? '' : 'none';
+}
+
+/* highlight the nav tab for the section in view */
+function initScrollSpy() {
+  const links = [...document.querySelectorAll('nav a[data-section]')].filter(a => {
+    const sec = document.getElementById(a.dataset.section);
+    return sec && sec.style.display !== 'none';
+  });
+  if (!links.length) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.toggle('active', a.dataset.section === e.target.id));
+      }
+    });
+  }, { rootMargin: '-35% 0px -55% 0px' });
+  links.forEach(a => obs.observe(document.getElementById(a.dataset.section)));
+}
+
+function initPage() {
+  window.GuestAuth.renderNav();
+  applyTagSections();
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+  renderSchedule();
+  initRsvp();
+  initScrollSpy();
+}
+</script>
 </body>
 </html>
