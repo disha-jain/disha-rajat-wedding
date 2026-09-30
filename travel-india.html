@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>India Travel — Disha & Rajat (#rishta)</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/travel.css">
 </head>
@@ -22,8 +22,6 @@
     }
   </script>
 
-  <div class="lights-overlay"></div>
-
   <nav>
     <a href="home.html">Home</a>
     <a href="schedule.html">Events</a>
@@ -33,37 +31,50 @@
     <a href="admin.html">Host Admin</a>
   </nav>
 
-  <div class="container">
-    <h2 class="section-title">India Travel Details</h2>
-    
-    <div class="card">
-      <h3 class="gold-title">Venue: Chomu Palace Hotel</h3>
-      <p>Chomu, District Jaipur, Rajasthan, India</p>
-      <br>
+  <div class="travel-wrap">
+    <div class="travel-script">The</div>
+    <h2 class="travel-title">VENUE</h2>
+    <p class="travel-lede">
+      Our wedding celebrations will take place at Chomu Palace in Chomu, Rajasthan — a
+      heritage palace venue. Expect open courtyards, festive lights, and lots of golden hour glow.
+    </p>
+
+    <div class="venue-card">
+      <div class="venue-name">Chomu Palace Hotel</div>
+      <div class="venue-address">Chomu, District Jaipur, Rajasthan, India</div>
       <div class="map-links">
-        <a href="https://maps.google.com/?q=Chomu+Palace+Hotel+Jaipur+Rajasthan" target="_blank" class="btn-map">📍 Open in Google Maps</a>
-        <a href="https://maps.apple.com/?q=Chomu+Palace+Hotel+Jaipur+Rajasthan" target="_blank" class="btn-map">🍎 Open in Apple Maps</a>
+        <a class="btn-map" href="https://maps.google.com/?q=Chomu+Palace+Hotel+Jaipur+Rajasthan" target="_blank" rel="noopener">Open in Google Maps</a>
+        <a class="btn-map-sm" href="https://maps.apple.com/?q=Chomu+Palace+Hotel+Jaipur+Rajasthan" target="_blank" rel="noopener">Apple Maps</a>
       </div>
     </div>
 
-    <div class="card">
-      <h3 class="gold-title">Arrival & Transfers</h3>
-      <p><strong>Nearest Airport:</strong> Jaipur International Airport (JAI) — ~45 km / 1 hour drive.</p>
-      <p><strong>Train Station:</strong> Jaipur Junction (JP).</p>
-      <p><strong>Driver Assistance:</strong> Driver contacts and airport pickup coordination details will be published here closer to March 2027.</p>
+    <div class="travel-dark-panel">
+      <div class="panel-script">Arrival & Transfers</div>
+      <p>
+        <strong>Nearest airport:</strong> Jaipur International Airport (JAI) — about 45 km / 1 hour drive.<br>
+        <strong>Train station:</strong> Jaipur Junction (JP).
+      </p>
+      <p>
+        Driver contacts and airport pickup coordination details will be published here closer to
+        March 2027. If you need special assistance, let us know.
+      </p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h4>Getting There</h4>
+        <p>Pre-paid taxis and ride-shares run from Jaipur airport to Chomu. We recommend arranging a pickup in advance for late-night arrivals.</p>
+      </div>
+      <div class="info-card">
+        <h4>Good to Know</h4>
+        <p>March in Rajasthan is warm during the day and cool in the evening — bring a light layer for outdoor events.</p>
+        <p class="fine">More lodging details coming soon.</p>
+      </div>
     </div>
   </div>
 
   <footer>
     DISHA & RAJAT • #RISHTA • 2027
   </footer>
-
-  <script>
-    const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-    if (tags.includes("us-guest")) {
-      const el = document.getElementById("nav-travel-us");
-      if (el) el.style.display = "inline-block";
-    }
-  </script>
 </body>
 </html>
