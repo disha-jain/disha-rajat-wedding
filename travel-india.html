@@ -13,9 +13,12 @@
   <link rel="stylesheet" href="css/travel.css">
 </head>
 <body>
+  <script src="js/guest-auth.js"></script>
   <script>
-    if (sessionStorage.getItem("site_unlocked") !== "true") {
-      window.location.href = "index.html";
+    if (!window.GuestAuth.requireUnlock()) {
+      // redirecting to index.html
+    } else {
+      document.addEventListener('DOMContentLoaded', () => window.GuestAuth.renderNav());
     }
   </script>
 
