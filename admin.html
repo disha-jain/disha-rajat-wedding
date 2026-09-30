@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Host Admin — Disha & Rajat (#rishta)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+  <script>
+    if (sessionStorage.getItem("site_unlocked") !== "true") {
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <div class="lights-overlay"></div>
+
+  <nav>
+    <a href="home.html">Home</a>
+    <a href="schedule.html">Events</a>
+    <a href="rsvp.html">RSVP</a>
+    <a href="travel-us.html" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
+    <a href="travel-india.html" id="nav-travel-india" style="display:none;">India Travel</a>
+    <a href="admin.html" class="active">Host Admin</a>
+  </nav>
+
+  <div class="container">
+    <h2 class="section-title">Host Admin Dashboard</h2>
+    
+    <div class="card">
+      <h3 class="gold-title">Guest List CSV Upload</h3>
+      <p style="color: var(--text-sub); margin: 10px 0;">
+        Upload your guest CSV file. Header required:<br>
+        <code>family_code,family_name,first_name,last_name,email,tags,max_plus_ones</code>
+      </p>
+      <br>
+      <input type="file" id="csv-file-input" accept=".csv" onchange="handleAdminCSVUpload(event)">
+      <br><br>
+      <button class="btn-gold-outline" onclick="exportRSVPDataCSV()">📥 Export RSVPs to CSV</button>
+      <button class="btn-gold-outline" style="margin-left:10px; border-color:#ff6b6b; color:#ff6b6b;" onclick="clearGuestDatabase()">🗑️ Clear Uploaded Guests</button>
+      <div id="admin-status" style="margin-top: 15px; color: var(--gold-light); font-weight: 500;"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="gold-title">Live Guest & RSVP Summary</h3>
+      <div class="admin-stat-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-families">0</div>
+          <p style="color:var(--text-sub); font-size:0.8rem;">Families / Groups</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-total-guests">0</div>
+          <p style="color:var(--text-sub); font-size:0.8rem;">Total Invited Guests</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-rsvps-submitted">0</div>
+          <p style="color:var(--text-sub); font-size:0.8rem;">RSVPs Submitted</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="gold-title">Loaded Guest Roster</h3>
+      <div id="guest-roster-table" style="margin-top: 15px; overflow-x: auto;">
+        <p style="color: var(--text-sub);">No guests loaded yet. Upload a CSV above or add entries to localStorage / Firebase.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    DISHA & RAJAT • #RISHTA • 2027
+  </footer>
+
+  <script>
+    // Navigation visibility for unlocked travel tabs
+    const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
+    if (sessionStorage.getItem("rsvp_submitted") === "true") {
+      if (tags.includes("us-guest")) document.getElementById("nav-travel-us").style.display = "inline-block";
+      if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
+    }
+
+    // Load and refresh stats on page load
+    window.addEventListener("DOMContentLoaded", loadDashboardData);
+
+    function getStoredGuestList() {
+      const stored = localStorage.getItem("wedding_guest_database");
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function getStoredRSVPs() {
+      const stored = localStorage.getItem("wedding_rsvps_database");
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function loadDashboardData() {
+      const families = getStoredGuestList();
+      const rsvps = getStoredRSVPs();
+
+      let totalGuests = 0;
+      families.forEach(f => {
+        totalGuests += (f.members ? f.members.length : 0);
+      });
+
+      document.getElementById("stat-families").innerText = families.length;
+      document.getElementById("stat-total-guests").innerText = totalGuests;
+      document.getElementById("stat-rsvps-submitted").innerText = rsvps.length;
+
+      renderRosterTable(families);
+    }
+
+    function renderRosterTable(families) {
+      const container = document.getElementById("guest-roster-table");
+      if (!families || families.length === 0) {
+        container.innerHTML = `<p style="color: var(--text-sub);">No guests currently loaded in local storage or database.</p>`;
+        return;
+      }
+
+      let html = `
+        <table style="width: 100%; border-collapse: collapse; color: #FFF; font-size: 0.85rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border-gold); color: var(--gold-light);">
+              <th style="padding: 8px;">Family Code</th>
+              <th style="padding: 8px;">Family Name</th>
+              <th style="padding: 8px;">Name</th>
+              <th style="padding: 8px;">Email</th>
+              <th style="padding: 8px;">Tags</th>
+              <th style="padding: 8px;">Plus Ones</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      families.forEach(fam => {
+        (fam.members || []).forEach(m => {
+          html += `
+            <tr style="border-bottom: 1px solid rgba(212,175,55,0.15);">
+              <td style="padding: 8px;"><code>${fam.family_code}</code></td>
+              <td style="padding: 8px;">${fam.family_name}</td>
+              <td style="padding: 8px;">${m.first_name} ${m.last_name}</td>
+              <td style="padding: 8px;">${m.email || '-'}</td>
+              <td style="padding: 8px; color: var(--gold-light);">${(m.tags || []).join(', ')}</td>
+              <td style="padding: 8px;">${m.max_plus_ones || 0}</td>
+            </tr>
+          `;
+        });
+      });
+
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+    }
+
+    function handleAdminCSVUpload(e) {
+      const file = e.target.files[0];
+      const statusEl = document.getElementById('admin-status');
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const text = evt.target.result;
+          const lines = text.split(/\r?\n/);
+          if (lines.length < 2) {
+            statusEl.innerText = "Error: File is empty or missing headers.";
+            return;
+          }
+
+          const familyMap = {};
+          let rowsParsed = 0;
+
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            // Handle standard comma split (accounting for quotes around tags)
+            const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+            if (cols.length >= 4) {
+              const code = cols[0].replace(/"/g, '').trim();
+              const famName = cols[1].replace(/"/g, '').trim();
+              const firstName = cols[2].replace(/"/g, '').trim();
+              const lastName = cols[3].replace(/"/g, '').trim();
+              const email = cols[4] ? cols[4].replace(/"/g, '').trim() : '';
+              const rawTags = cols[5] ? cols[5].replace(/"/g, '').trim() : '';
+              const plusOnes = cols[6] ? parseInt(cols[6].replace(/"/g, '').trim()) || 0 : 0;
+
+              const tagsArr = rawTags ? rawTags.split(/[;,]/).map(t => t.trim()) : [];
+
+              if (!familyMap[code]) {
+                familyMap[code] = {
+                  family_code: code,
+                  family_name: famName || `${lastName} Family`,
+                  members: []
+                };
+              }
+
+              familyMap[code].members.push({
+                first_name: firstName,
+                last_name: lastName,
+                email: email,
+                tags: tagsArr,
+                max_plus_ones: plusOnes
+              });
+
+              rowsParsed++;
+            }
+          }
+
+          const newFamilies = Object.values(familyMap);
+          localStorage.setItem("wedding_guest_database", JSON.stringify(newFamilies));
+
+          // Also save to Firebase if db is connected
+          if (typeof db !== 'undefined' && db !== null) {
+            newFamilies.forEach(fam => {
+              db.collection("families").doc(fam.family_code).set(fam);
+            });
+          }
+
+          statusEl.style.color = "#51cf66";
+          statusEl.innerText = `Successfully imported ${rowsParsed} guests in ${newFamilies.length} families!`;
+          loadDashboardData();
+        } catch (err) {
+          statusEl.style.color = "#ff6b6b";
+          statusEl.innerText = `Error parsing CSV: ${err.message}`;
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearGuestDatabase() {
+      if (confirm("Are you sure you want to clear all loaded guest data?")) {
+        localStorage.removeItem("wedding_guest_database");
+        localStorage.removeItem("wedding_rsvps_database");
+        document.getElementById('admin-status').innerText = "Guest database cleared.";
+        loadDashboardData();
+      }
+    }
+
+    function exportRSVPDataCSV() {
+      const rsvps = getStoredRSVPs();
+      let csvContent = "data:text/csv;charset=utf-8,family_code,family_name,guest_name,event_id,status,dietary_notes\n";
+
+      if (rsvps.length === 0) {
+        // Default sample row if empty
+        csvContent += "FAM01,Khanna Family,Rajat Khanna,e7,attending,None\n";
+      } else {
+        rsvps.forEach(r => {
+          csvContent += `"${r.family_code}","${r.family_name}","${r.guest_name}","${r.event_id}","${r.status}","${r.dietary_notes || ''}"\n`;
+        });
+      }
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "wedding_rsvp_export.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>

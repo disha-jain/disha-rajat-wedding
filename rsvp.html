@@ -11,6 +11,11 @@
   
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/rsvp.css">
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
 </head>
 <body>
   <script>
@@ -61,7 +66,7 @@
 
       <div id="rsvp-success-message" style="display:none; text-align:center; margin-top: 20px; color: #51cf66;">
         <h3 style="color: #51cf66;">RSVP Confirmed!</h3>
-        <p>Your response token has been saved. Travel pages are now unlocked in the menu!</p>
+        <p>Your response has been saved. Travel pages are now unlocked in the menu!</p>
       </div>
     </div>
   </div>
@@ -81,10 +86,15 @@
       { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', time: '6:00 PM - 12:00 AM', location: 'The Bellevue, Chantilly, Virginia', tags: ['us-guest'] }
     ];
 
-    let guestDatabase = [
+    let fallbackDatabase = [
       { family_code: 'FAM01', family_name: 'Khanna Family', members: [{ first_name: 'Rajat', last_name: 'Khanna', email: 'rajat@example.com', tags: ['india-guest', 'us-guest', 'groom-side'], max_plus_ones: 1 }] },
       { family_code: 'FAM02', family_name: 'Jain Family', members: [{ first_name: 'Disha', last_name: 'Jain', email: 'disha@example.com', tags: ['india-guest', 'us-guest', 'bride-side'], max_plus_ones: 2 }] }
     ];
+
+    function getGuestDatabase() {
+      const stored = localStorage.getItem("wedding_guest_database");
+      return stored ? JSON.parse(stored) : fallbackDatabase;
+    }
 
     let currentActiveFamily = null;
 
@@ -93,14 +103,16 @@
       const err = document.getElementById('lookup-error');
       let matchedFamily = null;
 
-      for (let fam of guestDatabase) {
+      const guestDB = getGuestDatabase();
+
+      for (let fam of guestDB) {
         if (fam.family_code.toLowerCase() === q || fam.family_name.toLowerCase().includes(q)) {
           matchedFamily = fam;
           break;
         }
         for (let m of fam.members) {
           const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
-          if (fullName.includes(q) || m.last_name.toLowerCase() === q || m.email.toLowerCase() === q) {
+          if (fullName.includes(q) || m.last_name.toLowerCase() === q || (m.email && m.email.toLowerCase() === q)) {
             matchedFamily = fam;
             break;
           }
@@ -163,6 +175,20 @@
       e.preventDefault();
       sessionStorage.setItem("rsvp_submitted", "true");
       
+      const dietary = document.getElementById("dietary-notes").value;
+      const rsvpRecord = {
+        family_code: currentActiveFamily.family_code,
+        family_name: currentActiveFamily.family_name,
+        guest_name: currentActiveFamily.members.map(m => m.first_name + ' ' + m.last_name).join(', '),
+        status: 'Submitted',
+        dietary_notes: dietary,
+        timestamp: new Date().toISOString()
+      };
+
+      const existingRSVPs = JSON.parse(localStorage.getItem("wedding_rsvps_database") || "[]");
+      existingRSVPs.push(rsvpRecord);
+      localStorage.setItem("wedding_rsvps_database", JSON.stringify(existingRSVPs));
+
       const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
       if (tags.includes("us-guest")) document.getElementById("nav-travel-us").style.display = "inline-block";
       if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
