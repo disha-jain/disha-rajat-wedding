@@ -1,3 +1,485 @@
+/* ==========================================================================
+   Disha Jain & Rajat Khanna — #rishta
+   Main Stylesheet (styles.css)
+   ========================================================================== */
+
+:root {
+  --gold-primary: #D4AF37;
+  --gold-light: #F3E5AB;
+  --gold-dark: #AA7C11;
+  --border-gold: #D4AF37;
+  --bg-dark: #0d0d0f;
+  --bg-card: rgba(18, 18, 22, 0.88);
+  --text-main: #FFFFFF;
+  --text-sub: #D1D1D6;
+  --font-serif: 'Cinzel', serif;
+  --font-script: 'Great Vibes', cursive;
+  --font-sans: 'Montserrat', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* --- Decorative String Lights Overlay --- */
+.lights-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: radial-gradient(circle at 10% 20px, #FFF5C0 3px, transparent 4px),
+              radial-gradient(circle at 25% 35px, #FFF5C0 4px, transparent 5px),
+              radial-gradient(circle at 40% 15px, #FFF5C0 3px, transparent 4px),
+              radial-gradient(circle at 55% 30px, #FFF5C0 4px, transparent 5px),
+              radial-gradient(circle at 70% 18px, #FFF5C0 3px, transparent 4px),
+              radial-gradient(circle at 85% 32px, #FFF5C0 4px, transparent 5px),
+              radial-gradient(circle at 95% 15px, #FFF5C0 3px, transparent 4px);
+  filter: drop-shadow(0 0 8px rgba(255, 245, 192, 0.9));
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* --- Passcode Gate Overlay --- */
+.passcode-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 12, 0.96);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.passcode-box {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+/* --- Navigation Bar --- */
+nav {
+  background: rgba(10, 10, 12, 0.9);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 10px;
+  backdrop-filter: blur(8px);
+}
+
+nav a {
+  color: #E2E2E8;
+  text-decoration: none;
+  padding: 6px 16px;
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+nav a:hover, nav a.active {
+  color: var(--gold-primary);
+}
+
+/* --- Hero Landing Section & Background Photo Fix --- */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 80px 20px 60px;
+  overflow: hidden;
+  background-color: var(--bg-dark);
+}
+
+/* Background Image Layer */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('NYCEngagementPhotographer-222.jpg');
+  background-position: center 25%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: 1;
+}
+
+/* Dark Gradient Overlay Layer */
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 12, 0.55) 0%,
+    rgba(10, 10, 12, 0.75) 50%,
+    rgba(10, 10, 12, 0.95) 100%
+  );
+  z-index: 1;
+}
+
+.hero-container {
+  max-width: 650px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-script-heading {
+  font-family: var(--font-script);
+  font-size: 4.8rem;
+  color: var(--gold-light);
+  margin-bottom: -10px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  font-weight: 400;
+}
+
+.hero-lead-text {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  color: #E5E5EA;
+  text-transform: uppercase;
+  margin-bottom: 25px;
+}
+
+.hero-names {
+  font-family: var(--font-serif);
+  font-size: 3.4rem;
+  color: #FFFFFF;
+  letter-spacing: 2px;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.hero-invite-text {
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  letter-spacing: 2px;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+/* --- Date Frame Box --- */
+.date-frame {
+  border-top: 2px solid var(--border-gold);
+  border-bottom: 2px solid var(--border-gold);
+  padding: 22px 15px;
+  margin: 20px auto 30px auto;
+  max-width: 520px;
+  background: rgba(10, 10, 12, 0.4);
+}
+
+.date-line-primary {
+  font-family: var(--font-serif);
+  font-size: 1.85rem;
+  color: #FFFFFF;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+
+.date-line-secondary {
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
+  color: #FFFFFF;
+  letter-spacing: 2px;
+}
+
+.date-line-sub {
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  color: var(--text-sub);
+  letter-spacing: 1px;
+}
+
+/* --- Rings Symbol --- */
+.rings-icon {
+  margin: 20px 0;
+  width: 55px;
+  height: 35px;
+  display: inline-block;
+  background: radial-gradient(circle at 35% 50%, transparent 12px, var(--gold-primary) 13px, var(--gold-primary) 16px, transparent 17px),
+              radial-gradient(circle at 65% 50%, transparent 12px, var(--gold-primary) 13px, var(--gold-primary) 16px, transparent 17px);
+}
+
+/* --- Couple Photo Oval Frame --- */
+.couple-photo-frame {
+  width: 170px;
+  height: 120px;
+  margin: 15px auto 25px auto;
+  border-radius: 50%;
+  border: 2px solid var(--gold-primary);
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.couple-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+/* --- Save The Date & Countdown --- */
+.save-the-date-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  letter-spacing: 4px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+.countdown-timer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  font-family: var(--font-serif);
+}
+
+.time-block {
+  text-align: center;
+}
+
+.time-num {
+  font-size: 2.2rem;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.time-label {
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+.timer-colon {
+  font-size: 1.8rem;
+  color: #FFFFFF;
+  margin-top: -15px;
+}
+
+/* --- Buttons --- */
+.btn-gold-outline {
+  border: 1.5px solid var(--gold-primary);
+  background: transparent;
+  color: #FFFFFF;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  padding: 12px 36px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-gold-outline:hover {
+  background: var(--gold-primary);
+  color: #000000;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+/* Dual Navigation Map Buttons */
+.map-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn-map {
+  padding: 8px 16px;
+  border: 1px solid var(--gold-primary);
+  color: var(--gold-light);
+  text-decoration: none;
+  font-size: 0.82rem;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.btn-map:hover {
+  background: var(--gold-primary);
+  color: #000;
+}
+
+.btn-map-sm {
+  padding: 4px 10px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: var(--text-sub);
+  text-decoration: none;
+  font-size: 0.75rem;
+  border-radius: 3px;
+}
+
+.btn-map-sm:hover {
+  color: var(--gold-primary);
+  border-color: var(--gold-primary);
+}
+
+/* --- Inner Sections & Cards --- */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 50px 20px;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  color: var(--gold-primary);
+  text-align: center;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 25px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+.card h3 {
+  font-family: var(--font-serif);
+  color: var(--gold-light);
+  font-size: 1.35rem;
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: var(--text-sub);
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+/* --- Form Controls --- */
+.login-box {
+  max-width: 480px;
+  margin: 20px auto;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--gold-light);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  border-radius: 3px;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--gold-primary);
+}
+
+/* --- Footer --- */
+footer {
+  text-align: center;
+  padding: 40px 20px;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  color: var(--text-sub);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .hero {
+    min-height: 100dvh;
+    padding-top: 100px;
+  }
+  
+  .hero::before {
+    background-position: center 15%;
+    background-size: cover;
+  }
+
+  .hero-names {
+    font-size: 2.6rem;
+  }
+
+  .hero-script-heading {
+    font-size: 3.8rem;
+  }
+
+  .date-line-primary {
+    font-size: 1.4rem;
+  }
+
+  .date-line-secondary {
+    font-size: 1.2rem;
+  }
+}
+
 /* Passcode Protection Overlay */
 .passcode-overlay {
   position: fixed;
