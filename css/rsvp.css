@@ -1,12 +1,16 @@
 /* 
-  Disha & Rajat Wedding - RSVP Styling with Glassmorphism Blur
-  File Location: css/rsvp.css
+  Disha & Rajat Wedding - RSVP Styling with Glassmorphism Overrides
+  File Location in Repository: css/rsvp.css
+  
+  This file completely transforms the visual layout to match the mockup 
+  without requiring any structural changes to the HTML or JavaScript logic.
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-/* Center phone mockup wrapper */
-.phone-wrapper {
+/* Center phone mockup/responsive form wrapper */
+.phone-wrapper, 
+#rsvp-container {
     max-width: 380px;
     width: 100%;
     margin: 40px auto;
@@ -16,9 +20,10 @@
     text-align: center;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     box-sizing: border-box;
+    padding: 0 10px;
 }
 
-/* Calligraphy Header at the top */
+/* Calligraphy Cursive Header at the top */
 .cursive-header {
     font-family: 'Great Vibes', cursive;
     font-size: 38px;
@@ -29,7 +34,7 @@
     letter-spacing: 1px;
 }
 
-/* Sub-header text */
+/* Bold Sans-Serif Sub-header banner */
 .sub-header {
     font-size: 21px;
     font-weight: 700;
@@ -41,18 +46,20 @@
 }
 
 /* 
-  Elegant RSVP Card with Backdrop Blur (Glassmorphism)
+  RSVP Glassmorphism Card Container
+  Overrides your main card background with translucency and backdrop-blur
 */
-.rsvp-card {
-    background-color: rgba(255, 255, 255, 0.9); /* Translucent white */
-    backdrop-filter: blur(12px);                /* Modern background blur */
-    -webkit-backdrop-filter: blur(12px);        /* Safari compatibility */
-    border: 1px solid rgba(255, 255, 255, 0.25); /* Ultra-soft glass edge */
+.rsvp-card, 
+form#rsvp-form {
+    background-color: rgba(255, 255, 255, 0.9); /* Subtle Translucency */
+    backdrop-filter: blur(12px);                /* Glass background blur */
+    -webkit-backdrop-filter: blur(12px);        /* Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.25); /* Ultra-soft outer highlight */
     border-radius: 24px;
     padding: 30px 24px;
     width: 100%;
     box-sizing: border-box;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25); /* Slightly softer shadow to accent the blur */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
     text-align: left;
 }
 
@@ -64,12 +71,13 @@
     letter-spacing: -0.5px;
 }
 
-/* Field Group layouts */
+/* Form Group Layout spacing */
 .form-group {
     margin-bottom: 20px;
 }
 
-.form-label {
+.form-label, 
+form label {
     font-size: 13px;
     font-weight: 700;
     color: #000000;
@@ -77,8 +85,9 @@
     display: block;
 }
 
-/* Standard Inputs */
-.text-input {
+/* Text Inputs with focus outline accents */
+.text-input, 
+form input[type="text"] {
     width: 100%;
     padding: 12px 14px;
     border: 1px solid #dcdcdc;
@@ -92,21 +101,25 @@
     background-color: #ffffff;
 }
 
-.text-input:focus {
+form input[type="text"]:focus {
     border-color: #000000;
     box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Interactive Stacked Option Pills */
+/* Stacked Selection Option Blocks (Pills) */
 .option-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.option-pill {
+/* Overrides for standard radio/checkbox labels to act as custom blocks */
+.option-pill, 
+.checkbox-pill,
+form .radio-option,
+form .checkbox-option {
     display: block;
-    background-color: rgba(234, 234, 234, 0.95); /* Slight opacity matching theme */
+    background-color: rgba(234, 234, 234, 0.95);
     padding: 12px 16px;
     border-radius: 10px;
     font-size: 14px;
@@ -116,32 +129,45 @@
     transition: background-color 0.2s, color 0.2s;
     user-select: none;
     box-sizing: border-box;
+    position: relative;
 }
 
-.option-pill input {
+/* Hide raw input markers completely */
+.option-pill input, 
+.checkbox-pill input,
+form .radio-option input,
+form .checkbox-option input {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.option-pill:hover {
+.option-pill:hover, 
+.checkbox-pill:hover,
+form .radio-option:hover,
+form .checkbox-option:hover {
     background-color: #e2e2e2;
 }
 
-/* Selection state (pills turn black, text turns white) */
-.option-pill:has(input:checked) {
+/* 
+  Pill selection: turns black when selected.
+  Utilizes the standard :has() pseudo-class to match any parent containing a checked input.
+*/
+.option-pill:has(input:checked),
+form .radio-option:has(input:checked) {
     background-color: #1a1a1a;
     color: #ffffff;
 }
 
-/* Horizontal Row for Guest Count */
+/* Horizontal Row layout for guest count selection */
 .guests-row {
     display: flex;
     gap: 8px;
 }
 
-.guest-pill {
+.guest-pill,
+form .guest-option {
     flex: 1;
     display: block;
     background-color: rgba(234, 234, 234, 0.95);
@@ -156,71 +182,51 @@
     user-select: none;
 }
 
-.guest-pill input {
+.guest-pill input,
+form .guest-option input {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.guest-pill:hover {
+.guest-pill:hover,
+form .guest-option:hover {
     background-color: #e2e2e2;
 }
 
-.guest-pill:has(input:checked) {
+.guest-pill:has(input:checked),
+form .guest-option:has(input:checked) {
     background-color: #1a1a1a;
     color: #ffffff;
 }
 
-/* Custom Checkbox Pill Options */
-.checkbox-pill {
-    display: flex;
-    align-items: center;
-    background-color: rgba(234, 234, 234, 0.95);
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    user-select: none;
-}
-
-.checkbox-pill input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.checkbox-pill:hover {
-    background-color: #e2e2e2;
-}
-
-/* Standalone checkbox box style */
+/* Custom Visual Checkbox Square Container */
 .checkbox-icon {
     width: 16px;
     height: 16px;
     border: 2px solid #a0a0a0;
     border-radius: 4px;
     margin-right: 12px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     background-color: #ffffff;
     transition: all 0.2s;
     box-sizing: border-box;
     flex-shrink: 0;
+    vertical-align: middle;
 }
 
-/* Active checked checkbox box style */
-.checkbox-pill:has(input:checked) .checkbox-icon {
+/* Checkbox active state inside option lists */
+.checkbox-pill:has(input:checked) .checkbox-icon,
+form .checkbox-option:has(input:checked) .checkbox-icon {
     background-color: #1a1a1a;
     border-color: #1a1a1a;
 }
 
-.checkbox-pill:has(input:checked) .checkbox-icon::after {
+.checkbox-pill:has(input:checked) .checkbox-icon::after,
+form .checkbox-option:has(input:checked) .checkbox-icon::after {
     content: "";
     width: 4px;
     height: 8px;
@@ -230,8 +236,9 @@
     margin-bottom: 2px;
 }
 
-/* Submit Response button */
-.submit-btn {
+/* Styled Submit Button overrides */
+.submit-btn,
+form button[type="submit"] {
     background-color: #1a1a1a;
     color: #ffffff;
     border: none;
@@ -246,8 +253,10 @@
     text-align: center;
     display: inline-block;
     box-sizing: border-box;
+    margin-top: 10px;
 }
 
-.submit-btn:hover {
+.submit-btn:hover,
+form button[type="submit"]:hover {
     background-color: #333333;
 }
