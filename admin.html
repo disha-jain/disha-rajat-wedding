@@ -14,13 +14,17 @@
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
 </head>
 <body>
+  <script src="js/guest-auth.js"></script>
   <script>
-    if (sessionStorage.getItem("site_unlocked") !== "true") {
-      window.location.href = "index.html";
+    if (!window.GuestAuth.requireUnlock()) {
+      // redirecting to index.html
+    } else {
+      document.addEventListener('DOMContentLoaded', () => window.GuestAuth.renderNav());
     }
   </script>
 
@@ -37,6 +41,22 @@
 
   <div class="container">
     <h2 class="section-title">Host Admin Dashboard</h2>
+
+    <div class="card" id="admin-auth-card">
+      <h3 class="gold-title">Admin Sign-In with Google</h3>
+      <p style="color: var(--text-sub); margin: 10px 0; font-size: 0.9rem;">
+        This dashboard is protected. Sign in with a Google account that is listed as an admin.
+      </p>
+      <div id="admin-auth-status" style="margin: 12px 0; color: var(--gold-light); font-size: 0.9rem;"></div>
+      <button id="google-signin-btn" class="btn-gold-outline" onclick="handleGoogleSignIn()">Sign in with Google</button>
+      <button id="google-signout-btn" class="btn-gold-outline" style="display:none; margin-left:10px;" onclick="handleGoogleSignOut()">Sign out</button>
+      <div id="admin-setup-hint" style="display:none; margin-top:12px; font-size:0.85rem; color: var(--text-sub);">
+        Firebase is not configured yet. Add your keys to <code>firebase-config.js</code> and list admin emails in <code>adminEmails</code> to enable Google sign-in.
+        You can still use the CSV tools below for local testing.
+      </div>
+    </div>
+
+    <div id="admin-dashboard" style="display:none;">
     
     <div class="card">
       <h3 class="gold-title">Guest List CSV Upload</h3>
@@ -74,6 +94,7 @@
       <h3 class="gold-title">Loaded Guest Roster</h3>
       <div id="guest-roster-table" style="margin-top: 15px; overflow-x: auto;">
         <p style="color: var(--text-sub);">No guests loaded yet. Upload a CSV above or add entries to localStorage / Firebase.</p>
+      </div>
       </div>
     </div>
   </div>
@@ -276,6 +297,101 @@
       link.click();
       document.body.removeChild(link);
     }
+  
+    // --- Google Admin Auth (mirrors reference site) ---
+    let adminUser = null;
+
+    function isFirebaseConfigured() {
+      return typeof db !== 'undefined' && db !== null;
+    }
+
+    function updateAdminUI() {
+      const dashboard = document.getElementById('admin-dashboard');
+      const signinBtn = document.getElementById('google-signin-btn');
+      const signoutBtn = document.getElementById('google-signout-btn');
+      const statusEl = document.getElementById('admin-auth-status');
+      const hintEl = document.getElementById('admin-setup-hint');
+
+      if (!isFirebaseConfigured()) {
+        hintEl.style.display = 'block';
+        // Allow local use when Firebase not configured
+        dashboard.style.display = 'block';
+        statusEl.textContent = 'Running in local mode (Firebase not configured).';
+        signinBtn.style.display = 'none';
+        signoutBtn.style.display = 'none';
+        return;
+      }
+
+      hintEl.style.display = 'none';
+      if (adminUser) {
+        dashboard.style.display = 'block';
+        signinBtn.style.display = 'none';
+        signoutBtn.style.display = 'inline-block';
+        statusEl.textContent = 'Signed in as ' + adminUser.email;
+      } else {
+        dashboard.style.display = 'none';
+        signinBtn.style.display = 'inline-block';
+        signoutBtn.style.display = 'none';
+        statusEl.textContent = 'Not signed in.';
+      }
+    }
+
+    function handleGoogleSignIn() {
+      if (!isFirebaseConfigured() || typeof firebase === 'undefined' || !firebase.auth) {
+        updateAdminUI();
+        return;
+      }
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider).catch(err => {
+        const statusEl = document.getElementById('admin-auth-status');
+        statusEl.style.color = '#ff6b6b';
+        statusEl.textContent = 'Sign-in failed: ' + err.message;
+      });
+    }
+
+    function handleGoogleSignOut() {
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().signOut();
+      }
+    }
+
+    function initAdminAuth() {
+      if (!isFirebaseConfigured() || typeof firebase === 'undefined' || !firebase.auth) {
+        updateAdminUI();
+        return;
+      }
+      firebase.auth().onAuthStateChanged(async (user) => {
+        adminUser = user;
+        if (user) {
+          // Check admin allowlist: Firestore admins/{email} or adminEmails in config
+          let isAdmin = false;
+          try {
+            const doc = await db.collection('admins').doc(user.email).get();
+            if (doc.exists) isAdmin = true;
+          } catch (e) {}
+          if (!isAdmin && typeof adminEmails !== 'undefined' && Array.isArray(adminEmails)) {
+            isAdmin = adminEmails.includes(user.email);
+          }
+          // If no allowlist configured, treat first signer as admin for setup ease (local only warning)
+          if (!isAdmin) {
+            const statusEl = document.getElementById('admin-auth-status');
+            statusEl.style.color = '#ff6b6b';
+            statusEl.textContent = user.email + ' is not listed as an admin. Add it to admins collection or adminEmails in firebase-config.js.';
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('google-signout-btn').style.display = 'inline-block';
+            document.getElementById('google-signin-btn').style.display = 'none';
+            return;
+          }
+        }
+        const statusEl = document.getElementById('admin-auth-status');
+        if (statusEl) statusEl.style.color = '';
+        updateAdminUI();
+      });
+      updateAdminUI();
+    }
+
+    window.addEventListener('DOMContentLoaded', initAdminAuth);
+
   </script>
 </body>
 </html>
