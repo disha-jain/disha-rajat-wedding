@@ -250,7 +250,7 @@
           <td style="font-size:0.85rem;">${esc(r.m.email || '\u2014')}</td>
           <td>${chips}</td>
           <td>${r.m.max_plus_ones || 0}</td>
-          <td><button class="edit-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="openEditModal(this)">Edit</button></td>
+          <td style="text-align:center;"><button class="edit-icon-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="openEditModal(this)" title="Edit guest" aria-label="Edit ${esc(r.m.first_name)} ${esc(r.m.last_name)}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td>
         </tr>`;
       });
 
