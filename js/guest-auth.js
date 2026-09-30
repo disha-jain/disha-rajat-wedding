@@ -129,9 +129,39 @@
     }
   }
 
+  // Fetch the shared guest list from Firestore (when configured) and cache it
+  // in localStorage so lookups work fast and offline. Never rejects: on any
+  // failure it falls back to the local cache. Safe to call from multiple
+  // places — the in-flight request is shared.
+  let _guestDbPromise = null;
+  function ensureGuestDatabase() {
+    if (!_guestDbPromise) {
+      _guestDbPromise = (async () => {
+        try {
+          if (typeof db !== 'undefined' && db !== null) {
+            const snap = await Promise.race([
+              db.collection('families').get(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))
+            ]);
+            const remote = [];
+            snap.forEach(doc => {
+              const f = doc.data();
+              if (f && f.family_code) remote.push(f);
+            });
+            if (remote.length) {
+              try { localStorage.setItem('wedding_guest_database', JSON.stringify(remote)); } catch (e) {}
+            }
+          }
+        } catch (e) { /* offline / denied: keep local cache */ }
+        return getGuestDatabase();
+      })();
+    }
+    return _guestDbPromise;
+  }
+
   window.GuestAuth = {
     getGuestDatabase, findFamilyByCode, findFamilyByName,
     signInFamily, signOut, isUnlocked, getStoredCode,
-    requireUnlock, renderNav
+    requireUnlock, renderNav, ensureGuestDatabase
   };
 })();
