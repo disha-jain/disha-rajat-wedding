@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RSVP — Disha & Rajat (#rishta)</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/rsvp.css">
 
@@ -16,15 +16,21 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <style>
+    body { background: linear-gradient(rgba(20,15,10,0.55), rgba(20,15,10,0.75)), url('NYCEngagementPhotographer-222.jpg') center 30%/cover no-repeat fixed; min-height: 100vh; }
+    .lights-overlay { display:none; }
+    nav { background: rgba(10,10,12,0.92); }
+  </style>
 </head>
 <body>
+  <script src="js/guest-auth.js"></script>
   <script>
-    if (sessionStorage.getItem("site_unlocked") !== "true") {
-      window.location.href = "index.html";
+    if (!window.GuestAuth.requireUnlock()) {
+      // redirecting
+    } else {
+      document.addEventListener('DOMContentLoaded', () => window.GuestAuth.renderNav());
     }
   </script>
-
-  <div class="lights-overlay"></div>
 
   <nav>
     <a href="home.html">Home</a>
@@ -35,184 +41,59 @@
     <a href="admin.html">Host Admin</a>
   </nav>
 
-  <div class="container">
-    <h2 class="section-title">RSVP</h2>
+  <div class="phone-wrapper">
+    <div class="cursive-header">Can't wait to party?</div>
+    <div class="sub-header">Fill out the RSVP<br>form below and let us<br>know</div>
 
-    <div id="lookup-card" class="card rsvp-lookup-card">
-      <h3 class="gold-title">Find Your Invitation</h3>
-      <p style="color: var(--text-sub); margin: 15px 0;">Search by <strong>Family Code</strong>, <strong>Family Name</strong>, or <strong>First/Last Name</strong>:</p>
-      <div class="form-group">
-        <input type="text" id="lookup-query" placeholder="e.g. FAM01, Jain Family, or Disha...">
-      </div>
-      <button class="btn-gold-outline" style="width: 100%;" onclick="lookupInvitation()">Find Invitation</button>
-      <div id="lookup-error" style="color: #ff6b6b; margin-top: 15px; display: none;">
-        No matching invitation found. Please check your spelling or Family Code.
-      </div>
-    </div>
+    <div class="rsvp-card">
+      <div class="rsvp-title">RSVP</div>
 
-    <div id="rsvp-form-card" class="card" style="display: none;">
-      <div id="family-header" style="margin-bottom: 25px; border-bottom: 1px solid var(--border-gold); padding-bottom: 15px;"></div>
-      
       <form id="rsvp-form" onsubmit="handleRSVPSubmit(event)">
-        <div id="events-rsvp-list"></div>
-
-        <div class="form-group" style="margin-top: 25px;">
-          <label for="dietary-notes">Dietary Restrictions or Special Notes:</label>
-          <textarea id="dietary-notes" rows="3" placeholder="Please specify requirements for individual party members..."></textarea>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <div class="form-group">
+          <label class="form-label" for="rsvp-name">Your name</label>
+          <input class="text-input" type="text" id="rsvp-name" placeholder="" required>
         </div>
 
-        <button type="submit" class="btn-gold-outline" style="width: 100%;">Submit RSVP</button>
+        <div class="form-group">
+          <label class="form-label">Are you coming?</label>
+          <label class="option-pill"><input type="radio" name="attending" value="yes" required><span>Absolutely, wouldn't miss it!</span></label>
+          <div style="height:8px"></div>
+          <label class="option-pill"><input type="radio" name="attending" value="no" required><span>Can't make it this time.</span></label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Number of Guests Attending</label>
+          <div class="guests-row">
+            <label class="guest-pill"><input type="radio" name="guest_count" value="1" checked><span>1</span></label>
+            <label class="guest-pill"><input type="radio" name="guest_count" value="2"><span>2</span></label>
+            <label class="guest-pill"><input type="radio" name="guest_count" value="3"><span>3</span></label>
+            <label class="guest-pill"><input type="radio" name="guest_count" value="4"><span>4</span></label>
+            <label class="guest-pill"><input type="radio" name="guest_count" value="5+"><span>5+</span></label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Meal Preference</label>
+          <label class="checkbox-pill"><input type="checkbox" name="meal" value="vegetarian" checked><span class="checkbox-icon"></span><span>Vegetarian</span></label>
+          <div style="height:8px"></div>
+          <label class="checkbox-pill"><input type="checkbox" name="meal" value="non-vegetarian"><span class="checkbox-icon"></span><span>Non-Vegetarian</span></label>
+          <div style="height:8px"></div>
+          <label class="checkbox-pill"><input type="checkbox" name="meal" value="no-preference"><span class="checkbox-icon"></span><span>No Preference</span></label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="rsvp-wishes">Leave your wishes for the couple</label>
+          <input class="text-input" type="text" id="rsvp-wishes" placeholder="">
+        </div>
+
+        <div style="text-align:center;">
+          <button class="submit-btn" type="submit">Send Response</button>
+        </div>
       </form>
 
-      <div id="rsvp-success-message" style="display:none; text-align:center; margin-top: 20px; color: #51cf66;">
-        <h3 style="color: #51cf66;">RSVP Confirmed!</h3>
-        <p>Your response has been saved. We can't wait to celebrate with you!</p>
+      <div id="rsvp-success" style="display:none; text-align:center; padding:20px 0;">
+        <div style="font-size:20px; font-weight:800; margin-bottom:10px;">Thank you!</div>
+        <div style="font-size:14px;">Your response has been saved.<br>We can't wait to celebrate with you!</div>
       </div>
     </div>
   </div>
@@ -223,151 +104,71 @@
 
   <script>
     const masterEvents = [
-      { id: 'e1', title: 'Welcome Lunch & Mehendi', date: 'March 13, 2027', time: 'Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
-      { id: 'e2', title: "Disha's Tel Ban", date: 'March 13, 2027', time: 'Late Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
-      { id: 'e3', title: 'Sangeet', date: 'March 13, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
-      { id: 'e4', title: "Rajat's Tel Haldi", date: 'March 14, 2027', time: 'Morning', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'groom-side'] },
-      { id: 'e5', title: "Disha's Gaur Puja & Phoolon Ki Haldi", date: 'March 14, 2027', time: 'Morning', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
-      { id: 'e6', title: 'Shaadi (Wedding Ceremony)', date: 'March 14, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
-      { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', time: '6:00 PM - 12:00 AM', location: 'The Bellevue, Chantilly, Virginia', tags: ['us-guest'] }
+      { id: 'e1', title: 'Welcome Lunch & Mehendi', date: 'March 13, 2027', tags: ['india-guest'] },
+      { id: 'e2', title: "Disha's Tel Ban", date: 'March 13, 2027', tags: ['india-guest', 'bride-side'] },
+      { id: 'e3', title: 'Sangeet', date: 'March 13, 2027', tags: ['india-guest'] },
+      { id: 'e4', title: "Rajat's Tel Haldi", date: 'March 14, 2027', tags: ['india-guest', 'groom-side'] },
+      { id: 'e5', title: "Disha's Gaur Puja & Phoolon Ki Haldi", date: 'March 14, 2027', tags: ['india-guest', 'bride-side'] },
+      { id: 'e6', title: 'Shaadi (Wedding Ceremony)', date: 'March 14, 2027', tags: ['india-guest'] },
+      { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', tags: ['us-guest'] }
     ];
 
-    let fallbackDatabase = [
-      { family_code: 'FAM01', family_name: 'Khanna Family', members: [{ first_name: 'Rajat', last_name: 'Khanna', email: 'rajat@example.com', tags: ['india-guest', 'us-guest', 'groom-side'], max_plus_ones: 1 }] },
-      { family_code: 'FAM02', family_name: 'Jain Family', members: [{ first_name: 'Disha', last_name: 'Jain', email: 'disha@example.com', tags: ['india-guest', 'us-guest', 'bride-side'], max_plus_ones: 2 }] }
-    ];
-
-    function getGuestDatabase() {
-      const stored = localStorage.getItem("wedding_guest_database");
-      return stored ? JSON.parse(stored) : fallbackDatabase;
-    }
-
-    let currentActiveFamily = null;
-
-    function lookupInvitation() {
-      const q = document.getElementById('lookup-query').value.trim().toLowerCase();
-      const err = document.getElementById('lookup-error');
-      let matchedFamily = null;
-
-      const guestDB = getGuestDatabase();
-
-      for (let fam of guestDB) {
-        if (fam.family_code.toLowerCase() === q || fam.family_name.toLowerCase().includes(q)) {
-          matchedFamily = fam;
-          break;
-        }
-        for (let m of fam.members) {
-          const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
-          if (fullName.includes(q) || m.last_name.toLowerCase() === q || (m.email && m.email.toLowerCase() === q)) {
-            matchedFamily = fam;
-            break;
-          }
-        }
-        if (matchedFamily) break;
+    document.addEventListener('DOMContentLoaded', () => {
+      const famName = sessionStorage.getItem('family_name') || '';
+      const code = sessionStorage.getItem('family_code') || '';
+      const db = window.GuestAuth.getGuestDatabase();
+      const fam = db.find(f => f.family_code === code);
+      if (fam && fam.members && fam.members.length === 1) {
+        document.getElementById('rsvp-name').value = fam.members[0].first_name + ' ' + fam.members[0].last_name;
+      } else if (famName) {
+        document.getElementById('rsvp-name').value = famName.replace(' Family','');
       }
-
-      if (matchedFamily) {
-        err.style.display = 'none';
-        currentActiveFamily = matchedFamily;
-        renderFamilyRSVPForm(matchedFamily);
-      } else {
-        err.style.display = 'block';
-      }
-    }
-
-    function updateTravelNav(tags) {
-      if (tags.includes("us-guest")) {
-        const el = document.getElementById("nav-travel-us");
-        if (el) el.style.display = "inline-block";
-      }
-      if (tags.includes("india-guest")) {
-        const el = document.getElementById("nav-travel-india");
-        if (el) el.style.display = "inline-block";
-      }
-    }
-
-    // Check tags on load
-    updateTravelNav(JSON.parse(sessionStorage.getItem("guest_tags") || "[]"));
-
-    function renderFamilyRSVPForm(family) {
-      document.getElementById('lookup-card').style.display = 'none';
-      document.getElementById('rsvp-form-card').style.display = 'block';
-
-      const combinedTags = [...new Set(family.members.flatMap(m => m.tags))];
-      sessionStorage.setItem("guest_tags", JSON.stringify(combinedTags));
-      updateTravelNav(combinedTags);
-      const allowedEvents = masterEvents.filter(e => e.tags.some(t => combinedTags.includes(t)));
-
-      document.getElementById('family-header').innerHTML = `
-        <h3 class="gold-title">${family.family_name} (${family.family_code})</h3>
-        <p style="color:var(--text-sub); font-size:0.9rem;">Party Members: ${family.members.map(m => m.first_name + ' ' + m.last_name).join(', ')}</p>
-      `;
-
-      const listContainer = document.getElementById('events-rsvp-list');
-      listContainer.innerHTML = '';
-
-      allowedEvents.forEach(evt => {
-        const block = document.createElement('div');
-        block.className = 'event-rsvp-block';
-
-        let membersHTML = '';
-        family.members.forEach((m, idx) => {
-          membersHTML += `
-            <div class="member-option-row">
-              <p style="font-weight: 500; color: #FFF;">${m.first_name} ${m.last_name}</p>
-              <div class="radio-group">
-                <label><input type="radio" name="att_${evt.id}_${idx}" value="attending" required> Joyfully Accepts</label>
-                <label><input type="radio" name="att_${evt.id}_${idx}" value="declining" required> Respectfully Declines</label>
-              </div>
-            </div>
-          `;
-        });
-
-        block.innerHTML = `
-          <h4 class="gold-title" style="font-size:1.1rem;">${evt.title}</h4>
-          <p style="font-size:0.85rem; color:var(--text-sub);">${evt.date} • ${evt.location}</p>
-          ${membersHTML}
-        `;
-        listContainer.appendChild(block);
-      });
-    }
+    });
 
     function handleRSVPSubmit(e) {
       e.preventDefault();
-      sessionStorage.setItem("rsvp_submitted", "true");
-      
-      const dietary = document.getElementById("dietary-notes").value;
-      const combinedTags = [...new Set(currentActiveFamily.members.flatMap(m => m.tags))];
-      const allowedEvents = masterEvents.filter(evt => evt.tags.some(t => combinedTags.includes(t)));
-      const existingRSVPs = JSON.parse(localStorage.getItem("wedding_rsvps_database") || "[]");
+      const name = document.getElementById('rsvp-name').value.trim();
+      const attending = document.querySelector('input[name="attending"]:checked');
+      const guestCount = document.querySelector('input[name="guest_count"]:checked');
+      const meals = [...document.querySelectorAll('input[name="meal"]:checked')].map(i => i.value);
+      const wishes = document.getElementById('rsvp-wishes').value.trim();
 
-      allowedEvents.forEach(evt => {
-        currentActiveFamily.members.forEach((m, idx) => {
-          const radio = document.querySelector(`input[name="att_${evt.id}_${idx}"]:checked`);
-          const status = radio ? radio.value : "attending";
-          const rsvpRecord = {
-            family_code: currentActiveFamily.family_code,
-            family_name: currentActiveFamily.family_name,
-            guest_name: `${m.first_name} ${m.last_name}`,
-            event_id: evt.id,
-            event_title: evt.title,
-            status: status,
-            dietary_notes: dietary,
-            timestamp: new Date().toISOString()
-          };
-          existingRSVPs.push(rsvpRecord);
+      if (!name || !attending) return;
 
-          if (typeof db !== 'undefined' && db !== null) {
-            db.collection("rsvps").add(rsvpRecord);
-          }
-        });
+      const familyCode = sessionStorage.getItem('family_code') || 'GUEST';
+      const familyName = sessionStorage.getItem('family_name') || name;
+      const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
+      const allowedEvents = masterEvents.filter(ev => ev.tags.some(t => tags.includes(t)));
+
+      const status = attending.value === 'yes' ? 'attending' : 'declining';
+      const dietary = meals.join(', ') + (wishes ? ' | Wishes: ' + wishes : '');
+
+      const existing = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]');
+      const timestamp = new Date().toISOString();
+
+      const eventsToSave = allowedEvents.length ? allowedEvents : [{id:'general', title:'General'}];
+      eventsToSave.forEach(evt => {
+        const record = {
+          family_code: familyCode,
+          family_name: familyName,
+          guest_name: name,
+          event_id: evt.id,
+          event_title: evt.title,
+          status: status,
+          guest_count: guestCount ? guestCount.value : '1',
+          dietary_notes: dietary,
+          timestamp
+        };
+        existing.push(record);
+        if (typeof db !== 'undefined' && db !== null) {
+          db.collection('rsvps').add(record).catch(()=>{});
+        }
       });
-
-      localStorage.setItem("wedding_rsvps_database", JSON.stringify(existingRSVPs));
-      updateTravelNav(combinedTags);
+      localStorage.setItem('wedding_rsvps_database', JSON.stringify(existing));
 
       document.getElementById('rsvp-form').style.display = 'none';
-      document.getElementById('rsvp-success-message').style.display = 'block';
+      document.getElementById('rsvp-success').style.display = 'block';
+      window.scrollTo({top:0, behavior:'smooth'});
     }
   </script>
 </body>
