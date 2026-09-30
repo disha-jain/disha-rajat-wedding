@@ -4,83 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>US Travel — Disha & Rajat (#rishta)</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="styles.css?v=20260930c">
-  <link rel="stylesheet" href="css/travel.css?v=20260930c">
 </head>
 <body>
-  <script src="js/guest-auth.js"></script>
+  <p style="font-family:sans-serif;text-align:center;margin-top:80px;color:#666;">Taking you there&hellip; <a href="home.html#travel-us">continue</a></p>
   <script>
-    if (!window.GuestAuth.requireUnlock()) {
-      // redirecting to index.html
-    } else {
-      document.addEventListener('DOMContentLoaded', () => window.GuestAuth.renderNav());
-    }
+    // The site is now one scrolling page; home.html enforces the invite gate.
+    window.location.replace('home.html#travel-us');
   </script>
-
-  <nav>
-    <a href="home.html">Home</a>
-    <a href="schedule.html">Events</a>
-    <a href="rsvp.html">RSVP</a>
-    <a href="travel-us.html" class="active">US Travel & Lodging</a>
-    <a href="travel-india.html" id="nav-travel-india" style="display:none;">India Travel</a>
-    <a href="admin.html">Host Admin</a>
-  </nav>
-
-  <div class="travel-wrap">
-    <div class="travel-script">The</div>
-    <h2 class="travel-title">VENUE</h2>
-    <p class="travel-lede">
-      Our reception will take place at The Bellevue in Chantilly, Virginia — an elegant
-      ballroom space. Expect candlelight, a full dance floor, and lots of golden hour glow.
-    </p>
-
-    <div class="venue-card">
-      <div class="venue-name">The Bellevue</div>
-      <div class="venue-address">Chantilly, Virginia, USA</div>
-      <div class="map-links">
-        <a class="btn-map" href="https://maps.google.com/?q=The+Bellevue+Chantilly+VA" target="_blank" rel="noopener">Open in Google Maps</a>
-        <a class="btn-map-sm" href="https://maps.apple.com/?q=The+Bellevue+Chantilly+VA" target="_blank" rel="noopener">Apple Maps</a>
-      </div>
-    </div>
-
-    <div class="travel-dark-panel">
-      <div class="panel-script">Parking & Directions</div>
-      <p>
-        Free parking is available on site, with designated areas for elderly and senior guests.
-        If you need special assistance or a drop-off closer to the entrance, let us know.
-      </p>
-      <p>
-        <strong>Airport:</strong> Washington Dulles International Airport (IAD) — about 15 minutes away.<br>
-        <strong>Ride-share:</strong> Uber and Lyft operate extensively across Northern Virginia and IAD.
-      </p>
-    </div>
-
-    <div class="info-grid">
-      <div class="info-card">
-        <h4>Where to Stay</h4>
-        <p><strong>Westfields Marriott Washington Dulles</strong><br>14750 Conference Center Dr, Chantilly, VA</p>
-        <div class="map-links" style="justify-content:flex-start;">
-          <a class="btn-map-sm" href="https://maps.google.com/?q=Westfields+Marriott+Chantilly+VA" target="_blank" rel="noopener">Google Maps</a>
-        </div>
-      </div>
-      <div class="info-card">
-        <h4>More Options</h4>
-        <p><strong>Hyatt Place Chantilly Dulles Airport South</strong><br>4994 Avion Pkwy, Chantilly, VA</p>
-        <div class="map-links" style="justify-content:flex-start;">
-          <a class="btn-map-sm" href="https://maps.google.com/?q=Hyatt+Place+Chantilly+VA" target="_blank" rel="noopener">Google Maps</a>
-        </div>
-        <p class="fine">Subject to availability — no room blocks reserved.</p>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    DISHA & RAJAT • #RISHTA • 2027
-  </footer>
 </body>
 </html>
