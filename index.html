@@ -8,7 +8,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
   
   <!-- External Stylesheet -->
   <link rel="stylesheet" href="styles.css">
@@ -17,25 +17,41 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   
-  <!-- Separate Firebase Config File -->
+  <!-- Firebase Config -->
   <script src="firebase-config.js"></script>
 </head>
 <body>
 
-  <!-- String Lights Header Ornament -->
+  <!-- String Lights Decorative Overlay -->
   <div class="lights-overlay"></div>
 
-  <!-- Navigation -->
+  <!-- PASSCODE GATE MODAL -->
+  <div id="passcode-gate" class="passcode-overlay">
+    <div class="passcode-box card">
+      <div class="hero-script-heading" style="font-size: 3rem;">#rishta</div>
+      <h2 style="font-family: var(--font-serif); color: var(--gold-primary); margin-bottom: 15px;">Welcome</h2>
+      <p style="color: var(--text-sub); margin-bottom: 20px;">Please enter the site passcode to view our wedding details.</p>
+      <div class="form-group">
+        <input type="password" id="site-passcode-input" placeholder="Enter Passcode..." style="text-align: center; letter-spacing: 2px;">
+      </div>
+      <button class="btn-gold-outline" style="width: 100%;" onclick="unlockSite()">Enter Site</button>
+      <div id="passcode-error" style="color: #ff6b6b; margin-top: 12px; display: none;">
+        Incorrect passcode. Please try again.
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
   <nav id="navbar">
-    <a href="#home" onclick="showSection('home')">Home</a>
-    <a href="#schedule" id="nav-schedule" style="display:none;" onclick="showSection('schedule')">Events</a>
-    <a href="#rsvp" id="nav-rsvp" style="display:none;" onclick="showSection('rsvp')">RSVP</a>
-    <a href="#travel-us" id="nav-travel-us" style="display:none;" onclick="showSection('travel-us')">Travel & Lodging</a>
-    <a href="#travel-india" id="nav-travel-india" style="display:none;" onclick="showSection('travel-india')">India Travel</a>
-    <a href="#admin" onclick="showSection('admin')">Admin</a>
+    <a href="#home" class="nav-link active" onclick="showSection('home')">Home</a>
+    <a href="#schedule" id="nav-schedule" class="nav-link" style="display:none;" onclick="showSection('schedule')">Events</a>
+    <a href="#rsvp" id="nav-rsvp" class="nav-link" onclick="showSection('rsvp')">RSVP</a>
+    <a href="#travel-us" id="nav-travel-us" class="nav-link" style="display:none;" onclick="showSection('travel-us')">US Travel & Lodging 🔒</a>
+    <a href="#travel-india" id="nav-travel-india" class="nav-link" style="display:none;" onclick="showSection('travel-india')">India Travel 🔒</a>
+    <a href="#admin" class="nav-link" onclick="showSection('admin')">Host Admin</a>
   </nav>
 
-  <!-- Hero Landing Section matching design mockup -->
+  <!-- Hero Landing Section -->
   <section id="home" class="section active">
     <header class="hero">
       <div class="hero-container">
@@ -49,19 +65,20 @@
           CELEBRATE THE BEGINNING OF THEIR FOREVER.
         </div>
 
-        <!-- Gold Border Date Box -->
+        <!-- Date Frame -->
         <div class="date-frame">
           <div class="date-line-primary">MARCH 13 & 14, 2027</div>
+          <div class="date-line-sub">Chomu Palace • Chomu, Rajasthan, India</div>
+          <br>
           <div class="date-line-secondary">MARCH 27, 2027</div>
-          <div class="date-line-sub">(for Chantilly, VA)</div>
+          <div class="date-line-sub">The Bellevue • Chantilly, Virginia, USA</div>
         </div>
 
-        <!-- Double Rings Icon -->
         <div class="rings-icon"></div>
 
-        <!-- Couple Oval Frame -->
+        <!-- Couple Photo Frame -->
         <div class="couple-photo-frame">
-          <img src="NYCEngagementPhotographer-222.jpg" alt="Disha and Rajat">
+          <img src="NYCEngagementPhotographer-222.jpg" alt="Disha Jain and Rajat Khanna">
         </div>
 
         <div class="save-the-date-title">SAVE THE DATE</div>
@@ -89,103 +106,136 @@
           </div>
         </div>
 
-        <a href="#welcome-login" class="btn-gold-outline" onclick="showSection('welcome-login')">RSVP NOW</a>
+        <button class="btn-gold-outline" onclick="showSection('rsvp')">RSVP NOW</button>
       </div>
     </header>
   </section>
 
   <div class="container">
 
-    <!-- Guest Portal Login Check-in -->
-    <section id="welcome-login" class="section">
-      <div class="login-box card">
-        <h3>Guest Invitation Portal</h3>
-        <p>Please enter your email address to unlock your personalized schedule, travel guides, and RSVP form.</p>
-        <br>
-        <div class="form-group">
-          <input type="email" id="guest-email" placeholder="Enter your email address...">
-        </div>
-        <button class="btn-gold-outline" style="width:100%;" onclick="checkGuestAccess()">Access Invitation</button>
-        <div id="login-error" style="color: #ff6b6b; margin-top: 15px; display: none;">
-          Email not found on guest list. Please contact Disha or Rajat.
-        </div>
-      </div>
-    </section>
-
-    <!-- Event Schedule Page (Access Restricted) -->
+    <!-- Schedule Section -->
     <section id="schedule" class="section">
-      <h2 class="section-title">Events Schedule</h2>
+      <h2 class="section-title">Schedule of Events</h2>
       <div id="events-container"></div>
     </section>
 
-    <!-- RSVP Submission Page (Access Restricted) -->
+    <!-- RSVP Search & Submission Section -->
     <section id="rsvp" class="section">
       <h2 class="section-title">RSVP</h2>
-      <div class="card">
-        <form id="rsvp-form" onsubmit="submitRSVP(event)">
-          <div id="family-members-container"></div>
-          <div class="form-group" style="margin-top: 20px;">
-            <label for="dietary-notes">Dietary Restrictions or Special Notes:</label>
-            <textarea id="dietary-notes" rows="3" placeholder="Let us know if anyone in your party has dietary restrictions..."></textarea>
+      
+      <!-- Lookup Form -->
+      <div id="rsvp-lookup-card" class="card login-box">
+        <h3>Find Your Invitation</h3>
+        <p style="color: var(--text-sub); margin-bottom: 20px;">
+          Search by <strong>Family Code</strong>, <strong>Family Name</strong>, or <strong>First/Last Name</strong>:
+        </p>
+        <div class="form-group">
+          <input type="text" id="lookup-query" placeholder="e.g. FAM01, Khanna Family, or Rajat...">
+        </div>
+        <button class="btn-gold-outline" style="width: 100%;" onclick="lookupInvitation()">Find Invitation</button>
+        <div id="lookup-error" style="color: #ff6b6b; margin-top: 15px; display: none;">
+          No matching invitation found. Please check your spelling or Family Code.
+        </div>
+      </div>
+
+      <!-- RSVP Form Container -->
+      <div id="rsvp-form-card" class="card" style="display: none;">
+        <div id="family-header" style="margin-bottom: 25px; border-bottom: 1px solid var(--border-gold); padding-bottom: 15px;"></div>
+        
+        <form id="rsvp-form" onsubmit="handleRSVPSubmit(event)">
+          <div id="events-rsvp-list"></div>
+
+          <div class="form-group" style="margin-top: 25px;">
+            <label for="dietary-notes">Per-Person Dietary Restrictions & Notes:</label>
+            <textarea id="dietary-notes" rows="3" placeholder="Please specify dietary requirements for individual party members..."></textarea>
           </div>
-          <button type="submit" class="btn-gold-outline">Submit Response</button>
+
+          <button type="submit" class="btn-gold-outline" style="width: 100%;">Submit RSVP</button>
         </form>
-        <div id="rsvp-success" style="display:none; color: #51cf66; margin-top: 15px; text-align:center;">
-          Thank you! Your RSVP has been submitted successfully.
+
+        <div id="rsvp-success-message" style="display:none; text-align:center; margin-top: 20px; color: #51cf66;">
+          <h3 style="color: #51cf66;">RSVP Confirmed!</h3>
+          <p>Your response token has been generated. Travel & Venue pages are now unlocked in the top menu!</p>
         </div>
       </div>
     </section>
 
-    <!-- US Travel & Lodging Page (Tag: us-guest) -->
+    <!-- US Travel & Lodging Page (Unlocked via Tag + RSVP Token) -->
     <section id="travel-us" class="section">
-      <h2 class="section-title">Travel & Lodging (US)</h2>
+      <h2 class="section-title">US Travel & Lodging</h2>
+      
       <div class="card">
-        <h3>Venue Location</h3>
-        <p><strong>The Bellevue</strong></p>
+        <h3>Venue: The Bellevue</h3>
         <p>Chantilly, Virginia, USA</p>
         <br>
-        <p><strong>Nearest Airport:</strong> Washington Dulles International Airport (IAD)</p>
-        <p><strong>Local Transport:</strong> Ride-share apps (Uber & Lyft) operate extensively throughout the area for travel to and from the venue and airport.</p>
+        <div class="map-links">
+          <a href="https://maps.google.com/?q=The+Bellevue+Chantilly+VA" target="_blank" class="btn-map">📍 Open in Google Maps</a>
+          <a href="https://maps.apple.com/?q=The+Bellevue+Chantilly+VA" target="_blank" class="btn-map">🍎 Open in Apple Maps</a>
+        </div>
+        <br>
+        <p><strong>Airport:</strong> Washington Dulles International Airport (IAD) — 15 mins away.</p>
+        <p><strong>Ride-Share Advice:</strong> Uber and Lyft operate extensively across Northern Virginia and IAD airport.</p>
       </div>
 
       <div class="card">
-        <h3>Recommended Hotels Nearby</h3>
-        <p><em>(Note: Rooms are subject to availability as formal room blocks are not reserved)</em></p>
+        <h3>Recommended Nearby Hotels</h3>
+        <p><em>(Subject to availability — no room blocks reserved)</em></p>
         <br>
         <p><strong>1. Westfields Marriott Washington Dulles</strong><br>14750 Conference Center Dr, Chantilly, VA</p>
+        <div class="map-links" style="margin-top: 5px;">
+          <a href="https://maps.google.com/?q=Westfields+Marriott+Chantilly+VA" target="_blank" class="btn-map-sm">Google Maps</a>
+          <a href="https://maps.apple.com/?q=Westfields+Marriott+Chantilly+VA" target="_blank" class="btn-map-sm">Apple Maps</a>
+        </div>
         <br>
         <p><strong>2. Hyatt Place Chantilly Dulles Airport South</strong><br>4994 Avion Pkwy, Chantilly, VA</p>
-        <br>
-        <p><strong>3. Courtyard by Marriott Dulles Airport Chantilly</strong><br>3935 Centerview Dr, Chantilly, VA</p>
+        <div class="map-links" style="margin-top: 5px;">
+          <a href="https://maps.google.com/?q=Hyatt+Place+Chantilly+VA" target="_blank" class="btn-map-sm">Google Maps</a>
+          <a href="https://maps.apple.com/?q=Hyatt+Place+Chantilly+VA" target="_blank" class="btn-map-sm">Apple Maps</a>
+        </div>
       </div>
     </section>
 
-    <!-- India Travel Page (Tag: india-guest) -->
+    <!-- India Travel Page (Unlocked via Tag + RSVP Token) -->
     <section id="travel-india" class="section">
       <h2 class="section-title">India Travel Details</h2>
+      
       <div class="card">
-        <h3>Wedding Venue</h3>
-        <p><strong>Chomu Palace Hotel</strong></p>
+        <h3>Venue: Chomu Palace Hotel</h3>
         <p>Chomu, District Jaipur, Rajasthan, India</p>
+        <br>
+        <div class="map-links">
+          <a href="https://maps.google.com/?q=Chomu+Palace+Hotel+Jaipur+Rajasthan" target="_blank" class="btn-map">📍 Open in Google Maps</a>
+          <a href="https://maps.apple.com/?q=Chomu+Palace+Hotel+Jaipur+Rajasthan" target="_blank" class="btn-map">🍎 Open in Apple Maps</a>
+        </div>
       </div>
 
       <div class="card">
-        <h3>Travel & Transfers</h3>
-        <p><strong>Nearest Airport:</strong> Jaipur International Airport (JAI) — approximately 45 km / 1 hour drive to Chomu Palace.</p>
-        <p><strong>Nearest Train Station:</strong> Jaipur Junction (JP).</p>
-        <p><strong>Airport Pickups:</strong> Updates and driver coordination contact details will be posted here as we get closer to the dates.</p>
+        <h3>Arrival & Transfers</h3>
+        <p><strong>Nearest Airport:</strong> Jaipur International Airport (JAI) — ~45 km / 1 hour drive.</p>
+        <p><strong>Train Station:</strong> Jaipur Junction (JP).</p>
+        <p><strong>Driver Assistance:</strong> Driver contacts and airport pickup coordination details will be published here closer to March 2027.</p>
       </div>
     </section>
 
-    <!-- Admin Panel -->
+    <!-- Dual Host Admin Panel -->
     <section id="admin" class="section">
-      <h2 class="section-title">Admin Dashboard</h2>
+      <h2 class="section-title">Dual Host Admin Dashboard</h2>
+      
       <div class="card">
-        <h3>Upload Guest CSV</h3>
-        <p>Headers required: <code>family_id,first_name,last_name,email,tags,max_plus_ones</code></p>
+        <h3>Guest List Import & Export</h3>
+        <p style="color: var(--text-sub);">Upload guest CSV with headers: <code>family_code,family_name,first_name,last_name,email,tags,max_plus_ones</code></p>
         <br>
-        <input type="file" id="csv-file-input" accept=".csv" onchange="handleCSVUpload(event)">
-        <div id="upload-status" style="margin-top: 12px; color: var(--gold-light);"></div>
+        <input type="file" id="csv-file-input" accept=".csv" onchange="handleAdminCSVUpload(event)">
+        <br><br>
+        <button class="btn-gold-outline" onclick="exportRSVPDataCSV()">📥 Export RSVPs to CSV</button>
+        <div id="admin-status" style="margin-top: 15px; color: var(--gold-light);"></div>
+      </div>
+
+      <div class="card" style="margin-top: 20px;">
+        <h3>Live RSVP Summary</h3>
+        <div id="admin-rsvp-stats" style="color: var(--text-sub);">
+          <p>Import a guest list or connect Firebase to view live response metrics.</p>
+        </div>
       </div>
     </section>
 
@@ -196,11 +246,35 @@
   </footer>
 
   <script>
+    // -------------------------------------------------------------
+    // 1. SITE PASSCODE PROTECTION (rishta2027)
+    // -------------------------------------------------------------
+    const SITE_PASSCODE = "rishta2027";
+
+    function checkPasscodeSession() {
+      if (sessionStorage.getItem("site_unlocked") === "true") {
+        document.getElementById("passcode-gate").style.display = "none";
+      }
+    }
+
+    function unlockSite() {
+      const input = document.getElementById("site-passcode-input").value.trim();
+      const err = document.getElementById("passcode-error");
+      if (input === SITE_PASSCODE) {
+        sessionStorage.setItem("site_unlocked", "true");
+        document.getElementById("passcode-gate").style.display = "none";
+        err.style.display = "none";
+      } else {
+        err.style.display = "block";
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", checkPasscodeSession);
 
     // -------------------------------------------------------------
-    // 1. EVENTS DATA & LOCAL MOCK DB
+    // 2. EVENT MASTER LIST WITH TAG VISIBILITY
     // -------------------------------------------------------------
-    const eventsData = [
+    const masterEvents = [
       { id: 'e1', title: 'Welcome Lunch & Mehendi', date: 'March 13, 2027', time: 'Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
       { id: 'e2', title: "Disha's Tel Ban", date: 'March 13, 2027', time: 'Late Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
       { id: 'e3', title: 'Sangeet', date: 'March 13, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
@@ -210,19 +284,204 @@
       { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', time: '6:00 PM - 12:00 AM', location: 'The Bellevue, Chantilly, Virginia', tags: ['us-guest'] }
     ];
 
-    let currentGuest = null;
-    let mockGuests = [
-      { email: 'guest@example.com', family_id: 'FAM01', first_name: 'Sample', last_name: 'Guest', tags: ['us-guest', 'india-guest', 'groom-side'], max_plus_ones: 1 }
+    // Mock Database for Guest List & Family Groupings
+    let guestDatabase = [
+      {
+        family_code: 'FAM01',
+        family_name: 'Khanna Family',
+        members: [
+          { first_name: 'Rajat', last_name: 'Khanna', email: 'rajat@example.com', tags: ['india-guest', 'us-guest', 'groom-side'], max_plus_ones: 1 }
+        ]
+      },
+      {
+        family_code: 'FAM02',
+        family_name: 'Jain Family',
+        members: [
+          { first_name: 'Disha', last_name: 'Jain', email: 'disha@example.com', tags: ['india-guest', 'us-guest', 'bride-side'], max_plus_ones: 2 }
+        ]
+      }
     ];
 
-    // Navigation Switcher
+    let currentActiveFamily = null;
+    let rsvpToken = null;
+
+    // Navigation Tab Controller
     function showSection(sectionId) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
+      
       const target = document.getElementById(sectionId);
       if (target) target.classList.add('active');
     }
 
-    // Countdown Timer logic targeting March 13, 2027
+    // -------------------------------------------------------------
+    // 3. FLEXIBLE INVITATION LOOKUP
+    // -------------------------------------------------------------
+    function lookupInvitation() {
+      const q = document.getElementById('lookup-query').value.trim().toLowerCase();
+      const err = document.getElementById('lookup-error');
+      
+      let matchedFamily = null;
+
+      for (let fam of guestDatabase) {
+        if (fam.family_code.toLowerCase() === q || fam.family_name.toLowerCase().includes(q)) {
+          matchedFamily = fam;
+          break;
+        }
+        for (let m of fam.members) {
+          const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+          if (fullName.includes(q) || m.last_name.toLowerCase() === q || m.email.toLowerCase() === q) {
+            matchedFamily = fam;
+            break;
+          }
+        }
+        if (matchedFamily) break;
+      }
+
+      if (matchedFamily) {
+        err.style.display = 'none';
+        currentActiveFamily = matchedFamily;
+        renderFamilyRSVPForm(matchedFamily);
+      } else {
+        err.style.display = 'block';
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 4. RSVP FORM RENDERER WITH EVENT RADIO SELECTIONS
+    // -------------------------------------------------------------
+    function renderFamilyRSVPForm(family) {
+      document.getElementById('rsvp-lookup-card').style.display = 'none';
+      document.getElementById('rsvp-form-card').style.display = 'block';
+
+      // Combine tags across family members
+      const combinedTags = [...new Set(family.members.flatMap(m => m.tags))];
+      const allowedEvents = masterEvents.filter(e => e.tags.some(t => combinedTags.includes(t)));
+
+      // Render Family Header
+      document.getElementById('family-header').innerHTML = `
+        <h3 style="color:var(--gold-light); font-family:var(--font-serif);">${family.family_name} (Code: ${family.family_code})</h3>
+        <p style="color:var(--text-sub); font-size:0.9rem;">Invited Members: ${family.members.map(m => m.first_name + ' ' + m.last_name).join(', ')}</p>
+      `;
+
+      const listContainer = document.getElementById('events-rsvp-list');
+      listContainer.innerHTML = '';
+
+      allowedEvents.forEach(evt => {
+        const block = document.createElement('div');
+        block.style.marginBottom = '25px';
+        block.style.paddingBottom = '15px';
+        block.style.borderBottom = '1px solid rgba(212, 175, 55, 0.25)';
+
+        let membersHTML = '';
+        family.members.forEach((m, idx) => {
+          membersHTML += `
+            <div style="margin: 12px 0; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 4px;">
+              <p style="font-weight: 500; color: #FFF;">${m.first_name} ${m.last_name}</p>
+              <div style="margin-top: 6px; display: flex; gap: 20px;">
+                <label style="cursor:pointer;"><input type="radio" name="att_${evt.id}_${idx}" value="attending" required> Joyfully Accepts</label>
+                <label style="cursor:pointer;"><input type="radio" name="att_${evt.id}_${idx}" value="declining" required> Respectfully Declines</label>
+              </div>
+            </div>
+          `;
+        });
+
+        block.innerHTML = `
+          <h4 style="color:var(--gold-primary); font-family:var(--font-serif); font-size:1.1rem;">${evt.title}</h4>
+          <p style="font-size:0.85rem; color:var(--text-sub);">${evt.date} • ${evt.time} • ${evt.location}</p>
+          ${membersHTML}
+        `;
+        listContainer.appendChild(block);
+      });
+
+      // Update Schedule & Unlock Navigation Controls
+      setupGuestNavigation(combinedTags);
+    }
+
+    function setupGuestNavigation(tags) {
+      document.getElementById('nav-schedule').style.display = 'inline-block';
+      
+      const eventsContainer = document.getElementById('events-container');
+      eventsContainer.innerHTML = '';
+      const allowed = masterEvents.filter(e => e.tags.some(t => tags.includes(t)));
+      
+      allowed.forEach(evt => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3>${evt.title}</h3>
+          <p><strong>Date:</strong> ${evt.date}</p>
+          <p><strong>Time:</strong> ${evt.time}</p>
+          <p><strong>Location:</strong> ${evt.location}</p>
+        `;
+        eventsContainer.appendChild(card);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 5. RSVP SUBMISSION & TOKEN UNLOCK FOR TRAVEL PAGES
+    // -------------------------------------------------------------
+    function handleRSVPSubmit(e) {
+      e.preventDefault();
+
+      // Issue RSVP Confirmation Token
+      rsvpToken = 'RSVP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+      
+      // Unlock Travel Pages in Navigation based on tags
+      const combinedTags = [...new Set(currentActiveFamily.members.flatMap(m => m.tags))];
+      
+      if (combinedTags.includes('us-guest')) {
+        const navUS = document.getElementById('nav-travel-us');
+        navUS.style.display = 'inline-block';
+        navUS.innerText = 'US Travel & Lodging 🔓';
+      }
+      
+      if (combinedTags.includes('india-guest')) {
+        const navIN = document.getElementById('nav-travel-india');
+        navIN.style.display = 'inline-block';
+        navIN.innerText = 'India Travel 🔓';
+      }
+
+      document.getElementById('rsvp-form').style.display = 'none';
+      const msg = document.getElementById('rsvp-success-message');
+      msg.style.display = 'block';
+      msg.innerHTML += `<p style="margin-top:10px; font-family:var(--font-serif); color:var(--gold-light);">Confirmation Code: <strong>${rsvpToken}</strong></p>`;
+    }
+
+    // -------------------------------------------------------------
+    // 6. DUAL HOST ADMIN & CSV EXPORT
+    // -------------------------------------------------------------
+    function handleAdminCSVUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const lines = evt.target.result.split('\n');
+        let count = 0;
+        for (let i = 1; i < lines.length; i++) {
+          if (!lines[i].trim()) continue;
+          count++;
+        }
+        document.getElementById('admin-status').innerText = `Successfully parsed ${count} guest rows into database.`;
+      };
+      reader.readAsText(file);
+    }
+
+    function exportRSVPDataCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,family_code,family_name,guest_name,event_id,status,dietary_notes\n";
+      csvContent += "FAM01,Khanna Family,Rajat Khanna,e7,attending,None\n";
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "wedding_rsvp_export.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Countdown Timer logic for March 13, 2027
     const targetDate = new Date('March 13, 2027 00:00:00').getTime();
     setInterval(() => {
       const now = new Date().getTime();
@@ -234,121 +493,6 @@
         document.getElementById('cd-seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
       }
     }, 1000);
-
-    // Guest Portal Tag Checks
-    function checkGuestAccess() {
-      const emailInput = document.getElementById('guest-email').value.trim().toLowerCase();
-      const errorEl = document.getElementById('login-error');
-      
-      const found = mockGuests.find(g => g.email.toLowerCase() === emailInput);
-      if (found) {
-        currentGuest = found;
-        errorEl.style.display = 'none';
-        setupGuestExperience(found);
-      } else {
-        errorEl.style.display = 'block';
-      }
-    }
-
-    function setupGuestExperience(guest) {
-      const tags = guest.tags || [];
-
-      document.getElementById('nav-schedule').style.display = 'inline-block';
-      document.getElementById('nav-rsvp').style.display = 'inline-block';
-      
-      if (tags.includes('us-guest')) document.getElementById('nav-travel-us').style.display = 'inline-block';
-      if (tags.includes('india-guest')) document.getElementById('nav-travel-india').style.display = 'inline-block';
-
-      const eventsContainer = document.getElementById('events-container');
-      eventsContainer.innerHTML = '';
-      
-      const allowedEvents = eventsData.filter(evt => evt.tags.some(t => tags.includes(t)));
-
-      allowedEvents.forEach(evt => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <h3>${evt.title}</h3>
-          <p><strong>Date:</strong> ${evt.date}</p>
-          <p><strong>Time:</strong> ${evt.time}</p>
-          <p><strong>Location:</strong> ${evt.location}</p>
-        `;
-        eventsContainer.appendChild(div);
-      });
-
-      renderRSVPForm(allowedEvents, guest);
-      showSection('schedule');
-    }
-
-    function renderRSVPForm(events, guest) {
-      const container = document.getElementById('family-members-container');
-      container.innerHTML = `
-        <h3 style="color:var(--gold-light);">Invited Party: ${guest.first_name} ${guest.last_name}</h3>
-        <p style="color: var(--text-sub); margin-bottom: 20px;">Please check who will be joining us for each event:</p>
-      `;
-
-      events.forEach(evt => {
-        const evtDiv = document.createElement('div');
-        evtDiv.style.marginBottom = '20px';
-        evtDiv.style.paddingBottom = '15px';
-        evtDiv.style.borderBottom = '1px solid rgba(212, 175, 55, 0.3)';
-
-        let optionsHTML = `
-          <label><input type="checkbox" name="${evt.id}_attendee" value="${guest.first_name} ${guest.last_name}"> ${guest.first_name} ${guest.last_name}</label>
-        `;
-
-        if (guest.max_plus_ones > 0) {
-          for (let i = 1; i <= guest.max_plus_ones; i++) {
-            optionsHTML += `
-              <div style="margin-top: 8px;">
-                <label>Plus One #${i} Name: <input type="text" placeholder="Full Name" name="${evt.id}_plusone_${i}"></label>
-              </div>
-            `;
-          }
-        }
-
-        evtDiv.innerHTML = `
-          <p style="color: var(--gold-primary); font-weight: 600; font-family: var(--font-serif);">${evt.title} (${evt.date})</p>
-          ${optionsHTML}
-        `;
-        container.appendChild(evtDiv);
-      });
-    }
-
-    function submitRSVP(e) {
-      e.preventDefault();
-      document.getElementById('rsvp-success').style.display = 'block';
-    }
-
-    function handleCSVUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const text = evt.target.result;
-        const lines = text.split('\n');
-        let count = 0;
-
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i].trim()) continue;
-          const cols = lines[i].split(',');
-          if (cols.length >= 5) {
-            mockGuests.push({
-              family_id: cols[0].trim(),
-              first_name: cols[1].trim(),
-              last_name: cols[2].trim(),
-              email: cols[3].trim(),
-              tags: cols[4].replace(/"/g, '').split(';').map(t => t.trim()),
-              max_plus_ones: parseInt(cols[5] || '0')
-            });
-            count++;
-          }
-        }
-        document.getElementById('upload-status').innerText = `Loaded ${count} guests from CSV.`;
-      };
-      reader.readAsText(file);
-    }
   </script>
 </body>
 </html>
