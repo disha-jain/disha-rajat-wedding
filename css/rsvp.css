@@ -2,8 +2,9 @@
   Disha & Rajat Wedding - RSVP styling Overrides
   File Location: css/rsvp.css
   
-  This file completely customizes the form colors, typography, and contrast rules
-  to ensure perfect, crisp legibility over the blurred overlay backgrounds.
+  SUPER READABILITY EDITION:
+  Forces pure, opaque high-contrast backgrounds and rich black typography 
+  on all form elements to ensure perfect legibility.
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -22,247 +23,270 @@
     padding: 0 10px;
 }
 
-/* Calligraphy Cursive Header (White text with soft drop-shadow) */
+/* OUTSIDE THE CARD: High-visibility White Text with soft dropshadows */
 .cursive-header {
-    font-family: 'Great Vibes', cursive;
-    font-size: 38px;
+    font-family: 'Great Vibes', cursive !important;
+    font-size: 38px !important;
     color: #ffffff !important;
-    font-weight: 400;
-    margin: 0 0 10px 0;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
-    letter-spacing: 1px;
+    font-weight: 400 !important;
+    margin: 0 0 10px 0 !important;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6) !important;
+    letter-spacing: 1px !important;
 }
 
-/* Bold Sans-Serif Sub-header (White text with soft drop-shadow) */
 .sub-header {
-    font-size: 21px;
-    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 21px !important;
+    font-weight: 700 !important;
     color: #ffffff !important;
-    margin: 0 0 28px 0;
-    line-height: 1.35;
-    letter-spacing: -0.3px;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+    margin: 0 0 28px 0 !important;
+    line-height: 1.35 !important;
+    letter-spacing: -0.3px !important;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* RSVP Glassmorphism Card Container (Crisp black text inside white container) */
+/* 
+  RSVP Solid Container Card
+  Using pure, opaque white (#ffffff) to guarantee no background details bleed through.
+*/
 .rsvp-card {
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 24px;
-    padding: 30px 24px;
-    width: 100%;
-    box-sizing: border-box;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    background-color: #ffffff !important; /* Pure Solid White - No opacity leaks */
+    border: 1px solid #dcdcdc !important;
+    border-radius: 24px !important;
+    padding: 30px 24px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
     text-align: left;
-    color: #000000 !important; /* Forces all standard text inside the card to be black */
 }
 
+/* INSIDE THE CARD: Strict, absolute black elements */
+.rsvp-card *, 
+form#rsvp-form *,
+form#rsvp-form label,
+form#rsvp-form span,
+form#rsvp-form p {
+    color: #000000 !important; /* Forces solid black text for absolute readability */
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* Title inside the card */
 .rsvp-title {
-    font-size: 24px;
-    font-weight: 800;
+    font-size: 24px !important;
+    font-weight: 800 !important;
     color: #000000 !important;
-    margin: 0 0 22px 0;
-    letter-spacing: -0.5px;
+    margin: 0 0 22px 0 !important;
+    letter-spacing: -0.5px !important;
 }
 
-/* Form Groups */
+/* Form Layout Group spacing */
 .form-group {
-    margin-bottom: 20px;
-    box-sizing: border-box;
+    margin-bottom: 20px !important;
+    box-sizing: border-box !important;
 }
 
 .form-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: #000000 !important; /* Guarantees dark labels */
-    margin-bottom: 8px;
-    display: block;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
 }
 
 /* Styled text input fields */
-.text-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #dcdcdc;
-    border-radius: 8px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    color: #000000 !important; /* Dark text input */
-    box-sizing: border-box;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    background-color: #ffffff;
+.text-input,
+form input[type="text"],
+form input[type="email"],
+form textarea {
+    width: 100% !important;
+    padding: 12px 14px !important;
+    border: 1.5px solid #a0a0a0 !important; /* Strong dark border for clear field edges */
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    color: #000000 !important; /* Solid dark text inside inputs */
+    box-sizing: border-box !important;
+    outline: none !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    background-color: #ffffff !important; /* Pure white background inside inputs */
 }
 
-.text-input::placeholder {
-    color: #888888 !important;
+.text-input::placeholder,
+form input::placeholder {
+    color: #555555 !important; /* Easily legible placeholder text */
+    opacity: 1 !important;
 }
 
-.text-input:focus {
-    border-color: #000000;
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+.text-input:focus,
+form input[type="text"]:focus {
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Custom interactive selections (Pills) */
-.option-pill {
-    display: block;
-    background-color: #eaeaea;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a !important; /* Charcoal font color for unselected pills */
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-    user-select: none;
-    box-sizing: border-box;
-    position: relative;
+/* Option wrappers as custom blocks */
+.option-pill,
+.checkbox-pill,
+form .radio-option,
+form .checkbox-option {
+    display: block !important;
+    background-color: #f2f2f2 !important; /* Easily legible background contrast */
+    padding: 12px 16px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #000000 !important; /* Crisp black option text */
+    cursor: pointer !important;
+    transition: background-color 0.2s, color 0.2s !important;
+    user-select: none !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    border: 1px solid #dcdcdc !important;
 }
 
-.option-pill input[type="radio"],
-.option-pill input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    pointer-events: none;
+/* Hide native inputs cleanly inside the custom styled container pills */
+.option-pill input,
+.checkbox-pill input,
+form .radio-option input,
+form .checkbox-option input {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
 }
 
-.option-pill:hover {
-    background-color: #e2e2e2;
+.option-pill:hover,
+.checkbox-pill:hover,
+form .radio-option:hover,
+form .checkbox-option:hover {
+    background-color: #e5e5e2 !important; /* Subtle contrast change on hover */
 }
 
-/* Active selected state for radio/checkbox pills */
-.option-pill:has(input:checked) {
-    background-color: #1a1a1a;
-    color: #ffffff !important; /* Clean contrast white font when selected */
+/* 
+  Active/Selected states for Option wrappers
+  Turns selected option background to pure black, and text/labels inside to crisp white.
+*/
+.option-pill:has(input:checked),
+form .radio-option:has(input:checked),
+.checkbox-pill:has(input:checked),
+form .checkbox-option:has(input:checked) {
+    background-color: #000000 !important; /* Pure black selection */
 }
 
-/* Custom Checkbox Pills */
-.checkbox-pill {
-    display: flex;
-    align-items: center;
-    background-color: #eaeaea;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a !important; /* Dark text for checkbox option labels */
-    cursor: pointer;
-    transition: background-color 0.2s;
-    user-select: none;
-    box-sizing: border-box;
-    position: relative;
+.option-pill:has(input:checked) *,
+form .radio-option:has(input:checked) *,
+.checkbox-pill:has(input:checked) *,
+form .checkbox-option:has(input:checked) * {
+    color: #ffffff !important; /* High contrast selected white text */
 }
 
-.checkbox-pill input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    pointer-events: none;
-}
-
-.checkbox-pill:hover {
-    background-color: #e2e2e2;
-}
-
-/* Visual Checkbox Square icon */
+/* Custom Checkbox Squares */
 .checkbox-icon {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #a0a0a0;
-    border-radius: 4px;
-    margin-right: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #ffffff;
-    transition: all 0.2s;
-    box-sizing: border-box;
-    flex-shrink: 0;
+    width: 16px !important;
+    height: 16px !important;
+    border: 2px solid #555555 !important; /* Strong contrast border */
+    border-radius: 4px !important;
+    margin-right: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #ffffff !important;
+    transition: all 0.2s !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    vertical-align: middle !important;
 }
 
-.checkbox-pill:has(input:checked) .checkbox-icon {
-    background-color: #1a1a1a;
-    border-color: #1a1a1a;
+.checkbox-pill:has(input:checked) .checkbox-icon,
+form .checkbox-option:has(input:checked) .checkbox-icon {
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
 }
 
-.checkbox-pill:has(input:checked) .checkbox-icon::after {
-    content: "";
-    width: 4px;
-    height: 8px;
-    border: solid #ffffff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    margin-bottom: 2px;
+.checkbox-pill:has(input:checked) .checkbox-icon::after,
+form .checkbox-option:has(input:checked) .checkbox-icon::after {
+    content: "" !important;
+    width: 4px !important;
+    height: 8px !important;
+    border: solid #000000 !important; /* Dark tick mark inside white box */
+    border-width: 0 2px 2px 0 !important;
+    transform: rotate(45deg) !important;
+    margin-bottom: 2px !important;
+    display: block !important;
 }
 
 /* Symmetrical guest count selection rows */
 .guests-row {
-    display: flex;
-    gap: 8px;
-    box-sizing: border-box;
+    display: flex !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
 }
 
-.guest-pill {
-    flex: 1;
-    display: block;
-    background-color: #eaeaea;
-    padding: 10px 0;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #1a1a1a !important; /* Dark text for numbers */
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.2s, color 0.2s;
-    user-select: none;
-    box-sizing: border-box;
-    position: relative;
+.guest-pill,
+form .guest-option {
+    flex: 1 !important;
+    display: block !important;
+    background-color: #f2f2f2 !important;
+    padding: 10px 0 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #000000 !important; /* Dark unselected numbers */
+    cursor: pointer !important;
+    text-align: center !important;
+    transition: background-color 0.2s, color 0.2s !important;
+    user-select: none !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    border: 1px solid #dcdcdc !important;
 }
 
-.guest-pill input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    pointer-events: none;
+.guest-pill input,
+form .guest-option input {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
 }
 
-.guest-pill:hover {
-    background-color: #e2e2e2;
+.guest-pill:hover,
+form .guest-option:hover {
+    background-color: #e5e5e2 !important;
 }
 
-.guest-pill:has(input:checked) {
-    background-color: #1a1a1a;
-    color: #ffffff !important; /* Contrast white font for selected guest numbers */
+.guest-pill:has(input:checked),
+form .guest-option:has(input:checked) {
+    background-color: #000000 !important;
+    color: #ffffff !important; /* High contrast white text on selection */
+}
+
+.guest-pill:has(input:checked) * {
+    color: #ffffff !important;
 }
 
 /* Submit Response button */
-.submit-btn {
-    background-color: #1a1a1a;
-    color: #ffffff !important; /* Solid white text */
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    width: 60%;
-    text-align: center;
-    display: inline-block;
-    box-sizing: border-box;
-    margin-top: 10px;
+.submit-btn,
+form button[type="submit"] {
+    background-color: #000000 !important; /* Opaque solid black button */
+    color: #ffffff !important; /* High contrast solid white text */
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s !important;
+    width: 60% !important;
+    text-align: center !important;
+    display: inline-block !important;
+    box-sizing: border-box !important;
+    margin-top: 10px !important;
 }
 
-.submit-btn:hover {
-    background-color: #333333;
+.submit-btn:hover,
+form button[type="submit"]:hover {
+    background-color: #222222 !important;
 }
