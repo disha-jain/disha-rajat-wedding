@@ -51,7 +51,7 @@
 }
 
 .edit-icon-btn {
-  background: none; border: 1.5px solid var(--border-gold); color: var(--gold-dark);
+  background: none; border: 1.5px solid var(--gold-primary); color: var(--gold-dark);
   border-radius: 50%; width: 32px; height: 32px; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer; transition: all 0.2s; vertical-align: middle;
