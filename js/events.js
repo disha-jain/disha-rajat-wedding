@@ -2,7 +2,7 @@
    WEDDING EVENTS — single source of truth for the schedule.
    *** THIS IS THE FILE TO EDIT when dates, times, venues,
    *** dress codes, notes, or tags change. ***
-   schedule.html and rsvp.html both read from here, so one edit
+   the single-page home.html (events + rsvp sections) reads from here, so one edit
    updates every page.
 
    Tags control visibility: an event is shown to a guest if ANY of
