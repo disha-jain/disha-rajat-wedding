@@ -183,6 +183,8 @@
     let rosterSelection = new Set();   // "FAMILYCODE::memberIndex"
     let rosterQuery = '';
     let editingKey = null;
+    let lastRenderedKeys = [];   // display order of the current table body
+    let lastClickedRowIndex = -1; // anchor for shift-click range selection
 
     function flatRoster(families) {
       const rows = [];
@@ -218,6 +220,8 @@
 
     function renderRosterTable(families) {
       const container = document.getElementById("guest-roster-table");
+      lastRenderedKeys = [];
+      lastClickedRowIndex = -1;
       const allRows = flatRoster(families);
       const valid = new Set(allRows.map(r => r.key));
       rosterSelection.forEach(k => { if (!valid.has(k)) rosterSelection.delete(k); });
@@ -231,7 +235,7 @@
       }
 
       let html = `<table class="roster-table"><thead><tr>
-        <th style="width:36px;"><input type="checkbox" id="select-all" title="Select all" aria-label="Select all"></th>
+        <th class="row-select" style="width:44px;"><span class="cb-wrap"><input type="checkbox" id="select-all" title="Select all" aria-label="Select all"></span></th>
         <th>Family</th><th>Name</th><th>Email</th><th>Tags</th><th title="Max additional guests">+1s</th><th></th>
       </tr></thead><tbody>`;
 
@@ -239,8 +243,8 @@
         const checked = rosterSelection.has(r.key) ? 'checked' : '';
         const chips = (r.m.tags || []).map(tag => `<span class="tag-chip">${esc(tag)}</span>`).join('')
           || '<span style="color:var(--taupe);">&mdash;</span>';
-        html += `<tr>
-          <td><input type="checkbox" data-key="${esc(r.key)}" ${checked} onchange="toggleSelect(this)" aria-label="Select ${esc(r.m.first_name)} ${esc(r.m.last_name)}"></td>
+        html += `<tr data-key="${esc(r.key)}">
+          <td class="row-select"><span class="cb-wrap"><input type="checkbox" data-key="${esc(r.key)}" ${checked} onchange="toggleSelect(this)" aria-label="Select ${esc(r.m.first_name)} ${esc(r.m.last_name)}"></span></td>
           <td><code>${esc(r.fam.family_code)}</code><div style="font-size:0.78rem;color:var(--taupe);">${esc(r.fam.family_name)}</div></td>
           <td style="font-weight:600;white-space:nowrap;">${esc(r.m.first_name)} ${esc(r.m.last_name)}</td>
           <td style="font-size:0.85rem;">${esc(r.m.email || '\u2014')}</td>
@@ -251,27 +255,66 @@
       });
 
       container.innerHTML = html + `</tbody></table>`;
+      lastRenderedKeys = rows.map(r => r.key);
+
+      const tbody = container.querySelector('tbody');
+      if (tbody) tbody.addEventListener('click', onRowClick);
 
       const sa = document.getElementById('select-all');
       if (sa) {
-        const keys = rows.map(r => r.key);
-        sa.checked = keys.length > 0 && keys.every(k => rosterSelection.has(k));
         sa.onchange = () => {
-          keys.forEach(k => { sa.checked ? rosterSelection.add(k) : rosterSelection.delete(k); });
-          renderRosterTable(getStoredGuestList());
+          lastRenderedKeys.forEach(k => { sa.checked ? rosterSelection.add(k) : rosterSelection.delete(k); });
+          paintSelection();
         };
+      }
+      paintSelection();
+    }
+
+    function onRowClick(e) {
+      const tr = e.target.closest('tr[data-key]');
+      if (!tr) return;
+      // let interactive elements behave normally (checkbox has its own handler)
+      if (e.target.closest('button, a, input, select, textarea, label')) return;
+      const key = tr.dataset.key;
+      const idx = lastRenderedKeys.indexOf(key);
+      if (e.shiftKey && lastClickedRowIndex >= 0 && idx >= 0) {
+        const lo = Math.min(lastClickedRowIndex, idx), hi = Math.max(lastClickedRowIndex, idx);
+        for (let i = lo; i <= hi; i++) rosterSelection.add(lastRenderedKeys[i]);
+      } else {
+        if (rosterSelection.has(key)) rosterSelection.delete(key); else rosterSelection.add(key);
+        lastClickedRowIndex = idx;
+      }
+      paintSelection();
+    }
+
+    function paintSelection() {
+      const container = document.getElementById('guest-roster-table');
+      if (!container) return;
+      container.querySelectorAll('tr[data-key]').forEach(tr => {
+        const key = tr.dataset.key;
+        const selected = rosterSelection.has(key);
+        tr.classList.toggle('selected', selected);
+        const cb = tr.querySelector('input[type="checkbox"]');
+        if (cb) cb.checked = selected;
+      });
+      const sa = document.getElementById('select-all');
+      if (sa) {
+        sa.checked = lastRenderedKeys.length > 0 && lastRenderedKeys.every(k => rosterSelection.has(k));
+        sa.indeterminate = !sa.checked && lastRenderedKeys.some(k => rosterSelection.has(k));
       }
       updateBulkBar();
     }
 
     function toggleSelect(cb) {
       if (cb.checked) rosterSelection.add(cb.dataset.key); else rosterSelection.delete(cb.dataset.key);
-      renderRosterTable(getStoredGuestList());
+      const idx = lastRenderedKeys.indexOf(cb.dataset.key);
+      if (idx >= 0) lastClickedRowIndex = idx;
+      paintSelection();
     }
 
     function clearSelection() {
       rosterSelection.clear();
-      renderRosterTable(getStoredGuestList());
+      paintSelection();
     }
 
     function updateBulkBar() {
