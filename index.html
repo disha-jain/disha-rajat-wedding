@@ -11,11 +11,6 @@
 
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/passcode.css">
-  <style>
-    .invite-divider { text-align:center; color: var(--text-sub); margin: 18px 0; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; }
-    .invite-row { display:flex; gap:10px; }
-    .invite-row .form-group { flex:1; }
-  </style>
 </head>
 <body class="passcode-body">
   <div class="lights-overlay"></div>
@@ -32,7 +27,7 @@
         <div class="form-group">
           <input type="text" id="invite-code-input" placeholder="Invite code (e.g. FAM01)" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-align:center; letter-spacing:2px; text-transform:uppercase;">
         </div>
-        <button type="submit" class="btn-gold-outline" style="width:100%;">Continue</button>
+        <button type="submit" class="btn-primary" style="width:100%;">Continue</button>
       </form>
 
       <div class="invite-divider">or</div>
@@ -46,7 +41,7 @@
             <input type="text" id="invite-last" placeholder="Last name" autocomplete="family-name">
           </div>
         </div>
-        <button type="submit" class="btn-gold-outline" style="width:100%; border-color: rgba(212,175,55,0.5);">Find by name</button>
+        <button type="submit" class="btn-gold-outline" style="width:100%;">Find by name</button>
       </form>
 
       <p class="passcode-sub" style="margin-top:20px; font-size:0.8rem;">No tabs are visible until your invite is unlocked.</p>
