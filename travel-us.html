@@ -3,23 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>US Travel — Disha & Rajat (#rishta)</title>
-  
+  <title>Venue — Disha & Rajat (#rishta)</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="css/travel.css">
+  <style>
+    body { background: #f6f1e8; color: #2b2b2b; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .lights-overlay { display:none; }
+    nav { background: rgba(10,10,12,0.92); }
+    .venue-wrap { max-width: 420px; margin: 0 auto; padding: 20px 16px 40px; text-align: center; }
+    .script-head { font-family: 'Great Vibes', cursive; font-size: 52px; color: #3a3a3a; line-height: 1; margin: 10px 0 0; }
+    .serif-head { font-family: 'Cinzel', serif; font-size: 52px; font-weight: 700; letter-spacing: 1px; margin: -10px 0 16px; color: #1a1a1a; }
+    .venue-desc { font-size: 13px; line-height: 1.6; color: #4a4a4a; margin: 0 auto 18px; max-width: 360px; }
+    .venue-map { width: 100%; max-width: 340px; border-radius: 8px; border: 1px solid #ddd; margin: 0 auto 24px; display:block; background:#e8e4da; min-height: 140px; object-fit: cover; }
+    .parking-title { font-family: 'Great Vibes', cursive; font-size: 28px; color: #f5f0e6; text-align: left; margin: 0 0 8px; }
+    .parking-section { background: #1e1a16; color: #e8e0d0; text-align: left; padding: 22px 18px; border-radius: 12px; margin-top: 10px; }
+    .parking-section p { font-size: 13px; line-height: 1.6; color: #d8cfbd; }
+    .map-links { display:flex; gap:10px; justify-content:center; margin:16px 0; flex-wrap:wrap; }
+    .btn-map { background:#1a1a1a; color:#fff; padding:10px 18px; border-radius:999px; text-decoration:none; font-size:13px; font-weight:600; }
+    footer { background:#1e1a16; color:#d8cfbd; border-top:none; }
+  </style>
 </head>
 <body>
+  <script src="js/guest-auth.js"></script>
   <script>
-    if (sessionStorage.getItem("site_unlocked") !== "true") {
-      window.location.href = "index.html";
+    if (!window.GuestAuth.requireUnlock()) {} else {
+      document.addEventListener('DOMContentLoaded', () => window.GuestAuth.renderNav());
     }
   </script>
-
-  <div class="lights-overlay"></div>
 
   <nav>
     <a href="home.html">Home</a>
@@ -30,36 +44,36 @@
     <a href="admin.html">Host Admin</a>
   </nav>
 
-  <div class="container">
-    <h2 class="section-title">US Travel & Lodging</h2>
-    
-    <div class="card">
-      <h3 class="gold-title">Venue: The Bellevue</h3>
-      <p>Chantilly, Virginia, USA</p>
-      <br>
-      <div class="map-links">
-        <a href="https://maps.google.com/?q=The+Bellevue+Chantilly+VA" target="_blank" class="btn-map">📍 Open in Google Maps</a>
-        <a href="https://maps.apple.com/?q=The+Bellevue+Chantilly+VA" target="_blank" class="btn-map">🍎 Open in Apple Maps</a>
-      </div>
-      <br>
-      <p><strong>Airport:</strong> Washington Dulles International Airport (IAD) — 15 mins away.</p>
-      <p><strong>Ride-Share Advice:</strong> Uber and Lyft operate extensively across Northern Virginia and IAD airport.</p>
+  <div class="venue-wrap">
+    <div class="script-head">The</div>
+    <div class="serif-head">Venue</div>
+
+    <p class="venue-desc">
+      Our reception will take place at The Bellevue in Chantilly, Virginia — an elegant ballroom space.
+      The celebration will be indoors, so expect candlelight, a dance floor, and lots of golden hour glow in photos.
+    </p>
+
+    <a href="https://maps.google.com/?q=The+Bellevue+Chantilly+VA" target="_blank" rel="noopener">
+      <img class="venue-map" src="https://maps.googleapis.com/maps/api/staticmap?center=The+Bellevue+Chantilly+VA&zoom=14&size=600x300&maptype=roadmap" alt="Map to The Bellevue" onerror="this.style.display='none'">
+    </a>
+
+    <div class="map-links">
+      <a class="btn-map" href="https://maps.google.com/?q=The+Bellevue+Chantilly+VA" target="_blank" rel="noopener">Open in Google Maps</a>
+      <a class="btn-map" href="https://maps.apple.com/?q=The+Bellevue+Chantilly+VA" target="_blank" rel="noopener">Open in Apple Maps</a>
     </div>
 
-    <div class="card">
-      <h3 class="gold-title">Recommended Nearby Hotels</h3>
-      <p><em>(Subject to availability — no room blocks reserved)</em></p>
-      <br>
-      <p><strong>1. Westfields Marriott Washington Dulles</strong><br>14750 Conference Center Dr, Chantilly, VA</p>
-      <div class="map-links" style="margin-top: 5px;">
-        <a href="https://maps.google.com/?q=Westfields+Marriott+Chantilly+VA" target="_blank" class="btn-map-sm">Google Maps</a>
-        <a href="https://maps.apple.com/?q=Westfields+Marriott+Chantilly+VA" target="_blank" class="btn-map-sm">Apple Maps</a>
-      </div>
-      <br>
-      <p><strong>2. Hyatt Place Chantilly Dulles Airport South</strong><br>4994 Avion Pkwy, Chantilly, VA</p>
-      <div class="map-links" style="margin-top: 5px;">
-        <a href="https://maps.google.com/?q=Hyatt+Place+Chantilly+VA" target="_blank" class="btn-map-sm">Google Maps</a>
-        <a href="https://maps.apple.com/?q=Hyatt+Place+Chantilly+VA" target="_blank" class="btn-map-sm">Apple Maps</a>
+    <div class="parking-section">
+      <div class="parking-title">Parking & Directions</div>
+      <p>
+        Free parking is available on site, with designated areas for elderly and senior guests.
+        Washington Dulles International Airport (IAD) is 15 minutes away. Uber and Lyft operate extensively across Northern Virginia.
+        If you need special assistance or a drop-off closer to the entrance, let us know.
+      </p>
+      <div style="margin-top:16px;">
+        <div style="font-weight:700; margin-bottom:8px; color:#f5f0e6;">Recommended Nearby Hotels</div>
+        <p style="margin-bottom:8px;"><strong>Westfields Marriott Washington Dulles</strong><br>14750 Conference Center Dr, Chantilly, VA</p>
+        <p><strong>Hyatt Place Chantilly Dulles Airport South</strong><br>4994 Avion Pkwy, Chantilly, VA</p>
+        <p style="margin-top:8px; font-style:italic; font-size:12px;">Subject to availability — no room blocks reserved.</p>
       </div>
     </div>
   </div>
@@ -67,13 +81,5 @@
   <footer>
     DISHA & RAJAT • #RISHTA • 2027
   </footer>
-
-  <script>
-    const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-    if (tags.includes("india-guest")) {
-      const el = document.getElementById("nav-travel-india");
-      if (el) el.style.display = "inline-block";
-    }
-  </script>
 </body>
 </html>
