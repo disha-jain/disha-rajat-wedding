@@ -70,3 +70,42 @@
 .modal-sub { color: var(--taupe); font-size: 0.88rem; margin: 4px 0 18px; }
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
 .modal-actions .btn-primary, .modal-actions .btn-gold-outline { flex: 1; }
+
+/* ---------- Roster table: delineation, selection, checkbox alignment ---------- */
+.roster-table thead th {
+  background: var(--ivory);
+}
+.roster-table thead th:first-child { border-top-left-radius: 10px; }
+.roster-table thead th:last-child { border-top-right-radius: 10px; }
+
+.roster-table tbody tr { cursor: pointer; }
+.roster-table tbody tr:hover td { background: #FBF8F0; }
+.roster-table tbody tr.selected td { background: #FAF1DC; }
+.roster-table tbody tr.selected:hover td { background: #F6EACB; }
+.roster-table tbody tr:last-child td:first-child { border-bottom-left-radius: 10px; }
+.roster-table tbody tr:last-child td:last-child { border-bottom-right-radius: 10px; }
+
+/* checkbox cell: true centering (the alignment fix) */
+.roster-table th.row-select,
+.roster-table td.row-select {
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px 6px;
+}
+.roster-table .cb-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+.roster-table input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+  accent-color: var(--gold-dark);
+  cursor: pointer;
+  flex-shrink: 0;
+}
