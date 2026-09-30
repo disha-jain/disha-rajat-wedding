@@ -1,0 +1,32 @@
+.rsvp-lookup-card {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.event-rsvp-block {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.member-option-row {
+  margin: 12px 0;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+}
+
+.radio-group {
+  margin-top: 8px;
+  display: flex;
+  gap: 20px;
+}
+
+.radio-group label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+}

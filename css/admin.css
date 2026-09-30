@@ -1,0 +1,20 @@
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.stat-card {
+  background: rgba(0,0,0,0.4);
+  padding: 15px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 1.8rem;
+  color: var(--gold-light);
+  font-family: var(--font-serif);
+}

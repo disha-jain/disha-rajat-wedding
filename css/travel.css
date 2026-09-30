@@ -1,0 +1,35 @@
+.map-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn-map {
+  padding: 8px 16px;
+  border: 1px solid var(--gold-primary);
+  color: var(--gold-light);
+  text-decoration: none;
+  font-size: 0.82rem;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.btn-map:hover {
+  background: var(--gold-primary);
+  color: #000;
+}
+
+.btn-map-sm {
+  padding: 4px 10px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: var(--text-sub);
+  text-decoration: none;
+  font-size: 0.75rem;
+  border-radius: 3px;
+}
+
+.btn-map-sm:hover {
+  color: var(--gold-primary);
+  border-color: var(--gold-primary);
+}

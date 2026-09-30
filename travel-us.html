@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>US Travel — Disha & Rajat (#rishta)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/travel.css">
+</head>
+<body>
+  <script>
+    if (sessionStorage.getItem("site_unlocked") !== "true") {
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <div class="lights-overlay"></div>
+
+  <nav>
+    <a href="home.html">Home</a>
+    <a href="schedule.html">Events</a>
+    <a href="rsvp.html">RSVP</a>
+    <a href="travel-us.html" class="active">US Travel & Lodging</a>
+    <a href="travel-india.html" id="nav-travel-india" style="display:none;">India Travel</a>
+    <a href="admin.html">Host Admin</a>
+  </nav>
+
+  <div class="container">
+    <h2 class="section-title">US Travel & Lodging</h2>
+    
+    <div class="card">
+      <h3 class="gold-title">Venue: The Bellevue</h3>
+      <p>Chantilly, Virginia, USA</p>
+      <br>
+      <div class="map-links">
+        <a href="https://maps.google.com/?q=The+Bellevue+Chantilly+VA" target="_blank" class="btn-map">📍 Open in Google Maps</a>
+        <a href="https://maps.apple.com/?q=The+Bellevue+Chantilly+VA" target="_blank" class="btn-map">🍎 Open in Apple Maps</a>
+      </div>
+      <br>
+      <p><strong>Airport:</strong> Washington Dulles International Airport (IAD) — 15 mins away.</p>
+      <p><strong>Ride-Share Advice:</strong> Uber and Lyft operate extensively across Northern Virginia and IAD airport.</p>
+    </div>
+
+    <div class="card">
+      <h3 class="gold-title">Recommended Nearby Hotels</h3>
+      <p><em>(Subject to availability — no room blocks reserved)</em></p>
+      <br>
+      <p><strong>1. Westfields Marriott Washington Dulles</strong><br>14750 Conference Center Dr, Chantilly, VA</p>
+      <div class="map-links" style="margin-top: 5px;">
+        <a href="https://maps.google.com/?q=Westfields+Marriott+Chantilly+VA" target="_blank" class="btn-map-sm">Google Maps</a>
+        <a href="https://maps.apple.com/?q=Westfields+Marriott+Chantilly+VA" target="_blank" class="btn-map-sm">Apple Maps</a>
+      </div>
+      <br>
+      <p><strong>2. Hyatt Place Chantilly Dulles Airport South</strong><br>4994 Avion Pkwy, Chantilly, VA</p>
+      <div class="map-links" style="margin-top: 5px;">
+        <a href="https://maps.google.com/?q=Hyatt+Place+Chantilly+VA" target="_blank" class="btn-map-sm">Google Maps</a>
+        <a href="https://maps.apple.com/?q=Hyatt+Place+Chantilly+VA" target="_blank" class="btn-map-sm">Apple Maps</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    DISHA & RAJAT • #RISHTA • 2027
+  </footer>
+
+  <script>
+    const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
+    if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+.passcode-body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(rgba(10, 10, 12, 0.85), rgba(10, 10, 12, 0.95)),
+              url('../NYCEngagementPhotographer-222.jpg') center/cover no-repeat;
+  padding: 20px;
+}
+
+.passcode-container {
+  max-width: 440px;
+  width: 100%;
+}
+
+.passcode-card {
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.hero-script-heading {
+  font-family: var(--font-script);
+  font-size: 3.5rem;
+  color: var(--gold-light);
+  margin-bottom: -5px;
+}
+
+.passcode-sub {
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  margin: 15px 0 25px 0;
+}
+
+.error-msg {
+  color: #ff6b6b;
+  margin-top: 15px;
+  font-size: 0.85rem;
+}

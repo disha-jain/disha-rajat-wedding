@@ -1,0 +1,17 @@
+.event-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.event-time {
+  color: var(--gold-primary);
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.event-location {
+  color: var(--text-sub);
+  font-size: 0.85rem;
+}

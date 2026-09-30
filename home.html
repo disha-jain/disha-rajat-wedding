@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disha Jain & Rajat Khanna — #rishta</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+  <script>
+    if (sessionStorage.getItem("site_unlocked") !== "true") {
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <div class="lights-overlay"></div>
+
+  <nav>
+    <a href="home.html" class="active">Home</a>
+    <a href="schedule.html">Events</a>
+    <a href="rsvp.html">RSVP</a>
+    <a href="travel-us.html" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
+    <a href="travel-india.html" id="nav-travel-india" style="display:none;">India Travel</a>
+    <a href="admin.html">Host Admin</a>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-container">
+      <div class="hero-script-heading">We Do</div>
+      <div class="hero-lead-text">TOGETHER WITH THEIR LOVED ONES</div>
+      
+      <h1 class="hero-names">Disha & Rajat</h1>
+      
+      <div class="hero-invite-text">
+        JOYFULLY INVITE YOU TO<br>
+        CELEBRATE THE BEGINNING OF THEIR FOREVER.
+      </div>
+
+      <div class="date-frame">
+        <div class="date-line-primary">MARCH 13 & 14, 2027</div>
+        <div class="date-line-sub">Chomu Palace • Chomu, Rajasthan, India</div>
+        <br>
+        <div class="date-line-secondary">MARCH 27, 2027</div>
+        <div class="date-line-sub">The Bellevue • Chantilly, Virginia, USA</div>
+      </div>
+
+      <div class="rings-icon"></div>
+
+      <div class="couple-photo-frame">
+        <img src="NYCEngagementPhotographer-222.jpg" alt="Disha Jain and Rajat Khanna">
+      </div>
+
+      <div class="save-the-date-title">SAVE THE DATE</div>
+
+      <div class="countdown-timer">
+        <div class="time-block">
+          <div class="time-num" id="cd-days">00</div>
+          <div class="time-label">DAYS</div>
+        </div>
+        <div class="timer-colon">:</div>
+        <div class="time-block">
+          <div class="time-num" id="cd-hours">00</div>
+          <div class="time-label">HOURS</div>
+        </div>
+        <div class="timer-colon">:</div>
+        <div class="time-block">
+          <div class="time-num" id="cd-minutes">00</div>
+          <div class="time-label">MINUTES</div>
+        </div>
+        <div class="timer-colon">:</div>
+        <div class="time-block">
+          <div class="time-num" id="cd-seconds">00</div>
+          <div class="time-label">SECONDS</div>
+        </div>
+      </div>
+
+      <a href="rsvp.html" class="btn-gold-outline">RSVP NOW</a>
+    </div>
+  </header>
+
+  <footer>
+    DISHA & RAJAT • #RISHTA • 2027
+  </footer>
+
+  <script>
+    const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
+    if (sessionStorage.getItem("rsvp_submitted") === "true") {
+      if (tags.includes("us-guest")) document.getElementById("nav-travel-us").style.display = "inline-block";
+      if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
+    }
+
+    const targetDate = new Date('March 13, 2027 00:00:00').getTime();
+    setInterval(() => {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+      if (diff > 0) {
+        document.getElementById('cd-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+        document.getElementById('cd-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+        document.getElementById('cd-minutes').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+        document.getElementById('cd-seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

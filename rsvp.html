@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP — Disha & Rajat (#rishta)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/rsvp.css">
+</head>
+<body>
+  <script>
+    if (sessionStorage.getItem("site_unlocked") !== "true") {
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <div class="lights-overlay"></div>
+
+  <nav>
+    <a href="home.html">Home</a>
+    <a href="schedule.html">Events</a>
+    <a href="rsvp.html" class="active">RSVP</a>
+    <a href="travel-us.html" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
+    <a href="travel-india.html" id="nav-travel-india" style="display:none;">India Travel</a>
+    <a href="admin.html">Host Admin</a>
+  </nav>
+
+  <div class="container">
+    <h2 class="section-title">RSVP</h2>
+
+    <div id="lookup-card" class="card rsvp-lookup-card">
+      <h3 class="gold-title">Find Your Invitation</h3>
+      <p style="color: var(--text-sub); margin: 15px 0;">Search by <strong>Family Code</strong>, <strong>Family Name</strong>, or <strong>First/Last Name</strong>:</p>
+      <div class="form-group">
+        <input type="text" id="lookup-query" placeholder="e.g. FAM01, Jain Family, or Disha...">
+      </div>
+      <button class="btn-gold-outline" style="width: 100%;" onclick="lookupInvitation()">Find Invitation</button>
+      <div id="lookup-error" style="color: #ff6b6b; margin-top: 15px; display: none;">
+        No matching invitation found. Please check your spelling or Family Code.
+      </div>
+    </div>
+
+    <div id="rsvp-form-card" class="card" style="display: none;">
+      <div id="family-header" style="margin-bottom: 25px; border-bottom: 1px solid var(--border-gold); padding-bottom: 15px;"></div>
+      
+      <form id="rsvp-form" onsubmit="handleRSVPSubmit(event)">
+        <div id="events-rsvp-list"></div>
+
+        <div class="form-group" style="margin-top: 25px;">
+          <label for="dietary-notes">Dietary Restrictions or Special Notes:</label>
+          <textarea id="dietary-notes" rows="3" placeholder="Please specify requirements for individual party members..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-gold-outline" style="width: 100%;">Submit RSVP</button>
+      </form>
+
+      <div id="rsvp-success-message" style="display:none; text-align:center; margin-top: 20px; color: #51cf66;">
+        <h3 style="color: #51cf66;">RSVP Confirmed!</h3>
+        <p>Your response token has been saved. Travel pages are now unlocked in the menu!</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    DISHA & RAJAT • #RISHTA • 2027
+  </footer>
+
+  <script>
+    const masterEvents = [
+      { id: 'e1', title: 'Welcome Lunch & Mehendi', date: 'March 13, 2027', time: 'Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
+      { id: 'e2', title: "Disha's Tel Ban", date: 'March 13, 2027', time: 'Late Afternoon', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
+      { id: 'e3', title: 'Sangeet', date: 'March 13, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
+      { id: 'e4', title: "Rajat's Tel Haldi", date: 'March 14, 2027', time: 'Morning', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'groom-side'] },
+      { id: 'e5', title: "Disha's Gaur Puja & Phoolon Ki Haldi", date: 'March 14, 2027', time: 'Morning', location: 'Chomu Palace, Rajasthan', tags: ['india-guest', 'bride-side'] },
+      { id: 'e6', title: 'Shaadi (Wedding Ceremony)', date: 'March 14, 2027', time: 'Evening', location: 'Chomu Palace, Rajasthan', tags: ['india-guest'] },
+      { id: 'e7', title: 'Wedding Reception', date: 'March 27, 2027', time: '6:00 PM - 12:00 AM', location: 'The Bellevue, Chantilly, Virginia', tags: ['us-guest'] }
+    ];
+
+    let guestDatabase = [
+      { family_code: 'FAM01', family_name: 'Khanna Family', members: [{ first_name: 'Rajat', last_name: 'Khanna', email: 'rajat@example.com', tags: ['india-guest', 'us-guest', 'groom-side'], max_plus_ones: 1 }] },
+      { family_code: 'FAM02', family_name: 'Jain Family', members: [{ first_name: 'Disha', last_name: 'Jain', email: 'disha@example.com', tags: ['india-guest', 'us-guest', 'bride-side'], max_plus_ones: 2 }] }
+    ];
+
+    let currentActiveFamily = null;
+
+    function lookupInvitation() {
+      const q = document.getElementById('lookup-query').value.trim().toLowerCase();
+      const err = document.getElementById('lookup-error');
+      let matchedFamily = null;
+
+      for (let fam of guestDatabase) {
+        if (fam.family_code.toLowerCase() === q || fam.family_name.toLowerCase().includes(q)) {
+          matchedFamily = fam;
+          break;
+        }
+        for (let m of fam.members) {
+          const fullName = `${m.first_name} ${m.last_name}`.toLowerCase();
+          if (fullName.includes(q) || m.last_name.toLowerCase() === q || m.email.toLowerCase() === q) {
+            matchedFamily = fam;
+            break;
+          }
+        }
+        if (matchedFamily) break;
+      }
+
+      if (matchedFamily) {
+        err.style.display = 'none';
+        currentActiveFamily = matchedFamily;
+        renderFamilyRSVPForm(matchedFamily);
+      } else {
+        err.style.display = 'block';
+      }
+    }
+
+    function renderFamilyRSVPForm(family) {
+      document.getElementById('lookup-card').style.display = 'none';
+      document.getElementById('rsvp-form-card').style.display = 'block';
+
+      const combinedTags = [...new Set(family.members.flatMap(m => m.tags))];
+      sessionStorage.setItem("guest_tags", JSON.stringify(combinedTags));
+      const allowedEvents = masterEvents.filter(e => e.tags.some(t => combinedTags.includes(t)));
+
+      document.getElementById('family-header').innerHTML = `
+        <h3 class="gold-title">${family.family_name} (${family.family_code})</h3>
+        <p style="color:var(--text-sub); font-size:0.9rem;">Party Members: ${family.members.map(m => m.first_name + ' ' + m.last_name).join(', ')}</p>
+      `;
+
+      const listContainer = document.getElementById('events-rsvp-list');
+      listContainer.innerHTML = '';
+
+      allowedEvents.forEach(evt => {
+        const block = document.createElement('div');
+        block.className = 'event-rsvp-block';
+
+        let membersHTML = '';
+        family.members.forEach((m, idx) => {
+          membersHTML += `
+            <div class="member-option-row">
+              <p style="font-weight: 500; color: #FFF;">${m.first_name} ${m.last_name}</p>
+              <div class="radio-group">
+                <label><input type="radio" name="att_${evt.id}_${idx}" value="attending" required> Joyfully Accepts</label>
+                <label><input type="radio" name="att_${evt.id}_${idx}" value="declining" required> Respectfully Declines</label>
+              </div>
+            </div>
+          `;
+        });
+
+        block.innerHTML = `
+          <h4 class="gold-title" style="font-size:1.1rem;">${evt.title}</h4>
+          <p style="font-size:0.85rem; color:var(--text-sub);">${evt.date} • ${evt.location}</p>
+          ${membersHTML}
+        `;
+        listContainer.appendChild(block);
+      });
+    }
+
+    function handleRSVPSubmit(e) {
+      e.preventDefault();
+      sessionStorage.setItem("rsvp_submitted", "true");
+      
+      const tags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
+      if (tags.includes("us-guest")) document.getElementById("nav-travel-us").style.display = "inline-block";
+      if (tags.includes("india-guest")) document.getElementById("nav-travel-india").style.display = "inline-block";
+
+      document.getElementById('rsvp-form').style.display = 'none';
+      document.getElementById('rsvp-success-message').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
