@@ -1,19 +1,21 @@
 // firebase-config.js
-// Fill in your Firebase project keys to enable Firestore + Google Admin sign-in.
-// Admins: list Google account emails allowed to view the Host Admin dashboard,
-// or create Firestore docs at admins/{email} (e.g. admins/disha@example.com).
+// Firebase web app config (Firebase console → Project settings → General → Your apps).
+// These values are meant to be public; data is protected by Firestore rules
+// and the admin allowlist below, not by hiding this.
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyD20XhoNJ9yl-SvIiccmQV4RLM_BNTfg80",
+  authDomain: "disha-rajat-wedding.firebaseapp.com",
+  projectId: "disha-rajat-wedding",
+  storageBucket: "disha-rajat-wedding.firebasestorage.app",
+  messagingSenderId: "957221777354",
+  appId: "1:957221777354:web:34730da3d9833fb83c2933",
+  measurementId: "G-5GY3NTL951"
 };
 
-// Add admin Google account emails here, e.g. ["disha@example.com"]
-const adminEmails = [];
+// Google account emails allowed to view the Host Admin dashboard.
+// (Alternatively, create Firestore docs at admins/{email}.)
+const adminEmails = ["dishajain2016@gmail.com", "khanna.rjt@gmail.com"];
 
 let db = null;
 if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
