@@ -456,17 +456,26 @@ function initSmartFooter() {
   onScroll();
 }
 
-/* countdown (home hero) */
-const targetDate = new Date('March 13, 2027 00:00:00').getTime();
+/* countdown (home hero): the target is the guest's next celebration.
+   Wedding guests count down to the Shaadi; once it has passed, guests who are
+   also invited to the reception count down to the Virginia Reception instead.
+   With nothing left to count to, the clock holds at 00. */
+const SHAADI_START = new Date('2027-03-14T19:00:00+05:30').getTime();    // 7:00 PM IST, Chomu Palace
+const RECEPTION_START = new Date('2027-03-27T18:00:00-04:00').getTime(); // 6:00 PM EDT, The Bellevue
+function countdownTarget() {
+  const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
+  const now = Date.now();
+  if (tags.includes('india-guest') && now < SHAADI_START) return SHAADI_START;
+  if (tags.includes('us-guest') && now < RECEPTION_START) return RECEPTION_START;
+  return null;
+}
 function updateCountdown() {
-  const now = new Date().getTime();
-  const diff = targetDate - now;
-  if (diff > 0) {
-    document.getElementById('cd-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
-    document.getElementById('cd-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-    document.getElementById('cd-minutes').innerText = String(Math.floor((diff % (1000 * 60)) / (1000 * 60))).padStart(2, '0');
-    document.getElementById('cd-seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
-  }
+  const target = countdownTarget();
+  const diff = target === null ? 0 : Math.max(0, target - Date.now());
+  document.getElementById('cd-days').innerText = String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0');
+  document.getElementById('cd-hours').innerText = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+  document.getElementById('cd-minutes').innerText = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+  document.getElementById('cd-seconds').innerText = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
 }
 
 /* ----- schedule ----- */
