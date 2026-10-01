@@ -23,7 +23,7 @@
 
 .hero-script-heading {
   font-family: var(--font-script);
-  font-size: 4.6rem;
+  font-size: 3.6rem;
   color: var(--gold-dark);
   margin-bottom: -8px;
   line-height: 1;
@@ -165,7 +165,7 @@
 @media (max-width: 768px) {
   .hero { padding: 56px 15px 40px; }
   .hero-names { font-size: 2.4rem; }
-  .hero-script-heading { font-size: 3.4rem; }
+  .hero-script-heading { font-size: 2.5rem; }
   .date-line-primary { font-size: 1.35rem; }
   .date-line-secondary { font-size: 1.15rem; }
   .countdown-timer { gap: 8px; }
@@ -252,15 +252,21 @@ nav a.active {
 
 /* ---------- Our Story ---------- */
 .story-wrap { max-width: 820px; margin: 0 auto; padding: 72px 24px 32px; }
+.story-script {
+  font-family: var(--font-script);
+  font-size: 3.4rem;
+  color: var(--gold-dark);
+  line-height: 1;
+  text-align: center;
+}
 .story-title {
   font-family: var(--font-serif);
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 400;
-  letter-spacing: 8px;
-  text-indent: 8px;
+  letter-spacing: 2px;
   text-align: center;
   color: var(--dark-gray);
-  margin: 0 0 52px;
+  margin: -6px 0 52px;
 }
 .story-prose p {
   font-family: var(--font-body-serif);
