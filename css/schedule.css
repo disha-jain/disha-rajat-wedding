@@ -1,6 +1,6 @@
 body { font-family: var(--font-sans); }
     .schedule-wrap { max-width: 620px; margin: 0 auto; padding: 44px 20px 50px; text-align: center; }
-    .wedding-kicker { font-family: var(--font-serif); font-weight: 400; font-size: 1.6rem; letter-spacing: 5px; color: var(--dark-gray); margin: 0 0 10px; }
+    .wedding-kicker { font-family: var(--font-serif); font-weight: 700; font-size: 1.6rem; letter-spacing: 5px; color: var(--dark-gray); margin: 0 0 10px; }
     .schedule-script { font-family: var(--font-script); font-weight: 400; font-size: 3.2rem; color: var(--gold-dark); line-height: 1; margin: 0 0 -6px; }
     .schedule-note { color: var(--taupe); font-size: 0.9rem; margin-bottom: 24px; }
     .day-group { margin-bottom: 26px; text-align: left; }
@@ -19,3 +19,7 @@ body { font-family: var(--font-sans); }
     .timeline-meta { font-size: 13px; color: var(--taupe); margin-top: 6px; line-height: 1.6; }
     .timeline-meta strong { color: var(--dark-gray); font-weight: 600; }
     .empty-note { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px; color: var(--taupe); }
+
+@media (max-width: 768px) {
+  .schedule-script { font-size: 2.6rem; }
+}
