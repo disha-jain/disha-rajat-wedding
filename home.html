@@ -169,8 +169,8 @@
 
   <section id="travel-us" class="page-section" style="display:none;">
 <div class="travel-wrap">
-    <div class="travel-script">The</div>
-    <h2 class="travel-title">VENUE</h2>
+    <div class="travel-script">Chantilly</div>
+    <h2 class="travel-title">TRAVEL</h2>
     <p class="travel-lede">
       Our reception will take place at The Bellevue in Chantilly, Virginia — an elegant
       ballroom space. Expect candlelight, a full dance floor, and lots of golden hour glow.
@@ -260,8 +260,8 @@
 
   <section id="travel-india" class="page-section" style="display:none;">
 <div class="travel-wrap">
-    <div class="travel-script">The</div>
-    <h2 class="travel-title">VENUE</h2>
+    <div class="jaipur-script">Jaipur</div>
+    <h3 class="jaipur-title">TRAVEL</h3>
     <p class="travel-lede">
       Our wedding celebrations will take place at Chomu Palace in Chomu, Rajasthan — a
       heritage palace venue. Expect open courtyards, festive lights, and lots of golden hour glow.
@@ -277,8 +277,6 @@
     </div>
 
     <div class="jaipur-travel">
-      <div class="jaipur-script">Jaipur</div>
-      <h3 class="jaipur-title">TRAVEL</h3>
 
       <div class="jt-tabs" role="tablist" aria-label="Ways to reach Jaipur">
         <button class="jt-tab active" data-jt="jt-fly" role="tab" aria-selected="true">
@@ -743,8 +741,6 @@ function applyTagSections() {
   // single-destination guests get a simpler label
   if (hasUs && !hasIndia) {
     usTab.textContent = 'Travel & Lodging';
-    usSec.querySelector('.travel-title').textContent = 'TRAVEL & LODGING';
-    usSec.querySelector('.travel-script').style.display = 'none';
   }
   if (hasIndia && !hasUs) {
     indiaTab.textContent = 'Travel';
