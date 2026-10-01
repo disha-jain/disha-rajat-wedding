@@ -124,12 +124,7 @@
   color: var(--taupe);
   margin: 0 0 26px;
 }
-.stay-layout {
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 20px;
-  align-items: start;
-}
+.stay-map { margin-bottom: 0; }
 .map-frame {
   position: relative;
   border-radius: var(--radius);
@@ -164,14 +159,15 @@
   border-bottom: 0;
 }
 .map-pin.venue {
-  width: 24px;
-  height: 24px;
-  font-size: 0.7rem;
+  width: 28px;
+  height: 28px;
+  font-size: 0.85rem;
   background: var(--ink);
   color: var(--gold);
   border-color: var(--ink);
+  transform: translate(-50%, -50%);
 }
-.map-pin.venue::after { border-top-color: var(--ink); }
+.map-pin.venue::after { display: none; }
 .map-pin.nudge-1 { margin-left: -18px; margin-top: 14px; }
 .map-foot {
   display: flex;
@@ -184,7 +180,30 @@
 .map-foot a { color: var(--gold-dark); font-weight: 600; }
 .map-attr { color: var(--taupe); }
 .map-attr a { color: var(--taupe); font-weight: 400; }
-.stay-cards { display: flex; flex-direction: column; gap: 16px; }
+.stay-scroll-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 18px 18px 12px;
+  margin-top: 18px;
+}
+.stay-scroll-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 4px 2px 10px;
+}
+.stay-scroll-row::-webkit-scrollbar { height: 8px; }
+.stay-scroll-row::-webkit-scrollbar-track { background: var(--ivory); border-radius: 4px; }
+.stay-scroll-row::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+.stay-scroll-row .stay-card {
+  flex: 0 0 360px;
+  scroll-snap-align: start;
+  box-shadow: none;
+}
+.stay-scroll-row .stay-card > img { width: 140px; }
 .stay-card {
   position: relative;
   display: flex;
@@ -235,9 +254,11 @@
 }
 .btn-dark-sm:hover { background: #000; }
 @media (max-width: 860px) {
-  .stay-layout { grid-template-columns: 1fr; }
   .map-pin { width: 26px; height: 26px; font-size: 0.72rem; }
-  .stay-card > img { width: 128px; }
+  .map-pin.venue { width: 24px; height: 24px; font-size: 0.75rem; }
+  .stay-scroll-card { padding: 14px 14px 10px; }
+  .stay-scroll-row .stay-card { flex-basis: 82%; }
+  .stay-scroll-row .stay-card > img { width: 120px; }
 }
 
 .travel-dark-panel p {
