@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="css/home.css?v=20260930j">
   <link rel="stylesheet" href="css/schedule.css?v=20260930g">
   <link rel="stylesheet" href="css/rsvp.css?v=20260930i">
-  <link rel="stylesheet" href="css/travel.css?v=20260930o">
+  <link rel="stylesheet" href="css/travel.css?v=20260930p">
 
   <!-- Firebase SDKs (RSVP writes) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -187,17 +187,47 @@
       </div>
     </div>
 
-    <div class="travel-dark-panel">
-      <div class="panel-script">Parking &</div>
-      <div class="panel-title">DIRECTIONS</div>
-      <p>
-        Free parking is available on site, with designated areas for elderly and senior guests.
-        If you need special assistance or a drop-off closer to the entrance, let us know.
-      </p>
-      <p>
-        <strong>Airport:</strong> Washington Dulles International Airport (IAD) — about 15 minutes away.<br>
-        <strong>Ride-share:</strong> Uber and Lyft operate extensively across Northern Virginia and IAD.
-      </p>
+    <div class="chantilly-travel">
+
+      <div class="jt-tabs" role="tablist" aria-label="Ways to reach Chantilly">
+        <button class="jt-tab active" data-jt="ct-fly" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2z"/></svg>
+          <span>Flying In</span>
+        </button>
+        <button class="jt-tab" data-jt="ct-drive" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 3A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+          <span>Driving In</span>
+        </button>
+        <button class="jt-tab" data-jt="ct-train" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="13" rx="2"/><path d="M5 9h14"/><circle cx="9" cy="13.5" r="0.8"/><circle cx="15" cy="13.5" r="0.8"/><path d="M8 19l-1.5 2.5M16 19l1.5 2.5M8 16.5h8"/></svg>
+          <span>Taking the Train In</span>
+        </button>
+        <button class="jt-tab" data-jt="ct-bus" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2.5"/><path d="M4 10h16"/><circle cx="8" cy="19" r="1.6"/><circle cx="16" cy="19" r="1.6"/></svg>
+          <span>Taking the Bus In</span>
+        </button>
+      </div>
+
+      <div class="jt-panel active" id="ct-fly" role="tabpanel">
+        <p>We recommend flying into <strong>Washington Dulles International Airport (IAD)</strong> &mdash; about 15 minutes from The Bellevue.</p>
+        <p><strong>Ride-share:</strong> Uber and Lyft operate extensively across Northern Virginia and IAD, so the last leg of your trip is easy.</p>
+      </div>
+
+      <div class="jt-panel" id="ct-drive" role="tabpanel">
+        <p><strong>Parking:</strong> Free parking is available on site, with designated areas for elderly and senior guests.</p>
+        <p>If you need special assistance or a drop-off closer to the entrance, let us know.</p>
+      </div>
+
+      <div class="jt-panel" id="ct-train" role="tabpanel">
+        <p><strong>Nearest Amtrak station:</strong> Washington Union Station in DC.</p>
+        <p>From Union Station, take the Metro Silver Line west toward Dulles / Wiehle&ndash;Reston, then grab a quick Uber or Lyft to Chantilly.</p>
+      </div>
+
+      <div class="jt-panel" id="ct-bus" role="tabpanel">
+        <p><strong>From New York City:</strong> BestBus and GoBus run direct service from NYC to Vienna, Virginia.</p>
+        <p>From Vienna, it&rsquo;s a short Uber or Lyft ride to Chantilly and The Bellevue.</p>
+      </div>
+
     </div>
 
         <div class="stay-section">
@@ -992,8 +1022,12 @@ function initTravelTabs() {
   const tabs = [...document.querySelectorAll('.jt-tab')];
   if (!tabs.length) return;
   tabs.forEach(btn => btn.addEventListener('click', () => {
-    tabs.forEach(b => { b.classList.toggle('active', b === btn); b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
-    document.querySelectorAll('.jt-panel').forEach(p => p.classList.toggle('active', p.id === btn.dataset.jt));
+    const scope = btn.closest('.jt-tabs').parentElement;
+    scope.querySelectorAll('.jt-tab').forEach(b => {
+      b.classList.toggle('active', b === btn);
+      b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+    });
+    scope.querySelectorAll('.jt-panel').forEach(p => p.classList.toggle('active', p.id === btn.dataset.jt));
   }));
 }
 </script>
