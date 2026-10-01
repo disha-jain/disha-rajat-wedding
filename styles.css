@@ -252,6 +252,7 @@ code {
 
 /* ---------------- footer ---------------- */
 footer {
+  position: relative;
   text-align: center;
   padding: 40px 20px;
   background: var(--ink);
@@ -260,6 +261,21 @@ footer {
   letter-spacing: 2px;
   margin-top: 40px;
 }
+.admin-link {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.62rem;
+  letter-spacing: 2px;
+  color: var(--smoke);
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 4px;
+  padding: 5px 10px;
+  opacity: 0.65;
+}
+.admin-link:hover { opacity: 1; }
 
 /* ---------------- responsive ---------------- */
 @media (max-width: 768px) {
