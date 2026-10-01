@@ -252,14 +252,23 @@ code {
 
 /* ---------------- footer ---------------- */
 footer {
-  position: relative;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
   text-align: center;
-  padding: 40px 20px;
+  padding: 14px 20px;
   background: var(--ink);
   color: var(--smoke);
   font-size: 0.78rem;
   letter-spacing: 2px;
-  margin-top: 40px;
+  transform: translateY(110%);
+  transition: transform 0.32s ease;
+}
+footer.footer-visible { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  footer { transition: none; }
 }
 .footer-actions {
   position: absolute;
