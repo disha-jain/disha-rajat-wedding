@@ -101,10 +101,20 @@
 }
 
 .travel-dark-panel .panel-script {
-  font-family: var(--font-script);
-  font-size: 2rem;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  letter-spacing: 2px;
   color: var(--gold-light);
   margin-bottom: 10px;
+}
+
+.stay-title {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  letter-spacing: 3px;
+  color: var(--dark-gray);
+  margin: 8px 0 18px;
+  text-align: left;
 }
 
 .travel-dark-panel p {
