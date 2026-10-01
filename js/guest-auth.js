@@ -107,25 +107,15 @@
     if (usEl) usEl.style.display = tags.includes('us-guest') ? '' : 'none';
     if (indiaEl) indiaEl.style.display = tags.includes('india-guest') ? '' : 'none';
 
-    // Add logout button if nav exists and not already added
-    const nav = document.querySelector('nav');
-    if (nav && !document.getElementById('nav-logout')) {
-      const btn = document.createElement('button');
-      btn.id = 'nav-logout';
-      btn.textContent = 'Log out';
-      btn.style.cssText = 'background:none;border:none;color:#E2E2E8;font-family:var(--font-serif);font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;cursor:pointer;';
-      btn.onclick = () => { signOut(); window.location.href = 'index.html'; };
-      nav.appendChild(btn);
-    }
-
-    // Show family name in nav if available
-    const famName = sessionStorage.getItem('family_name');
-    if (famName && nav && !document.getElementById('nav-family')) {
-      const span = document.createElement('span');
-      span.id = 'nav-family';
-      span.textContent = famName;
-      span.style.cssText = 'color:var(--gold-light);font-size:0.75rem;letter-spacing:1px;margin-left:8px;';
-      nav.appendChild(span);
+    // Wire the footer's Log out button (the nav no longer carries
+    // logout or the family name)
+    const footLogout = document.getElementById('foot-logout');
+    if (footLogout) {
+      footLogout.style.display = sessionStorage.getItem('family_code') ? '' : 'none';
+      if (!footLogout.dataset.wired) {
+        footLogout.dataset.wired = '1';
+        footLogout.onclick = () => { signOut(); window.location.href = 'index.html'; };
+      }
     }
   }
 
