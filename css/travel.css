@@ -108,13 +108,90 @@
   margin-bottom: 10px;
 }
 
+.stay-section { margin: 10px 0 22px; text-align: left; }
 .stay-title {
   font-family: var(--font-serif);
-  font-size: 1.4rem;
-  letter-spacing: 3px;
+  font-size: 1.6rem;
+  letter-spacing: 4px;
   color: var(--dark-gray);
-  margin: 8px 0 18px;
-  text-align: left;
+  margin: 0 0 10px;
+  text-align: center;
+}
+.stay-sub {
+  text-align: center;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--taupe);
+  margin: 0 0 26px;
+}
+.stay-layout {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.stay-map iframe {
+  width: 100%;
+  height: 640px;
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  display: block;
+}
+.stay-cards { display: flex; flex-direction: column; gap: 16px; }
+.stay-card {
+  position: relative;
+  display: flex;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+.stay-card > img {
+  width: 158px;
+  min-height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.stay-num {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.94);
+  color: var(--dark-gray);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.stay-card-body { padding: 16px 16px 16px 18px; flex: 1; }
+.stay-hotel-name { font-weight: 700; font-size: 0.92rem; color: var(--dark-gray); margin-bottom: 4px; line-height: 1.4; }
+.stay-meta { font-size: 0.78rem; color: var(--taupe); margin-bottom: 8px; }
+.stay-stars { color: var(--gold-dark); letter-spacing: 1px; }
+.stay-card-body p { font-size: 0.85rem; line-height: 1.6; color: var(--dark-gray); margin: 0 0 12px; }
+.btn-dark-sm {
+  display: inline-block;
+  padding: 9px 22px;
+  background: var(--ink);
+  color: var(--white);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+.btn-dark-sm:hover { background: #000; }
+@media (max-width: 860px) {
+  .stay-layout { grid-template-columns: 1fr; }
+  .stay-map iframe { height: 320px; }
+  .stay-card > img { width: 128px; }
 }
 
 .travel-dark-panel p {
