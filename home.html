@@ -600,7 +600,7 @@ function updateCountdown() {
         document.getElementById('additional-card').style.display = 'block';
         document.getElementById('additional-note').textContent =
           `You may add up to ${plusOneLimit} additional guest${plusOneLimit === 1 ? '' : 's'}. Please give each guest's full name.`;
-        document.getElementById('add-extra-btn').addEventListener('click', addExtraRow);
+        document.getElementById('add-extra-btn').addEventListener('click', () => addExtraRow());
       }
 
       restorePrevious();
