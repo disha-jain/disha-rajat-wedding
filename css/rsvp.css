@@ -60,6 +60,12 @@ body {
     }
     .checkbox-pill:last-child { border-bottom: none; }
 
+    /* Your Party card: compact list, no separators, tight left edge */
+    #member-list .checkbox-pill { border-bottom: none; padding: 6px 4px; gap: 0; }
+    #member-list .checkbox-icon { display: none; }
+    .party-family-code { font-size: 0.8rem; color: var(--taupe); margin: 0 0 8px 4px; }
+    .party-family-code strong { color: var(--dark-gray); letter-spacing: 1px; }
+
     /* native input stays accessible; the gold box below is its visual */
     .checkbox-pill input[type="checkbox"] {
       position: absolute;
