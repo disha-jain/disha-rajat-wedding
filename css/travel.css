@@ -331,7 +331,7 @@
 }
 
 /* ---------- Jaipur Travel detail block (India) ---------- */
-.jaipur-travel { max-width: 920px; margin: 44px auto 0; text-align: left; }
+.jaipur-travel, .chantilly-travel { max-width: 920px; margin: 44px auto 0; text-align: left; }
 .jaipur-script {
   font-family: var(--font-script);
   font-size: 3.2rem;
