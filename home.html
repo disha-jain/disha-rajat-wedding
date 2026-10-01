@@ -782,7 +782,7 @@ function updateCountdown() {
             family_code: family.family_code,
             family_name: family.family_name,
             guest_name: p.name,
-            guest_type: p.kind,
+            guest_type: p.kind === 'guest' ? 'plus-one' : p.kind,
             event_id: e.id,
             event_title: e.title,
             status: attending ? 'attending' : 'declining',
