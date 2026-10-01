@@ -20,7 +20,7 @@
 .travel-title {
   font-family: var(--font-serif);
   font-size: 1.6rem;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 5px;
   color: var(--dark-gray);
   text-align: center;
@@ -117,7 +117,7 @@
 .travel-dark-panel .panel-title {
   font-family: var(--font-serif);
   font-size: 1.6rem;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 5px;
   color: var(--gold-light);
   text-align: center;
@@ -137,7 +137,7 @@
 .stay-title {
   font-family: var(--font-serif);
   font-size: 1.6rem;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 5px;
   color: var(--dark-gray);
   margin: 0 0 10px;
@@ -299,9 +299,10 @@
 .info-card .fine { font-size: 0.8rem; color: var(--taupe); font-style: italic; }
 
 @media (max-width: 640px) {
-  .travel-script { font-size: 2.8rem; }
-  .travel-title { font-size: 1.9rem; }
   .venue-card, .travel-dark-panel { padding: 24px 18px; }
+}
+@media (max-width: 768px) {
+  .travel-script, .stay-script, .jaipur-script, .travel-dark-panel .panel-script { font-size: 2.6rem; }
 }
 
 /* ---------- Jaipur Travel detail block (India) ---------- */
@@ -318,7 +319,7 @@
 .jaipur-title {
   font-family: var(--font-serif);
   font-size: 1.6rem;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 5px;
   text-align: center;
   color: var(--dark-gray);
