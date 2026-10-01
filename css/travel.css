@@ -177,6 +177,7 @@
 .map-foot a { color: var(--gold-dark); font-weight: 600; }
 .map-attr { color: var(--taupe); }
 .stay-scroll-card {
+  position: relative;
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -194,6 +195,30 @@
 .stay-scroll-row::-webkit-scrollbar { height: 8px; }
 .stay-scroll-row::-webkit-scrollbar-track { background: var(--ivory); border-radius: 4px; }
 .stay-scroll-row::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+.scroll-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.96);
+  border: 1px solid var(--border-gold);
+  box-shadow: var(--shadow-soft);
+  color: var(--dark-gray);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 3px;
+  transition: opacity 0.2s ease;
+}
+.scroll-arrow.left { left: 10px; }
+.scroll-arrow.right { right: 10px; }
+.scroll-arrow.hidden { opacity: 0; pointer-events: none; }
 .stay-scroll-row .stay-card {
   flex: 0 0 360px;
   scroll-snap-align: start;
