@@ -156,46 +156,16 @@
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
+  aspect-ratio: 3 / 2;
+  background: var(--ivory);
 }
-.map-frame img { display: block; width: 100%; height: auto; }
-.map-pin {
+#hotel-map {
   position: absolute;
-  transform: translate(-50%, -100%);
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #fff;
-  color: var(--dark-gray);
-  border: 2px solid var(--gold);
-  font-size: 0.8rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
-.map-pin::after {
-  content: "";
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: var(--gold);
-  border-bottom: 0;
-}
-.map-pin.venue {
-  width: 28px;
-  height: 28px;
-  font-size: 0.85rem;
-  background: var(--ink);
-  color: var(--gold);
-  border-color: var(--ink);
-  transform: translate(-50%, -50%);
-}
-.map-pin.venue::after { display: none; }
-.map-pin.venue { z-index: 2; }
-.map-pin.nudge-1 { margin-left: -28px; margin-top: 24px; }
+#hotel-map img { max-width: none; }
 .map-foot {
   display: flex;
   justify-content: space-between;
@@ -206,7 +176,6 @@
 }
 .map-foot a { color: var(--gold-dark); font-weight: 600; }
 .map-attr { color: var(--taupe); }
-.map-attr a { color: var(--taupe); font-weight: 400; }
 .stay-scroll-card {
   background: var(--white);
   border: 1px solid var(--line);
@@ -281,8 +250,6 @@
 }
 .btn-dark-sm:hover { background: #000; }
 @media (max-width: 860px) {
-  .map-pin { width: 26px; height: 26px; font-size: 0.72rem; }
-  .map-pin.venue { width: 24px; height: 24px; font-size: 0.75rem; }
   .stay-scroll-card { padding: 14px 14px 10px; }
   .stay-scroll-row .stay-card { flex-basis: 82%; }
   .stay-scroll-row .stay-card > img { width: 120px; }
