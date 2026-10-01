@@ -370,7 +370,6 @@
       <img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach">
     </div>
 
-    <p class="family-greeting" id="family-greeting"></p>
     <div class="form-error" id="form-error"></div>
 
     <div id="rsvp-body">
@@ -511,12 +510,9 @@ function updateCountdown() {
       familyEvents = eventsForTags(tags);
       plusOneLimit = (family.members || []).reduce((n, m) => n + (parseInt(m.max_plus_ones) || 0), 0);
 
-      document.getElementById('family-greeting').innerHTML =
-        `RSVP for the <strong>${esc(family.family_name)}</strong>`;
-
       // members
       document.getElementById('member-list').innerHTML =
-        `<div class="party-family-code">Family code: <strong>${esc(family.family_code)}</strong></div>` +
+        `<div class="party-family-code">Party code: <strong>${esc(family.family_code)}</strong></div>` +
         family.members.map(m => `
           <label class="checkbox-pill" style="cursor:default;">
             <span class="checkbox-icon" style="visibility:hidden;"></span>
