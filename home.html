@@ -682,11 +682,35 @@ function updateCountdown() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-/* show/hide travel sections per guest tags */
+/* show/hide travel sections per guest tags; relabel for single-destination
+   guests and put India first (tabs + scroll order) when invited to both */
 function applyTagSections() {
   const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
-  document.getElementById('travel-us').style.display = tags.includes('us-guest') ? '' : 'none';
-  document.getElementById('travel-india').style.display = tags.includes('india-guest') ? '' : 'none';
+  const hasUs = tags.includes('us-guest');
+  const hasIndia = tags.includes('india-guest');
+  const usSec = document.getElementById('travel-us');
+  const indiaSec = document.getElementById('travel-india');
+  const usTab = document.getElementById('nav-travel-us');
+  const indiaTab = document.getElementById('nav-travel-india');
+
+  usSec.style.display = hasUs ? '' : 'none';
+  indiaSec.style.display = hasIndia ? '' : 'none';
+
+  // single-destination guests get a simpler label
+  if (hasUs && !hasIndia) {
+    usTab.textContent = 'Travel & Lodging';
+    usSec.querySelector('.travel-title').textContent = 'TRAVEL & LODGING';
+    usSec.querySelector('.travel-script').style.display = 'none';
+  }
+  if (hasIndia && !hasUs) {
+    indiaTab.textContent = 'Travel';
+  }
+
+  // guests invited to both see India travel first — in the tabs and in scroll order
+  if (hasUs && hasIndia) {
+    usSec.parentNode.insertBefore(indiaSec, usSec);
+    usTab.parentNode.insertBefore(indiaTab, usTab);
+  }
 }
 
 /* highlight the nav tab for the section in view */
