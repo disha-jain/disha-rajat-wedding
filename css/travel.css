@@ -168,7 +168,8 @@
   transform: translate(-50%, -50%);
 }
 .map-pin.venue::after { display: none; }
-.map-pin.nudge-1 { margin-left: -18px; margin-top: 14px; }
+.map-pin.venue { z-index: 2; }
+.map-pin.nudge-1 { margin-left: -28px; margin-top: 24px; }
 .map-foot {
   display: flex;
   justify-content: space-between;
