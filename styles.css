@@ -261,21 +261,36 @@ footer {
   letter-spacing: 2px;
   margin-top: 40px;
 }
-.admin-link {
+.footer-actions {
   position: absolute;
   right: 20px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+}
+.foot-btn {
+  font-family: inherit;
   font-size: 0.62rem;
   letter-spacing: 2px;
   color: var(--smoke);
   text-decoration: none;
+  background: none;
   border: 1px solid rgba(255,255,255,0.28);
   border-radius: 4px;
   padding: 5px 10px;
   opacity: 0.65;
+  cursor: pointer;
 }
-.admin-link:hover { opacity: 1; }
+.foot-btn:hover { opacity: 1; }
+@media (max-width: 640px) {
+  .footer-actions {
+    position: static;
+    transform: none;
+    justify-content: center;
+    margin-top: 12px;
+  }
+}
 
 /* ---------------- responsive ---------------- */
 @media (max-width: 768px) {
