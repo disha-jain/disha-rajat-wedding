@@ -39,10 +39,10 @@
     <a href="#home" data-section="home" class="active">Home</a>
     <a href="#our-story" data-section="our-story">Our Story</a>
     <a href="#events" data-section="events">Events</a>
-    <a href="#rsvp" data-section="rsvp">RSVP</a>
     <a href="#travel-us" data-section="travel-us" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
     <a href="#travel-india" data-section="travel-india" id="nav-travel-india" style="display:none;">India Travel</a>
     <a href="#qa" data-section="qa">Q&amp;A</a>
+    <a href="#rsvp" data-section="rsvp">RSVP</a>
     <a href="admin.html">Host Admin</a>
   </nav>
 
@@ -165,60 +165,6 @@
   </div>
   </section>
 
-  <section id="rsvp" class="page-section">
-<div class="rsvp-wrap">
-    <div class="cursive-header" style="text-align:center;">Can't wait to party?</div>
-    <div class="sub-header" style="text-align:center;">Tell us who's coming<br>to each event</div>
-
-    <div class="rsvp-photo-frame">
-      <img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach">
-    </div>
-
-    <p class="family-greeting" id="family-greeting"></p>
-    <div class="form-error" id="form-error"></div>
-
-    <div id="rsvp-body">
-      <div class="section-card" id="party-card">
-        <h3>Your party</h3>
-        <p class="limit-note">Everyone below can be RSVP'd for each event. Tick who's attending.</p>
-        <div id="member-list"></div>
-      </div>
-
-      <div class="section-card" id="additional-card" style="display:none;">
-        <h3>Additional guests</h3>
-        <p class="limit-note" id="additional-note"></p>
-        <div id="additional-list"></div>
-        <button class="add-extra-btn" id="add-extra-btn" type="button">+ Add a guest</button>
-      </div>
-
-      <div id="events-list"></div>
-
-      <div class="section-card">
-        <h3>Dietary needs</h3>
-        <p class="limit-note">Anything we should know (vegetarian, allergies…)? List the person it applies to.</p>
-        <div class="form-group" style="margin-bottom:0;">
-          <textarea id="dietary-notes" rows="3" placeholder="e.g. Priya — vegetarian"></textarea>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <h3>Wishes for the couple</h3>
-        <div class="form-group" style="margin-bottom:0;">
-          <textarea id="wishes" rows="2" placeholder="Leave your wishes…"></textarea>
-        </div>
-      </div>
-
-      <div class="submit-wrap">
-        <button class="submit-btn" type="button" id="submit-rsvp" onclick="handleSubmit()">Send RSVP</button>
-      </div>
-    </div>
-
-    <div id="rsvp-success">
-      <div class="big">Thank you!</div>
-      <p style="color:var(--taupe);">Your RSVP has been saved.<br>We can't wait to celebrate with you!</p>
-    </div>
-  </div>
-  </section>
 
 
   <section id="travel-us" class="page-section" style="display:none;">
@@ -413,6 +359,61 @@
         <p>Absolutely! We’d love for you to snap photos and share them in our Google Photos album.</p>
       </div>
     </div>
+  </section>
+
+  <section id="rsvp" class="page-section">
+<div class="rsvp-wrap">
+    <div class="cursive-header" style="text-align:center;">Can't wait to party?</div>
+    <div class="sub-header" style="text-align:center;">Tell us who's coming<br>to each event</div>
+
+    <div class="rsvp-photo-frame">
+      <img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach">
+    </div>
+
+    <p class="family-greeting" id="family-greeting"></p>
+    <div class="form-error" id="form-error"></div>
+
+    <div id="rsvp-body">
+      <div class="section-card" id="party-card">
+        <h3>Your party</h3>
+        <p class="limit-note">Everyone below can be RSVP'd for each event. Tick who's attending.</p>
+        <div id="member-list"></div>
+      </div>
+
+      <div class="section-card" id="additional-card" style="display:none;">
+        <h3>Additional guests</h3>
+        <p class="limit-note" id="additional-note"></p>
+        <div id="additional-list"></div>
+        <button class="add-extra-btn" id="add-extra-btn" type="button">+ Add a guest</button>
+      </div>
+
+      <div id="events-list"></div>
+
+      <div class="section-card">
+        <h3>Dietary needs</h3>
+        <p class="limit-note">Anything we should know (vegetarian, allergies…)? List the person it applies to.</p>
+        <div class="form-group" style="margin-bottom:0;">
+          <textarea id="dietary-notes" rows="3" placeholder="e.g. Priya — vegetarian"></textarea>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>Wishes for the couple</h3>
+        <div class="form-group" style="margin-bottom:0;">
+          <textarea id="wishes" rows="2" placeholder="Leave your wishes…"></textarea>
+        </div>
+      </div>
+
+      <div class="submit-wrap">
+        <button class="submit-btn" type="button" id="submit-rsvp" onclick="handleSubmit()">Send RSVP</button>
+      </div>
+    </div>
+
+    <div id="rsvp-success">
+      <div class="big">Thank you!</div>
+      <p style="color:var(--taupe);">Your RSVP has been saved.<br>We can't wait to celebrate with you!</p>
+    </div>
+  </div>
   </section>
 
   <footer>
