@@ -203,3 +203,90 @@
 @media (max-width: 640px) {
   .jt-row { grid-template-columns: 1fr; gap: 14px; padding: 24px 0; }
 }
+
+/* ---------- India travel: tabbed transport ---------- */
+.jt-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0 0;
+  flex-wrap: wrap;
+}
+.jt-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  color: var(--dark-gray);
+  font-family: var(--font-serif);
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.jt-tab svg { width: 20px; height: 20px; color: var(--gold-dark); transition: color 0.2s ease; }
+.jt-tab:hover { border-color: var(--gold-primary); }
+.jt-tab.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--white);
+}
+.jt-tab.active svg { color: var(--gold-light); }
+
+.jt-panel {
+  display: none;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 30px 8px 6px;
+  text-align: left;
+}
+.jt-panel.active { display: block; }
+.jt-panel p {
+  font-size: 0.93rem;
+  line-height: 1.75;
+  color: var(--dark-gray);
+  margin: 0 0 14px;
+}
+.jt-panel p:last-child { margin-bottom: 0; }
+.jt-panel h5 {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  margin: 24px 0 10px;
+}
+.jt-panel h5:first-of-type { margin-top: 18px; }
+
+/* quick tips below the tabs */
+.jt-tips {
+  max-width: 720px;
+  margin: 36px auto 0;
+  padding: 30px 8px 0;
+  border-top: 1px solid var(--line);
+  text-align: left;
+}
+.jt-tips h4 {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  letter-spacing: 1.5px;
+  color: var(--dark-gray);
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+.jt-tips p {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--dark-gray);
+  margin: 0 0 14px;
+}
+.jt-tips p:last-child { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .jt-tab { padding: 10px 16px; font-size: 0.7rem; }
+  .jt-tab svg { width: 17px; height: 17px; }
+}
