@@ -534,14 +534,14 @@
 
     function exportRSVPDataCSV() {
       const rsvps = getStoredRSVPs();
-      let csvContent = "data:text/csv;charset=utf-8,family_code,family_name,guest_name,event_id,status,dietary_notes\n";
+      let csvContent = "data:text/csv;charset=utf-8,family_code,family_name,guest_name,guest_type,event_id,status,dietary_notes\n";
 
       if (rsvps.length === 0) {
         // Default sample row if empty
         csvContent += "FAM01,Khanna Family,Rajat Khanna,e7,attending,None\n";
       } else {
         rsvps.forEach(r => {
-          csvContent += `"${r.family_code}","${r.family_name}","${r.guest_name}","${r.event_id}","${r.status}","${r.dietary_notes || ''}"\n`;
+          csvContent += `"${r.family_code}","${r.family_name}","${r.guest_name}","${r.guest_type||''}","${r.event_id}","${r.status}","${r.dietary_notes || ''}"\n`;
         });
       }
 
