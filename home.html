@@ -10,10 +10,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css?v=20260930e">
-  <link rel="stylesheet" href="css/home.css?v=20260930i">
+  <link rel="stylesheet" href="css/home.css?v=20260930j">
   <link rel="stylesheet" href="css/schedule.css?v=20260930g">
   <link rel="stylesheet" href="css/rsvp.css?v=20260930i">
-  <link rel="stylesheet" href="css/travel.css?v=20260930n">
+  <link rel="stylesheet" href="css/travel.css?v=20260930o">
 
   <!-- Firebase SDKs (RSVP writes) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -105,14 +105,17 @@
       <div class="moments-script">Captured</div>
       <h2 class="moments-title">MOMENTS</h2>
       <p class="moments-sub">A few of our favorites, from marble halls to coastlines.</p>
-      <div class="moments-feature">
-        <img src="images/couple-marble-hall.jpg" alt="Disha and Rajat in a marble hall">
-      </div>
-      <div class="moments-grid">
-        <div class="moments-item"><img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach" loading="lazy"></div>
-        <div class="moments-item"><img src="images/couple-lake-lift.jpg" alt="Rajat lifting Disha by the lake" loading="lazy"></div>
-        <div class="moments-item"><img src="images/couple-holidays.jpg" alt="Disha and Rajat in front of a holiday tree" loading="lazy"></div>
-        <div class="moments-item"><img src="images/couple-balcony.jpg" alt="Disha and Rajat on a marble balcony" loading="lazy"></div>
+      <div class="carousel" id="moments-carousel">
+        <div class="carousel-stage">
+          <div class="carousel-slide"><img src="images/couple-marble-hall.jpg" alt="Disha and Rajat in a marble hall"></div>
+          <div class="carousel-slide"><img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach" loading="lazy"></div>
+          <div class="carousel-slide"><img src="images/couple-lake-lift.jpg" alt="Rajat lifting Disha by the lake" loading="lazy"></div>
+          <div class="carousel-slide"><img src="images/couple-holidays.jpg" alt="Disha and Rajat in front of a holiday tree" loading="lazy"></div>
+          <div class="carousel-slide"><img src="images/couple-balcony.jpg" alt="Disha and Rajat on a marble balcony" loading="lazy"></div>
+        </div>
+        <button class="carousel-arrow left" type="button" aria-label="Previous photo">&#8249;</button>
+        <button class="carousel-arrow right" type="button" aria-label="Next photo">&#8250;</button>
+        <div class="carousel-dots" role="tablist" aria-label="Choose photo"></div>
       </div>
     </div>
   </section>
@@ -212,7 +215,8 @@
           </div>
         </div>
       <div class="stay-scroll-card">
-        <div class="stay-scroll-row">
+        <button class="scroll-arrow left" id="stay-prev" type="button" aria-label="Show previous hotels">&#8249;</button>
+        <div class="stay-scroll-row" id="stay-scroll-row">
         <div class="stay-card">
           <div class="stay-num">1</div>
           <img src="images/hotel-home2-chantilly.jpg" alt="Home2 Suites by Hilton Chantilly Dulles Airport" loading="lazy">
@@ -254,6 +258,7 @@
           </div>
         </div>
         </div>
+        <button class="scroll-arrow right" id="stay-next" type="button" aria-label="Show more hotels">&#8250;</button>
       </div>
     </div>
 </section>
@@ -781,6 +786,8 @@ async function initPage() {
   initRsvp();
   initScrollSpy();
   initTravelTabs();
+  initCarousel();
+  initStayScroll();
 }
 
 /* ---------- Where To Stay: Google Map ---------- */
@@ -861,6 +868,84 @@ window.initHotelMap = function () {
   hotelMapsApiReady = true;
   maybeInitHotelMap();
 };
+
+/* ---------- Where To Stay: scroll-row arrow buttons ---------- */
+function initStayScroll() {
+  const row = document.getElementById('stay-scroll-row');
+  const prev = document.getElementById('stay-prev');
+  const next = document.getElementById('stay-next');
+  if (!row || !prev || !next) return;
+  const step = () => Math.min(400, row.clientWidth * 0.8);
+  prev.addEventListener('click', () => row.scrollBy({ left: -step(), behavior: 'smooth' }));
+  next.addEventListener('click', () => row.scrollBy({ left: step(), behavior: 'smooth' }));
+  function update() {
+    prev.classList.toggle('hidden', row.scrollLeft <= 4);
+    next.classList.toggle('hidden', row.scrollLeft + row.clientWidth >= row.scrollWidth - 4);
+  }
+  row.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+}
+
+/* ---------- Captured Moments: rotating coverflow carousel ---------- */
+function initCarousel() {
+  const root = document.getElementById('moments-carousel');
+  if (!root) return;
+  const slides = [...root.querySelectorAll('.carousel-slide')];
+  const dotsWrap = root.querySelector('.carousel-dots');
+  const n = slides.length;
+  let cur = 0, timer = null;
+
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-label', 'Show photo ' + (i + 1));
+    b.addEventListener('click', () => { go(i); restart(); });
+    dotsWrap.appendChild(b);
+  });
+  const dots = [...dotsWrap.children];
+
+  function layout() {
+    const w = slides[0].offsetWidth || 340;
+    const step = w * 0.7;
+    const maxOff = window.innerWidth < 640 ? 1 : 2;
+    slides.forEach((s, i) => {
+      let off = (((i - cur) % n) + n) % n;
+      if (off > n / 2) off -= n;
+      const abs = Math.abs(off);
+      dots[i].classList.toggle('on', i === cur);
+      if (abs > maxOff) {
+        s.style.opacity = '0';
+        s.style.zIndex = '0';
+        s.style.pointerEvents = 'none';
+        s.style.transform = 'translateX(-50%) translateX(' + (off * step) + 'px) scale(.5)';
+        return;
+      }
+      const scale = [1, 0.8, 0.62][abs];
+      const rotY = off === 0 ? 0 : (off > 0 ? -12 : 12);
+      s.style.transform = 'translateX(-50%) translateX(' + (off * step) + 'px) scale(' + scale + ') rotateY(' + rotY + 'deg)';
+      s.style.opacity = String([1, 0.92, 0.7][abs]);
+      s.style.zIndex = String(10 - abs);
+      s.style.pointerEvents = 'auto';
+      s.style.cursor = off === 0 ? 'default' : 'pointer';
+    });
+  }
+  function go(i) { cur = (((i % n) + n) % n); layout(); }
+  function restart() { stop(); timer = setInterval(() => go(cur + 1), 6000); }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+  slides.forEach((s, i) => s.addEventListener('click', () => {
+    if (i !== cur) { go(i); restart(); }
+  }));
+  root.querySelector('.carousel-arrow.left').addEventListener('click', () => { go(cur - 1); restart(); });
+  root.querySelector('.carousel-arrow.right').addEventListener('click', () => { go(cur + 1); restart(); });
+  root.addEventListener('mouseenter', stop);
+  root.addEventListener('mouseleave', restart);
+  window.addEventListener('resize', layout);
+  layout();
+  restart();
+}
 
 /* India travel: Flying / Driving / Train tabs */
 function initTravelTabs() {
