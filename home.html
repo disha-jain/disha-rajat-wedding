@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="css/home.css?v=20260930g">
   <link rel="stylesheet" href="css/schedule.css?v=20260930e">
   <link rel="stylesheet" href="css/rsvp.css?v=20260930f">
-  <link rel="stylesheet" href="css/travel.css?v=20260930h">
+  <link rel="stylesheet" href="css/travel.css?v=20260930i">
 
   <!-- Firebase SDKs (RSVP writes) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -278,7 +278,18 @@
       <p class="stay-sub">To make planning easier, we&rsquo;re sharing a few hotels near The Bellevue.</p>
       <div class="stay-layout">
         <div class="stay-map">
-          <iframe title="Map of hotels near Chantilly, Virginia" src="https://www.google.com/maps?q=hotels+near+Chantilly,+Virginia&amp;z=12&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <div class="map-frame">
+            <img src="images/map-hotels-chantilly.png" alt="Map of the four recommended hotels near The Bellevue in Chantilly, Virginia">
+            <span class="map-pin venue" style="left:19.20%;top:34.50%" title="The Bellevue &mdash; our venue">&#9733;</span>
+            <span class="map-pin nudge-1" style="left:17.58%;top:36.85%" title="1 &middot; Home2 Suites by Hilton Chantilly Dulles Airport">1</span>
+            <span class="map-pin" style="left:84.97%;top:59.13%" title="2 &middot; Residence Inn by Marriott Chantilly Dulles South">2</span>
+            <span class="map-pin" style="left:73.71%;top:55.59%" title="3 &middot; Hampton Inn Washington-Dulles International Airport South">3</span>
+            <span class="map-pin" style="left:71.94%;top:82.34%" title="4 &middot; Westfields Marriott Washington Dulles">4</span>
+          </div>
+          <div class="map-foot">
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=hotels+near+The+Bellevue+Chantilly+VA" target="_blank" rel="noopener">Open in Google Maps</a>
+            <span class="map-attr">&#9733; = our venue &middot; &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</span>
+          </div>
         </div>
         <div class="stay-cards">
         <div class="stay-card">
