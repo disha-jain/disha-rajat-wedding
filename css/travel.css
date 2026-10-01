@@ -9,17 +9,22 @@
 
 .travel-script {
   font-family: var(--font-script);
-  font-size: 3.4rem;
+  font-size: 3.2rem;
+  font-weight: 400;
   color: var(--gold-dark);
   line-height: 1;
+  text-align: center;
+  margin: 0 0 -6px;
 }
 
 .travel-title {
   font-family: var(--font-serif);
-  font-size: 2.4rem;
-  letter-spacing: 2px;
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: 5px;
   color: var(--dark-gray);
-  margin: -6px 0 14px;
+  text-align: center;
+  margin: 0 0 10px;
 }
 
 .travel-lede {
@@ -101,18 +106,39 @@
 }
 
 .travel-dark-panel .panel-script {
+  font-family: var(--font-script);
+  font-size: 3.2rem;
+  font-weight: 400;
+  color: var(--gold-primary);
+  line-height: 1;
+  text-align: center;
+  margin: 0 0 -6px;
+}
+.travel-dark-panel .panel-title {
   font-family: var(--font-serif);
-  font-size: 1.3rem;
-  letter-spacing: 2px;
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: 5px;
   color: var(--gold-light);
-  margin-bottom: 10px;
+  text-align: center;
+  margin: 0 0 10px;
 }
 
 .stay-section { margin: 10px 0 22px; text-align: left; }
+.stay-script {
+  font-family: var(--font-script);
+  font-size: 3.2rem;
+  font-weight: 400;
+  color: var(--gold-dark);
+  line-height: 1;
+  text-align: center;
+  margin: 0 0 -6px;
+}
 .stay-title {
   font-family: var(--font-serif);
   font-size: 1.6rem;
-  letter-spacing: 4px;
+  font-weight: 400;
+  letter-spacing: 5px;
   color: var(--dark-gray);
   margin: 0 0 10px;
   text-align: center;
@@ -313,13 +339,23 @@
 
 /* ---------- Jaipur Travel detail block (India) ---------- */
 .jaipur-travel { max-width: 920px; margin: 44px auto 0; text-align: left; }
+.jaipur-script {
+  font-family: var(--font-script);
+  font-size: 3.2rem;
+  font-weight: 400;
+  color: var(--gold-dark);
+  line-height: 1;
+  text-align: center;
+  margin: 0 0 -6px;
+}
 .jaipur-title {
   font-family: var(--font-serif);
-  font-size: 1.9rem;
+  font-size: 1.6rem;
+  font-weight: 400;
   letter-spacing: 5px;
   text-align: center;
   color: var(--dark-gray);
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 }
 .jt-row {
   display: grid;
