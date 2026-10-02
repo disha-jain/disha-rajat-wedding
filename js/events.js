@@ -107,7 +107,8 @@ const WEDDING_EVENTS = [
     time: '11:30 AM – 2:30 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
-    dressCode: '',              // EDIT ME
+    dressCode: 'Shades of yellow',
+    palette: ['#F0B402', '#FDC52E', '#FED360', '#FEE193', '#FEEFC6'],
     notes: '',
     tags: ['india-guest'],
     icon: '🌸'
