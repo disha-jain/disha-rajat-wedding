@@ -643,7 +643,7 @@ function updateCountdown() {
       if (!family) { showError("We couldn't find your invitation. Please sign in again."); return; }
 
       const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
-      familyEvents = eventsForTags(tags);
+      familyEvents = eventsForTags(tags).filter(e => e.rsvp !== false);
       plusOneLimit = (family.members || []).reduce((n, m) => n + (parseInt(m.max_plus_ones) || 0), 0);
 
       // members
