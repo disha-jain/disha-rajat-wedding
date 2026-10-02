@@ -100,29 +100,16 @@ const WEDDING_EVENTS = [
   },
   {
     id: 'phoolon-haldi',
-    title: 'Phoolon Ki Haldi',
+    title: 'Phoolon Ki Haldi & Lunch',
     date: '2027-03-14',
     dateLabel: 'Day 2 — March 14, 2027',
-    time: '11:30 AM – 12:30 PM',
+    time: '11:30 AM – 2:30 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
     notes: '',
     tags: ['india-guest'],
     icon: '🌸'
-  },
-  {
-    id: 'wedding-lunch',
-    title: 'Lunch',
-    date: '2027-03-14',
-    dateLabel: 'Day 2 — March 14, 2027',
-    time: '12:30 PM – 2:30 PM',
-    venue: 'Chomu Palace',
-    venueDetail: '',            // EDIT ME
-    dressCode: '',              // EDIT ME
-    notes: '',
-    tags: ['india-guest'],
-    icon: '🍽️'
   },
   {
     id: 'sehra-bandi',
