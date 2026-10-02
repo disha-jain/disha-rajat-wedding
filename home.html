@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="styles.css?v=20261001a">
   <link rel="stylesheet" href="css/home.css?v=20261002b">
-  <link rel="stylesheet" href="css/schedule.css?v=20261002b">
+  <link rel="stylesheet" href="css/schedule.css?v=20261002c">
   <link rel="stylesheet" href="css/rsvp.css?v=20260930i">
   <link rel="stylesheet" href="css/travel.css?v=20261002b">
 
@@ -22,7 +22,7 @@
 </head>
 <body>
   <script src="js/guest-auth.js"></script>
-  <script src="js/events.js?v=20261002a"></script>
+  <script src="js/events.js?v=20261002b"></script>
   <script>
     if (!window.GuestAuth.requireUnlock()) {
       // redirecting to index.html
@@ -598,6 +598,8 @@ function updateCountdown() {
                     ${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}${renderPalette(e)}` : ''}
                     ${e.notes ? `<br>${esc(e.notes)}` : ''}
                   </div>
+                  ${e.parts ? `<div class="timeline-parts">${e.parts.map(p => `
+                    <div class="timeline-part"><span class="part-icon">${p.icon || '✦'}</span><span class="part-time">${esc(p.time)}</span><span class="part-title">${esc(p.title)}</span></div>`).join('')}</div>` : ''}
                 </div>
               </div>`).join('')}
           </div>
