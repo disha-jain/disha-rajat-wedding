@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css?v=20261001a">
-  <link rel="stylesheet" href="css/home.css?v=20261002a">
+  <link rel="stylesheet" href="css/home.css?v=20261002b">
   <link rel="stylesheet" href="css/schedule.css?v=20260930g">
   <link rel="stylesheet" href="css/rsvp.css?v=20260930i">
   <link rel="stylesheet" href="css/travel.css?v=20260930p">
@@ -422,49 +422,38 @@
         <div class="fund-card">
           <h3>Honeymoon Fund</h3>
           <p>Help us make our first adventure as newlyweds unforgettable.</p>
-          <button type="button" class="registry-btn fund-toggle" aria-expanded="false">Contribute</button>
-          <div class="fund-payments" hidden>
-            <div class="pay-option">
-              <img src="images/qr-venmo.png" alt="Venmo QR code" loading="lazy">
-              <div class="pay-name">Venmo</div>
-              <div class="pay-handle">@dishajain98</div>
-            </div>
-            <div class="pay-option">
-              <img src="images/qr-zelle.png" alt="Zelle QR code" loading="lazy">
-              <div class="pay-name">Zelle</div>
-              <div class="pay-handle">Rajat Khanna</div>
-              <div class="pay-note">Scan in your banking app</div>
-            </div>
-            <div class="pay-option">
-              <img src="images/qr-upi.png" alt="UPI QR code" loading="lazy">
-              <div class="pay-name">UPI</div>
-              <div class="pay-handle">dishajain2016@icici</div>
-              <div class="pay-note">Scan with any UPI app</div>
-            </div>
-          </div>
+          <button type="button" class="registry-btn fund-toggle" data-fund="Honeymoon Fund">Contribute</button>
         </div>
         <div class="fund-card">
           <h3>House Down Payment Fund</h3>
           <p>Help us put down roots in our first home together.</p>
-          <button type="button" class="registry-btn fund-toggle" aria-expanded="false">Contribute</button>
-          <div class="fund-payments" hidden>
-            <div class="pay-option">
-              <img src="images/qr-venmo.png" alt="Venmo QR code" loading="lazy">
-              <div class="pay-name">Venmo</div>
-              <div class="pay-handle">@dishajain98</div>
-            </div>
-            <div class="pay-option">
-              <img src="images/qr-zelle.png" alt="Zelle QR code" loading="lazy">
-              <div class="pay-name">Zelle</div>
-              <div class="pay-handle">Rajat Khanna</div>
-              <div class="pay-note">Scan in your banking app</div>
-            </div>
-            <div class="pay-option">
-              <img src="images/qr-upi.png" alt="UPI QR code" loading="lazy">
-              <div class="pay-name">UPI</div>
-              <div class="pay-handle">dishajain2016@icici</div>
-              <div class="pay-note">Scan with any UPI app</div>
-            </div>
+          <button type="button" class="registry-btn fund-toggle" data-fund="House Down Payment Fund">Contribute</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fund-modal-backdrop" id="fund-modal-backdrop" hidden>
+      <div class="fund-modal" role="dialog" aria-modal="true" aria-labelledby="fund-modal-title">
+        <button type="button" class="fund-modal-close" id="fund-modal-close" aria-label="Close">&times;</button>
+        <h3 id="fund-modal-title">Honeymoon Fund</h3>
+        <p class="fund-modal-sub">Choose a payment method to contribute:</p>
+        <div class="fund-payments-modal">
+          <div class="pay-option">
+            <img src="images/qr-venmo.png" alt="Venmo QR code" loading="lazy">
+            <div class="pay-name">Venmo</div>
+            <div class="pay-handle">@dishajain98</div>
+          </div>
+          <div class="pay-option">
+            <img src="images/qr-zelle.png" alt="Zelle QR code" loading="lazy">
+            <div class="pay-name">Zelle</div>
+            <div class="pay-handle">Rajat Khanna</div>
+            <div class="pay-note">Scan in your banking app</div>
+          </div>
+          <div class="pay-option">
+            <img src="images/qr-upi.png" alt="UPI QR code" loading="lazy">
+            <div class="pay-name">UPI</div>
+            <div class="pay-handle">dishajain2016@icici</div>
+            <div class="pay-note">Scan with any UPI app</div>
           </div>
         </div>
       </div>
@@ -1035,20 +1024,26 @@ function initStayScroll() {
   update();
 }
 
-/* ---------- registry fund toggles ---------- */
+/* ---------- registry fund modal ---------- */
 function initRegistry() {
+  const backdrop = document.getElementById('fund-modal-backdrop');
+  const closeBtn = document.getElementById('fund-modal-close');
+  const titleEl = document.getElementById('fund-modal-title');
+  if (!backdrop || backdrop.dataset.wired) return;
+  backdrop.dataset.wired = '1';
+  const close = () => { backdrop.hidden = true; document.body.style.overflow = ''; };
+  const open = (fundName) => {
+    if (titleEl && fundName) titleEl.textContent = fundName;
+    backdrop.hidden = false;
+    document.body.style.overflow = 'hidden';
+    if (closeBtn) closeBtn.focus();
+  };
   document.querySelectorAll('.fund-toggle').forEach(btn => {
-    if (btn.dataset.wired) return;
-    btn.dataset.wired = '1';
-    btn.addEventListener('click', () => {
-      const panel = btn.parentElement.querySelector('.fund-payments');
-      if (!panel) return;
-      const open = panel.hidden;
-      panel.hidden = !open;
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.textContent = open ? 'Hide' : 'Contribute';
-    });
+    btn.addEventListener('click', () => open(btn.dataset.fund));
   });
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !backdrop.hidden) close(); });
 }
 
 /* ---------- nav hamburger menu ---------- */
