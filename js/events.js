@@ -146,56 +146,23 @@ const WEDDING_EVENTS = [
     icon: '🥁'
   },
   {
-    id: 'varmala',
-    title: 'Varmala',
+    id: 'shaadi',
+    title: 'Shaadi',
     date: '2027-03-14',
     dateLabel: 'Day 2 — March 14, 2027',
-    time: '7:00 PM',
+    time: '7:00 PM – 11:00 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
-    notes: '',
+    notes: '',                  // EDIT ME — anything guests should know
     tags: ['india-guest'],
-    icon: '💐'
-  },
-  {
-    id: 'wedding-reception',
-    title: 'Reception',
-    date: '2027-03-14',
-    dateLabel: 'Day 2 — March 14, 2027',
-    time: '7:30 PM – 9:30 PM',
-    venue: 'Chomu Palace',
-    venueDetail: '',            // EDIT ME
-    dressCode: '',              // EDIT ME
-    notes: '',
-    tags: ['india-guest'],
-    icon: '🥂'
-  },
-  {
-    id: 'pheras',
-    title: 'Pheras',
-    date: '2027-03-14',
-    dateLabel: 'Day 2 — March 14, 2027',
-    time: '9:45 PM – 10:40 PM',
-    venue: 'Chomu Palace',
-    venueDetail: '',            // EDIT ME
-    dressCode: '',              // EDIT ME
-    notes: '',
-    tags: ['india-guest'],
-    icon: '🔥'
-  },
-  {
-    id: 'bidai',
-    title: 'Vidai',
-    date: '2027-03-14',
-    dateLabel: 'Day 2 — March 14, 2027',
-    time: '11:00 PM',
-    venue: 'Chomu Palace',
-    venueDetail: '',            // EDIT ME
-    dressCode: '',              // EDIT ME
-    notes: '',
-    tags: ['india-guest'],
-    icon: '👋'
+    icon: '💒',
+    parts: [                    // sub-events shown on the schedule; RSVP stays a single row
+      { time: '7:00 PM', title: 'Varmala', icon: '💐' },
+      { time: '7:30 PM – 9:30 PM', title: 'Reception', icon: '🥂' },
+      { time: '9:45 PM – 10:40 PM', title: 'Pheras', icon: '🔥' },
+      { time: '11:00 PM', title: 'Vidai', icon: '👋' }
+    ]
   },
 
   // ---------------- March 27 — Virginia ----------------
