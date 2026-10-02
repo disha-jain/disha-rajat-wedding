@@ -269,6 +269,7 @@ html { scroll-behavior: smooth; }
 #events { background: var(--ivory); border-top: 1px solid var(--line); }
 #rsvp { background: var(--white); border-top: 1px solid var(--line); }
 #travel-us { background: var(--ivory); border-top: 1px solid var(--line); }
+#qa { background: #F5EDD8; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 #travel-india { background: var(--white); border-top: 1px solid var(--line); }
 
 #events .schedule-wrap, #travel-us .travel-wrap { padding-bottom: 60px; }
