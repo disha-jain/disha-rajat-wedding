@@ -551,15 +551,15 @@ function initSmartFooter() {
 }
 
 /* countdown (home hero): the target is the guest's next celebration.
-   Wedding guests count down to the Shaadi; once it has passed, guests who are
+   Wedding guests count down to the Pheras; once it has passed, guests who are
    also invited to the reception count down to the Virginia Reception instead.
    With nothing left to count to, the clock holds at 00. */
-const SHAADI_START = new Date('2027-03-14T19:00:00+05:30').getTime();    // 7:00 PM IST, Chomu Palace
+const PHERAS_START = new Date('2027-03-14T21:45:00+05:30').getTime();    // 9:45 PM IST, Chomu Palace
 const RECEPTION_START = new Date('2027-03-27T18:00:00-04:00').getTime(); // 6:00 PM EDT, The Bellevue
 function countdownTarget() {
   const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
   const now = Date.now();
-  if (tags.includes('india-guest') && now < SHAADI_START) return SHAADI_START;
+  if (tags.includes('india-guest') && now < PHERAS_START) return PHERAS_START;
   if (tags.includes('us-guest') && now < RECEPTION_START) return RECEPTION_START;
   return null;
 }
