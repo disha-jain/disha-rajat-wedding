@@ -189,7 +189,7 @@ const WEDDING_EVENTS = [
     time: '6:00 PM – 12:00 AM', // EDIT ME
     venue: 'The Bellevue',
     venueDetail: 'Chantilly, Virginia',  // EDIT ME
-    dressCode: '',              // EDIT ME — e.g. 'Black tie optional'
+    dressCode: 'Sparkling Indian Formal or Western Black-Tie',
     notes: '',
     tags: ['us-guest'],
     icon: '🥂'
