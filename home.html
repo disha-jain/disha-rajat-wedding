@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css?v=20260930h">
+  <link rel="stylesheet" href="styles.css?v=20261001a">
   <link rel="stylesheet" href="css/home.css?v=20260930j">
   <link rel="stylesheet" href="css/schedule.css?v=20260930g">
   <link rel="stylesheet" href="css/rsvp.css?v=20260930i">
@@ -43,6 +43,15 @@
     <a href="#travel-india" data-section="travel-india" id="nav-travel-india" style="display:none;">India Travel</a>
     <a href="#qa" data-section="qa">Q&amp;A</a>
     <a href="#rsvp" data-section="rsvp">RSVP</a>
+    <div class="nav-menu-wrap" id="nav-menu-wrap" hidden>
+      <button type="button" class="nav-menu-btn" id="nav-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-menu" id="nav-menu" role="menu">
+        <a href="admin.html" class="nav-menu-item" role="menuitem">Admin</a>
+        <button type="button" class="nav-menu-item" id="nav-logout" role="menuitem">Log Out</button>
+      </div>
+    </div>
   </nav>
 
   <section id="home" class="page-section">
@@ -453,10 +462,6 @@
 
   <footer>
     <span>DISHA & RAJAT • #RISHTA • 2027</span>
-    <span class="footer-actions">
-      <button type="button" class="foot-btn" id="foot-logout">LOG OUT</button>
-      <a href="admin.html" class="foot-btn">ADMIN</a>
-    </span>
   </footer>
 
 <script>
@@ -851,6 +856,7 @@ function initScrollSpy() {
 
 async function initPage() {
   window.GuestAuth.renderNav();
+  initNavMenu();
   initSmartFooter();
   applyTagSections();
   try { if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
@@ -959,6 +965,25 @@ function initStayScroll() {
   row.addEventListener('scroll', update, { passive: true });
   window.addEventListener('resize', update);
   update();
+}
+
+/* ---------- nav hamburger menu ---------- */
+function initNavMenu() {
+  const btn = document.getElementById('nav-menu-btn');
+  const menu = document.getElementById('nav-menu');
+  if (!btn || !menu || btn.dataset.wired) return;
+  btn.dataset.wired = '1';
+  const close = () => { menu.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', (e) => {
+    if (!menu.classList.contains('open')) return;
+    if (!e.target.closest('#nav-menu-wrap')) close();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
 
 /* ---------- Captured Moments: rotating coverflow carousel ---------- */
