@@ -59,6 +59,7 @@ const WEDDING_EVENTS = [
     dressCode: '',              // EDIT ME
     notes: '',
     tags: ['india-guest'],
+    rsvp: false,                // shown on the schedule, hidden from the RSVP form
     icon: '🫖'
   },
   {
@@ -117,6 +118,20 @@ const WEDDING_EVENTS = [
     notes: '',
     tags: ['india-guest'],
     icon: '🌸'
+  },
+  {
+    id: 'high-tea-2',
+    title: 'High Tea',
+    date: '2027-03-14',
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '4:00 PM – 6:00 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    rsvp: false,                // shown on the schedule, hidden from the RSVP form
+    icon: '🫖'
   },
   {
     id: 'sehra-bandi',
