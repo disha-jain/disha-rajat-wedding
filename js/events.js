@@ -7,6 +7,8 @@
 
    Tags control visibility: an event is shown to a guest if ANY of
    the event's tags matches ANY of the guest's (or family's) tags.
+   Set `rsvp: false` on an event to keep it on the schedule while
+   hiding it from the RSVP form.
    Tag vocabulary (keep it consistent, no apostrophes):
      india-guest  – invited to the India celebrations
      us-guest     – invited to the Virginia reception
@@ -43,6 +45,7 @@ const WEDDING_EVENTS = [
     dressCode: '',              // EDIT ME
     notes: '',
     tags: ['bride-side'],
+    rsvp: false,                // shown on the schedule, hidden from the RSVP form
     icon: '🪔'
   },
   {
@@ -84,6 +87,7 @@ const WEDDING_EVENTS = [
     dressCode: '',              // EDIT ME
     notes: '',
     tags: ['bride-side'],
+    rsvp: false,                // shown on the schedule, hidden from the RSVP form
     icon: '🙏'
   },
   {
@@ -97,6 +101,7 @@ const WEDDING_EVENTS = [
     dressCode: '',              // EDIT ME
     notes: 'Parallel activity',
     tags: ['groom-side'],
+    rsvp: false,                // shown on the schedule, hidden from the RSVP form
     icon: '🌼'
   },
   {
@@ -136,7 +141,8 @@ const WEDDING_EVENTS = [
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
     notes: '',
-    tags: ['india-guest'],
+    tags: ['groom-side'],
+    rsvp: false,                // shown on the schedule, hidden from the RSVP form
     icon: '🥁'
   },
   {
