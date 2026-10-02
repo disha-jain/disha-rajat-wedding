@@ -17,13 +17,13 @@
    ============================================================ */
 
 const WEDDING_EVENTS = [
-  // ---------------- March 13 — Chomu Palace ----------------
+  // ---------------- Day 1 — March 13, Chomu Palace ----------------
   {
     id: 'welcome-lunch',
-    title: 'Welcome Lunch & Mehendi',
+    title: 'Welcome Lunch + Mehndi + Music',
     date: '2027-03-13',
-    dateLabel: 'March 13, 2027',
-    time: '12:00 PM',            // EDIT ME
+    dateLabel: 'Day 1 — March 13, 2027',
+    time: '12:00 PM – 2:30 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME — e.g. 'Main Courtyard'
     dressCode: '',              // EDIT ME — e.g. 'Festive Indian wear'
@@ -32,11 +32,11 @@ const WEDDING_EVENTS = [
     icon: '🌿'
   },
   {
-    id: 'tel-ban',
-    title: "Disha's Tel Ban",
+    id: 'tel-baan',
+    title: 'Disha Tel Baan',
     date: '2027-03-13',
-    dateLabel: 'March 13, 2027',
-    time: '4:00 PM',            // EDIT ME
+    dateLabel: 'Day 1 — March 13, 2027',
+    time: '3:00 PM – 4:30 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
@@ -45,11 +45,24 @@ const WEDDING_EVENTS = [
     icon: '🪔'
   },
   {
+    id: 'high-tea',
+    title: 'High Tea',
+    date: '2027-03-13',
+    dateLabel: 'Day 1 — March 13, 2027',
+    time: '4:00 PM – 6:00 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    icon: '🫖'
+  },
+  {
     id: 'sangeet',
     title: 'Sangeet',
     date: '2027-03-13',
-    dateLabel: 'March 13, 2027',
-    time: '7:00 PM',            // EDIT ME
+    dateLabel: 'Day 1 — March 13, 2027',
+    time: '7:00 PM – 11:00 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
@@ -58,26 +71,13 @@ const WEDDING_EVENTS = [
     icon: '🎶'
   },
 
-  // ---------------- March 14 — Chomu Palace ----------------
-  {
-    id: 'tel-haldi',
-    title: "Rajat's Tel Haldi",
-    date: '2027-03-14',
-    dateLabel: 'March 14, 2027',
-    time: '10:00 AM',           // EDIT ME
-    venue: 'Chomu Palace',
-    venueDetail: '',            // EDIT ME
-    dressCode: '',              // EDIT ME
-    notes: '',
-    tags: ['groom-side'],
-    icon: '🌼'
-  },
+  // ---------------- Day 2 — March 14, Chomu Palace ----------------
   {
     id: 'gaur-puja',
-    title: "Disha's Gaur Puja",
+    title: 'Gaur Puja',
     date: '2027-03-14',
-    dateLabel: 'March 14, 2027',
-    time: '10:00 AM',           // EDIT ME
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '9:00 AM – 9:30 AM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
@@ -86,11 +86,24 @@ const WEDDING_EVENTS = [
     icon: '🙏'
   },
   {
+    id: 'tel-haldi',
+    title: 'Rajat Tel Haldi',
+    date: '2027-03-14',
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '9:00 AM – 9:30 AM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: 'Parallel activity',
+    tags: ['groom-side'],
+    icon: '🌼'
+  },
+  {
     id: 'phoolon-haldi',
     title: 'Phoolon Ki Haldi',
     date: '2027-03-14',
-    dateLabel: 'March 14, 2027',
-    time: '11:00 AM',           // EDIT ME
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '11:30 AM – 12:30 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
@@ -99,17 +112,95 @@ const WEDDING_EVENTS = [
     icon: '🌸'
   },
   {
-    id: 'shaadi',
-    title: 'Shaadi',
+    id: 'wedding-lunch',
+    title: 'Lunch',
     date: '2027-03-14',
-    dateLabel: 'March 14, 2027',
-    time: '7:00 PM',            // EDIT ME
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '12:30 PM – 2:30 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
     notes: '',
     tags: ['india-guest'],
-    icon: '💒'
+    icon: '🍽️'
+  },
+  {
+    id: 'sehra-bandi',
+    title: 'Sehra Bandi',
+    date: '2027-03-14',
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '6:00 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['groom-side'],
+    icon: '👑'
+  },
+  {
+    id: 'baarat',
+    title: 'Baarat',
+    date: '2027-03-14',
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '6:30 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    icon: '🥁'
+  },
+  {
+    id: 'varmala',
+    title: 'Varmala',
+    date: '2027-03-14',
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '7:00 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    icon: '💐'
+  },
+  {
+    id: 'wedding-reception',
+    title: 'Reception',
+    date: '2027-03-14',
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '7:30 PM – 9:30 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    icon: '🥂'
+  },
+  {
+    id: 'pheras',
+    title: 'Pheras',
+    date: '2027-03-14',
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '9:45 PM – 10:40 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    icon: '🔥'
+  },
+  {
+    id: 'bidai',
+    title: 'Bidai',
+    date: '2027-03-14',
+    dateLabel: 'Day 2 — March 14, 2027',
+    time: '11:00 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    icon: '👋'
   },
 
   // ---------------- March 27 — Virginia ----------------
