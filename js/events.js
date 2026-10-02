@@ -180,7 +180,7 @@ const WEDDING_EVENTS = [
   },
   {
     id: 'bidai',
-    title: 'Bidai',
+    title: 'Vidai',
     date: '2027-03-14',
     dateLabel: 'Day 2 — March 14, 2027',
     time: '11:00 PM',
