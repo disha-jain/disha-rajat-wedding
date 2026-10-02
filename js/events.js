@@ -108,7 +108,7 @@ const WEDDING_EVENTS = [
     venueDetail: '',            // EDIT ME
     dressCode: '',              // EDIT ME
     notes: '',
-    tags: ['bride-side'],
+    tags: ['india-guest'],
     icon: '🌸'
   },
   {
