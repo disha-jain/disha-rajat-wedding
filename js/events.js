@@ -70,7 +70,7 @@ const WEDDING_EVENTS = [
     time: '7:00 PM – 11:00 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
-    dressCode: '',              // EDIT ME
+    dressCode: 'Festive Glamour & Shine (Lehengas, Anarkalis, Bandhgalas, or glamorous Western cocktail attire)',
     notes: '',
     tags: ['india-guest'],
     icon: '🎶'
