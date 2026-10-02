@@ -107,14 +107,15 @@
     if (usEl) usEl.style.display = tags.includes('us-guest') ? '' : 'none';
     if (indiaEl) indiaEl.style.display = tags.includes('india-guest') ? '' : 'none';
 
-    // Wire the footer's Log out button (the nav no longer carries
-    // logout or the family name)
-    const footLogout = document.getElementById('foot-logout');
-    if (footLogout) {
-      footLogout.style.display = sessionStorage.getItem('family_code') ? '' : 'none';
-      if (!footLogout.dataset.wired) {
-        footLogout.dataset.wired = '1';
-        footLogout.onclick = () => { signOut(); window.location.href = 'index.html'; };
+    // Hamburger menu (Admin / Log out) lives in the top nav now; show it
+    // only for signed-in guests and wire the Log out item.
+    const menuWrap = document.getElementById('nav-menu-wrap');
+    if (menuWrap) {
+      menuWrap.hidden = !sessionStorage.getItem('family_code');
+      const navLogout = document.getElementById('nav-logout');
+      if (navLogout && !navLogout.dataset.wired) {
+        navLogout.dataset.wired = '1';
+        navLogout.onclick = () => { signOut(); window.location.href = 'index.html'; };
       }
     }
   }
