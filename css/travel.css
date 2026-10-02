@@ -125,22 +125,13 @@
 }
 
 .stay-section { margin: 10px 0 22px; text-align: left; }
-.stay-script {
-  font-family: var(--font-script);
-  font-size: 3.2rem;
-  font-weight: 400;
-  color: var(--gold-dark);
-  line-height: 1;
-  text-align: center;
-  margin: 0 0 -6px;
-}
-.stay-title {
+.stay-heading {
   font-family: var(--font-serif);
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 5px;
+  font-size: 1rem;
+  letter-spacing: 1.5px;
   color: var(--dark-gray);
-  margin: 0 0 10px;
+  margin: 0 0 18px;
+  line-height: 1.5;
   text-align: center;
 }
 .stay-sub {
@@ -327,7 +318,7 @@
   .venue-card, .travel-dark-panel { padding: 24px 18px; }
 }
 @media (max-width: 768px) {
-  .travel-script, .stay-script, .jaipur-script, .travel-dark-panel .panel-script { font-size: 2.6rem; }
+  .travel-script, .jaipur-script, .travel-dark-panel .panel-script { font-size: 2.6rem; }
 }
 
 /* ---------- Jaipur Travel detail block (India) ---------- */
