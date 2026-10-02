@@ -1,7 +1,7 @@
 /* ============================================================
    WEDDING EVENTS — single source of truth for the schedule.
    *** THIS IS THE FILE TO EDIT when dates, times, venues,
-   *** dress codes, notes, or tags change. ***
+   *** dress codes, color palettes, notes, or tags change. ***
    the single-page home.html (events + rsvp sections) reads from here, so one edit
    updates every page.
 
@@ -26,7 +26,8 @@ const WEDDING_EVENTS = [
     time: '12:00 PM – 2:30 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME — e.g. 'Main Courtyard'
-    dressCode: '',              // EDIT ME — e.g. 'Festive Indian wear'
+    dressCode: 'Sunset colors',   // EDIT ME — e.g. 'Festive Indian wear'
+    palette: ['#D22424', '#E7583E', '#E38322', '#F2C79C', '#166963'], // EDIT ME — swatch colors shown with the dress code
     notes: '',                  // EDIT ME — anything guests should know
     tags: ['india-guest'],
     icon: '🌿'
@@ -205,6 +206,18 @@ const WEDDING_EVENTS = [
     icon: '🥂'
   }
 ];
+
+/* Render an event's color palette as a row of small swatches.
+   Used after the dress-code line wherever events are listed. */
+function renderPalette(e) {
+  if (!e || !Array.isArray(e.palette) || !e.palette.length) return '';
+  const swatches = e.palette
+    .filter(c => /^#[0-9a-fA-F]{6}$/.test(String(c).trim()))
+    .map(c => `<span class="palette-swatch" style="background:${String(c).trim()}"></span>`)
+    .join('');
+  if (!swatches) return '';
+  return `<span class="palette-swatches" aria-label="Dress code color palette">${swatches}</span>`;
+}
 
 /* Events visible to a guest with the given tags (any tag overlap). */
 function eventsForTags(tags) {
