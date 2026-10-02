@@ -168,7 +168,7 @@ const WEDDING_EVENTS = [
     time: '7:00 PM – 11:00 PM',
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME
-    dressCode: '',              // EDIT ME
+    dressCode: 'Traditional Indian Formal (Sarees, Lehengas, Sherwanis)',
     notes: '',                  // EDIT ME — anything guests should know
     tags: ['india-guest'],
     icon: '💒',
