@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="styles.css?v=20261001a">
   <link rel="stylesheet" href="css/home.css?v=20261002b">
-  <link rel="stylesheet" href="css/schedule.css?v=20260930g">
+  <link rel="stylesheet" href="css/schedule.css?v=20261002a">
   <link rel="stylesheet" href="css/rsvp.css?v=20260930i">
   <link rel="stylesheet" href="css/travel.css?v=20261002b">
 
@@ -595,7 +595,7 @@ function updateCountdown() {
                   <div class="timeline-label">${esc(e.title)}</div>
                   <div class="timeline-meta">
                     ${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}
-                    ${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}` : ''}
+                    ${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}${renderPalette(e)}` : ''}
                     ${e.notes ? `<br>${esc(e.notes)}` : ''}
                   </div>
                 </div>
@@ -724,7 +724,7 @@ function updateCountdown() {
               <div class="event-icon">${e.icon || '✦'}</div>
               <div>
                 <div class="event-title">${esc(e.title)}</div>
-                <div class="event-sub">${esc(e.dateLabel)} · ${esc(e.time)}<br>${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}` : ''}</div>
+                <div class="event-sub">${esc(e.dateLabel)} · ${esc(e.time)}<br>${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}${renderPalette(e)}` : ''}</div>
               </div>
             </div>
             <div class="quick-links">
