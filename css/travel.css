@@ -124,7 +124,7 @@
   margin: 0 0 10px;
 }
 
-.stay-section { margin: 10px 0 22px; text-align: left; }
+.stay-section { margin: 10px 0 22px; text-align: left; border-top: 1px solid var(--line); padding-top: 38px; }
 .stay-heading {
   font-family: var(--font-serif);
   font-size: 1rem;
@@ -313,6 +313,16 @@
 
 .info-card p:last-child { margin-bottom: 0; }
 .info-card .fine { font-size: 0.8rem; color: var(--taupe); font-style: italic; }
+
+.venue-note {
+  font-size: 0.85rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--taupe);
+  line-height: 1.7;
+  margin: 18px auto 0;
+  max-width: 600px;
+}
 
 @media (max-width: 640px) {
   .venue-card, .travel-dark-panel { padding: 24px 18px; }
