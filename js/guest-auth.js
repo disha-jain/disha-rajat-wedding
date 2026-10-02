@@ -108,10 +108,22 @@
     if (indiaEl) indiaEl.style.display = tags.includes('india-guest') ? '' : 'none';
 
     // Hamburger menu (Admin / Log out) lives in the top nav now; show it
-    // only for signed-in guests and wire the Log out item.
+    // only for signed-in guests and wire the Log out item. The Admin item
+    // is only shown when the signed-in family includes Rajat Khanna or
+    // Disha Jain.
     const menuWrap = document.getElementById('nav-menu-wrap');
     if (menuWrap) {
-      menuWrap.hidden = !sessionStorage.getItem('family_code');
+      const familyCode = sessionStorage.getItem('family_code');
+      menuWrap.hidden = !familyCode;
+      const adminItem = document.getElementById('nav-admin');
+      if (adminItem) {
+        const fam = familyCode ? findFamilyByCode(familyCode) : null;
+        const isOwner = !!fam && (fam.members || []).some(m => {
+          const fn = normalize(m.first_name), ln = normalize(m.last_name);
+          return (fn === 'rajat' && ln === 'khanna') || (fn === 'disha' && ln === 'jain');
+        });
+        adminItem.style.display = isOwner ? '' : 'none';
+      }
       const navLogout = document.getElementById('nav-logout');
       if (navLogout && !navLogout.dataset.wired) {
         navLogout.dataset.wired = '1';
