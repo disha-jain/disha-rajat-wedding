@@ -27,7 +27,7 @@ const WEDDING_EVENTS = [
     venue: 'Chomu Palace',
     venueDetail: '',            // EDIT ME — e.g. 'Main Courtyard'
     dressCode: 'Sunset colors',   // EDIT ME — e.g. 'Festive Indian wear'
-    palette: ['#D22424', '#E7583E', '#E38322', '#F2C79C', '#166963'], // EDIT ME — swatch colors shown with the dress code
+    palette: ['#F0A8A0', '#E7583E', '#E38322', '#F2C79C', '#166963'], // EDIT ME — swatch colors shown with the dress code
     notes: '',                  // EDIT ME — anything guests should know
     tags: ['india-guest'],
     icon: '🌿'
