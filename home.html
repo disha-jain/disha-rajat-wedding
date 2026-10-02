@@ -48,7 +48,7 @@
         <span></span><span></span><span></span>
       </button>
       <div class="nav-menu" id="nav-menu" role="menu">
-        <a href="admin.html" class="nav-menu-item" role="menuitem">Admin</a>
+        <a href="admin.html" class="nav-menu-item" id="nav-admin" role="menuitem">Admin</a>
         <button type="button" class="nav-menu-item" id="nav-logout" role="menuitem">Log Out</button>
       </div>
     </div>
@@ -860,6 +860,7 @@ async function initPage() {
   initSmartFooter();
   applyTagSections();
   try { if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
+  window.GuestAuth.renderNav(); // re-run after DB refresh so the Admin-item owner check uses fresh data
   updateCountdown();
   setInterval(updateCountdown, 1000);
   renderSchedule();
