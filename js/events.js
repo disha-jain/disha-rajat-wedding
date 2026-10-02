@@ -20,7 +20,7 @@ const WEDDING_EVENTS = [
   // ---------------- Day 1 — March 13, Chomu Palace ----------------
   {
     id: 'welcome-lunch',
-    title: 'Welcome Lunch + Mehndi + Music',
+    title: 'Welcome Lunch & Mehendi',
     date: '2027-03-13',
     dateLabel: 'Day 1 — March 13, 2027',
     time: '12:00 PM – 2:30 PM',
