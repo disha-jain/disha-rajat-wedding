@@ -121,11 +121,16 @@
       menuWrap.hidden = !familyCode;
       const adminItem = document.getElementById('nav-admin');
       if (adminItem) {
-        const fam = familyCode ? findFamilyByCode(familyCode) : null;
-        const isOwner = !!fam && (fam.members || []).some(m => {
-          const fn = normalize(m.first_name), ln = normalize(m.last_name);
-          return (fn === 'rajat' && ln === 'khanna') || (fn === 'disha' && ln === 'jain');
-        });
+        // The Admin link is reserved for verified admins: it appears only
+        // after signing in with Google as an allowlisted admin on admin.html.
+        // Never for guests — not even members of the owners' families.
+        let isOwner = false;
+        try {
+          const verified = localStorage.getItem('admin_verified_email') || '';
+          const allowlist = (typeof adminEmails !== 'undefined' && Array.isArray(adminEmails))
+            ? adminEmails : [];
+          isOwner = !!verified && allowlist.includes(verified);
+        } catch (e) {}
         adminItem.style.display = isOwner ? '' : 'none';
       }
       const navLogout = document.getElementById('nav-logout');
