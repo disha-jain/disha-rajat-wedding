@@ -354,6 +354,12 @@ nav a.active {
   color: var(--dark-gray);
   margin: 0;
 }
+.qa-item a {
+  color: var(--gold-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.qa-item a:hover { color: var(--gold-primary); }
 
 /* ---------- Registry ---------- */
 .registry-wrap { max-width: 900px; margin: 0 auto; padding: 72px 24px; }
