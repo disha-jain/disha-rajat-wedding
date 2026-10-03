@@ -43,14 +43,30 @@
     return matches.length > 1 ? { ambiguous: true, families: matches } : null;
   }
 
-  function signInFamily(family) {
+  function signInFamily(family, member) {
     const tags = [...new Set((family.members || []).flatMap(m => m.tags || []))];
     localStorage.setItem('inviteCode', family.family_code.toUpperCase());
     sessionStorage.setItem('site_unlocked', 'true');
     sessionStorage.setItem('family_code', family.family_code);
     sessionStorage.setItem('family_name', family.family_name);
     sessionStorage.setItem('guest_tags', JSON.stringify(tags));
+    // Track the individual when known (name login), so person-level
+    // features can tell family members apart. Code / ?invite= logins
+    // leave this blank — the individual is unknown there.
+    if (member && member.first_name && member.last_name) {
+      sessionStorage.setItem('guest_first_name', member.first_name);
+      sessionStorage.setItem('guest_last_name', member.last_name);
+    } else {
+      sessionStorage.removeItem('guest_first_name');
+      sessionStorage.removeItem('guest_last_name');
+    }
     return tags;
+  }
+
+  function findFamilyMember(family, first, last) {
+    const fn = normalize(first), ln = normalize(last);
+    return ((family && family.members) || []).find(m =>
+      normalize(m.first_name) === fn && normalize(m.last_name) === ln) || null;
   }
 
   function signOut() {
@@ -59,6 +75,8 @@
     sessionStorage.removeItem('family_code');
     sessionStorage.removeItem('family_name');
     sessionStorage.removeItem('guest_tags');
+    sessionStorage.removeItem('guest_first_name');
+    sessionStorage.removeItem('guest_last_name');
   }
 
   function isUnlocked() {
@@ -121,16 +139,25 @@
       menuWrap.hidden = !familyCode;
       const adminItem = document.getElementById('nav-admin');
       if (adminItem) {
-        // The Admin link is reserved for verified admins: it appears only
-        // after signing in with Google as an allowlisted admin on admin.html.
-        // Never for guests — not even members of the owners' families.
+        // The Admin link is reserved for the owners. It appears when the
+        // signed-in individual is Rajat Khanna or Disha Jain (known from
+        // name login), or after signing in with Google as an allowlisted
+        // admin on admin.html. Never for other guests — not even members
+        // of the owners' families.
         let isOwner = false;
         try {
-          const verified = localStorage.getItem('admin_verified_email') || '';
-          const allowlist = (typeof adminEmails !== 'undefined' && Array.isArray(adminEmails))
-            ? adminEmails : [];
-          isOwner = !!verified && allowlist.includes(verified);
+          const fn = normalize(sessionStorage.getItem('guest_first_name') || '');
+          const ln = normalize(sessionStorage.getItem('guest_last_name') || '');
+          isOwner = (fn === 'rajat' && ln === 'khanna') || (fn === 'disha' && ln === 'jain');
         } catch (e) {}
+        if (!isOwner) {
+          try {
+            const verified = localStorage.getItem('admin_verified_email') || '';
+            const allowlist = (typeof adminEmails !== 'undefined' && Array.isArray(adminEmails))
+              ? adminEmails : [];
+            isOwner = !!verified && allowlist.includes(verified);
+          } catch (e) {}
+        }
         adminItem.style.display = isOwner ? '' : 'none';
       }
       const navLogout = document.getElementById('nav-logout');
@@ -172,7 +199,7 @@
   }
 
   window.GuestAuth = {
-    getGuestDatabase, findFamilyByCode, findFamilyByName,
+    getGuestDatabase, findFamilyByCode, findFamilyByName, findFamilyMember,
     signInFamily, signOut, isUnlocked, getStoredCode,
     requireUnlock, renderNav, ensureGuestDatabase
   };
