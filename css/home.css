@@ -330,13 +330,6 @@ nav a.active {
   color: var(--dark-gray);
   margin: 0 0 10px;
 }
-.qa-intro {
-  font-family: var(--font-body-serif);
-  font-size: 1.18rem;
-  line-height: 1.9;
-  color: var(--dark-gray);
-  margin: 0 0 60px;
-}
 .qa-item { margin-bottom: 50px; }
 .qa-item:last-child { margin-bottom: 0; }
 .qa-item h4 {
