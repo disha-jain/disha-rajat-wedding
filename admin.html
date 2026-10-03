@@ -32,11 +32,22 @@
 
   <nav>
     <a href="home.html#home">Home</a>
+    <a href="home.html#our-story">Our Story</a>
     <a href="home.html#events">Events</a>
-    <a href="home.html#rsvp">RSVP</a>
     <a href="home.html#travel-us" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
     <a href="home.html#travel-india" id="nav-travel-india" style="display:none;">India Travel</a>
+    <a href="home.html#qa">Q&amp;A</a>
+    <a href="home.html#registry">Registry</a>
+    <a href="home.html#rsvp">RSVP</a>
     <a href="admin.html" class="active">Host Admin</a>
+    <div class="nav-menu-wrap" id="nav-menu-wrap" hidden>
+      <button type="button" class="nav-menu-btn" id="nav-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-menu" id="nav-menu" role="menu">
+        <button type="button" class="nav-menu-item" id="nav-logout" role="menuitem">Log Out</button>
+      </div>
+    </div>
   </nav>
 
   <div class="container">
@@ -156,16 +167,38 @@
   </div>
 
   <script>
-    // Navigation visibility for unlocked travel tabs
+    // Travel-tab labels and order (mirrors home.html). Show/hide itself is
+    // handled by GuestAuth.renderNav(); here we relabel for single-destination
+    // guests and put India first when invited to both.
     const storedTags = JSON.parse(sessionStorage.getItem("guest_tags") || "[]");
-    if (storedTags.includes("us-guest")) {
-      const el = document.getElementById("nav-travel-us");
-      if (el) el.style.display = "inline-block";
+    const hasUsTag = storedTags.includes("us-guest");
+    const hasIndiaTag = storedTags.includes("india-guest");
+    const usTab = document.getElementById("nav-travel-us");
+    const indiaTab = document.getElementById("nav-travel-india");
+    if (hasUsTag && !hasIndiaTag && usTab) usTab.textContent = "Travel & Lodging";
+    if (hasIndiaTag && !hasUsTag && indiaTab) indiaTab.textContent = "Travel";
+    if (hasUsTag && hasIndiaTag && usTab && indiaTab) {
+      usTab.parentNode.insertBefore(indiaTab, usTab);
     }
-    if (storedTags.includes("india-guest")) {
-      const el = document.getElementById("nav-travel-india");
-      if (el) el.style.display = "inline-block";
-    }
+
+    // Hamburger menu open/close (mirrors home.html initNavMenu)
+    (function initAdminNavMenu() {
+      const btn = document.getElementById('nav-menu-btn');
+      const menu = document.getElementById('nav-menu');
+      if (!btn || !menu || btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      const close = () => { menu.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = menu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', (e) => {
+        if (!menu.classList.contains('open')) return;
+        if (!e.target.closest('#nav-menu-wrap')) close();
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    })();
 
     // Fallback database matching rsvp.html
     const fallbackDatabase = [
