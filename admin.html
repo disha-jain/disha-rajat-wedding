@@ -816,6 +816,12 @@
           if (!isAdmin && typeof adminEmails !== 'undefined' && Array.isArray(adminEmails)) {
             isAdmin = adminEmails.includes(user.email);
           }
+          // Remember verified admins so the guest nav can offer the Admin
+          // link only to them (see renderNav in guest-auth.js).
+          try {
+            if (isAdmin) localStorage.setItem('admin_verified_email', user.email);
+            else localStorage.removeItem('admin_verified_email');
+          } catch (e) {}
           // If no allowlist configured, treat first signer as admin for setup ease (local only warning)
           if (!isAdmin) {
             const statusEl = document.getElementById('admin-auth-status');
@@ -826,6 +832,8 @@
             document.getElementById('google-signin-btn').style.display = 'none';
             return;
           }
+        } else {
+          try { localStorage.removeItem('admin_verified_email'); } catch (e) {}
         }
         const statusEl = document.getElementById('admin-auth-status');
         if (statusEl) statusEl.style.color = '';
