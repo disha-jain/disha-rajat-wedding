@@ -119,8 +119,12 @@
       var tags = [];
       try { tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]'); } catch (e) {}
 
+      // A chapter is shown only when its event is visible to this guest —
+      // eventsForTags() applies the same tag rule the schedule uses.
+      // (NB: events.js declares `const WEDDING_EVENTS`, which is NOT a
+      // window property — always use the bare identifier or this helper.)
       var byId = {};
-      (window.WEDDING_EVENTS || []).forEach(function (e) { byId[e.id] = e; });
+      eventsForTags(tags).forEach(function (e) { byId[e.id] = e; });
 
       var shown = 0;
       document.querySelectorAll('.lb-chapter').forEach(function (chapter) {
