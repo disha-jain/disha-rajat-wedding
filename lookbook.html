@@ -131,12 +131,10 @@
         var ev = byId[chapter.getAttribute('data-event-id')];
         var visible = !!ev && (ev.tags || []).some(function (t) { return tags.indexOf(t) !== -1; });
         chapter.style.display = visible ? '' : 'none';
-        if (visible) {
-          shown++;
-          // Keep the dress-code wording exactly in sync with events.js.
-          var em = chapter.querySelector('.lb-dresscode em');
-          if (em && ev.dressCode) em.textContent = ev.dressCode;
-        }
+        // NB: the dress-code lines keep the lookbook's own em-dash display
+        // wording (see the static markup above) — they intentionally do NOT
+        // mirror the parenthesized wording in events.js.
+        if (visible) shown++;
       });
 
       document.getElementById('lb-empty').hidden = shown > 0;
