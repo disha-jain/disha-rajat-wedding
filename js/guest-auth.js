@@ -71,7 +71,9 @@
 
   // Call on protected pages: redirects to index.html if not unlocked.
   // Also hides nav until unlocked, then reveals per-guest tabs.
-  function requireUnlock() {
+  // Pass returnTo (e.g. 'lookbook.html') to send the guest back there
+  // after they unlock on the gate page.
+  function requireUnlock(returnTo) {
     // Support personal invite links like ?invite=FAM01
     const params = new URLSearchParams(location.search);
     if (params.has('invite')) {
@@ -93,7 +95,9 @@
     }
 
     if (!isUnlocked()) {
-      window.location.href = 'index.html';
+      window.location.href = returnTo
+        ? 'index.html?next=' + encodeURIComponent(returnTo)
+        : 'index.html';
       return false;
     }
     return true;
