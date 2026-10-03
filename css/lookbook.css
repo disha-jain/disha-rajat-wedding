@@ -1,5 +1,6 @@
 /* ============================================================
-   Disha & Rajat — Dress Code Lookbook (standalone public page)
+   Disha & Rajat — Dress Code Lookbook (invite-gated page;
+   chapters are filtered by the guest's event tags in JS)
    ============================================================ */
 
 @font-face {
@@ -197,6 +198,16 @@ body {
   text-transform: uppercase;
   color: var(--taupe);
   margin: 12px 0 0;
+}
+
+/* ---------- empty state (guest sees no chapters) ---------- */
+.lb-empty {
+  max-width: 640px;
+  margin: 0 auto 90px;
+  padding: 40px 24px 0;
+  text-align: center;
+  font-size: 1.3rem;
+  color: var(--dark-gray);
 }
 
 /* ---------- small screens ---------- */
