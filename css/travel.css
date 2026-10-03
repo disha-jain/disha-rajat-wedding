@@ -437,6 +437,12 @@
   margin: 0 0 14px;
 }
 .jt-panel p:last-child { margin-bottom: 0; }
+.jt-panel a {
+  color: var(--gold-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.jt-panel a:hover { color: var(--gold-primary); }
 .jt-panel h5 {
   font-family: var(--font-serif);
   font-size: 0.85rem;
