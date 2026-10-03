@@ -196,6 +196,11 @@ const WEDDING_EVENTS = [
   }
 ];
 
+/* RSVP deadline (YYYY-MM-DD). The guest site reads this — the "Edit RSVP"
+   button on the thank-you screen disappears one day after this date, and the
+   RSVP section renders it. Change it here once and every page follows. */
+const RSVP_DEADLINE = '2026-12-15';
+
 /* Render an event's color palette as a row of small swatches.
    Used after the dress-code line wherever events are listed. */
 function renderPalette(e) {
