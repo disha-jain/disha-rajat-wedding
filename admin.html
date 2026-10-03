@@ -95,6 +95,7 @@
       <p id="guest-sync-note" style="font-size:0.82rem;color:var(--taupe);margin:-4px 0 10px;"></p>
       <div class="roster-controls">
         <input type="search" id="guest-search" placeholder="Search name, email, family, code, or tag\u2026" oninput="rosterQuery=this.value; renderRosterTable(getStoredGuestList())">
+        <button class="btn-primary btn-sm" onclick="openAddModal()">+ Add guest</button>
       </div>
       <div class="bulk-bar" id="bulk-bar" style="display:none;">
         <span id="bulk-count" style="font-size:0.88rem; white-space:nowrap;"></span>
@@ -128,6 +129,27 @@
       <div class="modal-actions">
         <button class="btn-primary" onclick="saveEditModal()">Save changes</button>
         <button class="btn-gold-outline" onclick="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="add-modal" style="display:none;">
+    <div class="modal-card" role="dialog" aria-label="Add guest">
+      <h3 class="gold-title">Add guest</h3>
+      <p class="modal-sub">Add a guest to an existing family, or create a new family for them.</p>
+      <div class="form-group"><label for="add-first">First name</label><input type="text" id="add-first" autocomplete="off"></div>
+      <div class="form-group"><label for="add-last">Last name</label><input type="text" id="add-last" autocomplete="off"></div>
+      <div class="form-group"><label for="add-email">Email</label><input type="email" id="add-email" autocomplete="off"></div>
+      <div class="form-group"><label for="add-tags">Tags (separate with ; )</label><input type="text" id="add-tags" placeholder="india-guest; us-guest" autocomplete="off"></div>
+      <div class="form-group"><label for="add-plus">Max additional guests</label><input type="number" id="add-plus" min="0" step="1" value="0"></div>
+      <div class="form-group"><label for="add-family">Family</label><select id="add-family" onchange="onAddFamilyChange()"></select></div>
+      <div id="add-new-family-fields" style="display:none;">
+        <div class="form-group"><label for="add-family-code">New family code (invite code)</label><input type="text" id="add-family-code" style="text-transform:uppercase;" autocomplete="off" spellcheck="false"></div>
+        <div class="form-group"><label for="add-family-name">New family name</label><input type="text" id="add-family-name" placeholder="e.g. Sharma Family" autocomplete="off"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="saveAddModal()">Add guest</button>
+        <button class="btn-gold-outline" onclick="closeAddModal()">Cancel</button>
       </div>
     </div>
   </div>
@@ -440,6 +462,83 @@
       setAdminStatus(`Saved changes for ${first} ${last}.`, false);
       loadDashboardData();
     }
+
+    // ---------- Add guest (direct entry, no CSV) ----------
+    function suggestNextFamilyCode(families) {
+      let max = 0;
+      (families || []).forEach(f => {
+        const m = String(f.family_code || '').match(/^FAM(\d+)$/i);
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+      });
+      return 'FAM' + String(max + 1).padStart(2, '0');
+    }
+
+    function openAddModal() {
+      const families = getStoredGuestList();
+      const sel = document.getElementById('add-family');
+      sel.innerHTML = families.map(f =>
+        `<option value="${esc(f.family_code)}">${esc(f.family_name || f.family_code)} (${esc(f.family_code)})</option>`
+      ).join('') + `<option value="__new__">+ New family&hellip;</option>`;
+      document.getElementById('add-first').value = '';
+      document.getElementById('add-last').value = '';
+      document.getElementById('add-email').value = '';
+      document.getElementById('add-tags').value = '';
+      document.getElementById('add-plus').value = '0';
+      document.getElementById('add-family-code').value = suggestNextFamilyCode(families);
+      document.getElementById('add-family-name').value = '';
+      onAddFamilyChange();
+      document.getElementById('add-modal').style.display = 'flex';
+      document.getElementById('add-first').focus();
+    }
+
+    function onAddFamilyChange() {
+      const isNew = document.getElementById('add-family').value === '__new__';
+      document.getElementById('add-new-family-fields').style.display = isNew ? '' : 'none';
+    }
+
+    function closeAddModal() {
+      document.getElementById('add-modal').style.display = 'none';
+    }
+
+    function saveAddModal() {
+      const first = document.getElementById('add-first').value.trim();
+      const last = document.getElementById('add-last').value.trim();
+      if (!first || !last) { alert('First and last name are required.'); return; }
+      const families = getStoredGuestList();
+      const famChoice = document.getElementById('add-family').value;
+      let fam;
+      if (famChoice === '__new__') {
+        const code = document.getElementById('add-family-code').value.trim().toUpperCase();
+        if (!code) { alert('Enter a family code for the new family.'); return; }
+        if (families.some(f => String(f.family_code).toUpperCase() === code)) {
+          alert('That family code is already in use. Pick another one.');
+          return;
+        }
+        const famName = document.getElementById('add-family-name').value.trim() || `${last} Family`;
+        fam = { family_code: code, family_name: famName, members: [] };
+        families.push(fam);
+      } else {
+        fam = families.find(f => f.family_code === famChoice);
+        if (!fam) { alert('Family not found.'); return; }
+      }
+      fam.members.push({
+        first_name: first,
+        last_name: last,
+        email: document.getElementById('add-email').value.trim(),
+        tags: parseTagsInput(document.getElementById('add-tags').value),
+        max_plus_ones: Math.max(0, parseInt(document.getElementById('add-plus').value, 10) || 0)
+      });
+      persistFamilies(families);
+      closeAddModal();
+      setAdminStatus(`Added ${first} ${last} to ${fam.family_name} (${fam.family_code}).`, false);
+      loadDashboardData();
+    }
+
+    // add-modal: close on overlay click / Escape
+    document.getElementById('add-modal').addEventListener('click', e => {
+      if (e.target.id === 'add-modal') closeAddModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAddModal(); });
 
     // modal: close on overlay click / Escape
     document.getElementById('edit-modal').addEventListener('click', e => {
