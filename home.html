@@ -22,7 +22,7 @@
 </head>
 <body>
   <script src="js/guest-auth.js"></script>
-  <script src="js/events.js?v=20261002g"></script>
+  <script src="js/events.js?v=20261002h"></script>
   <script>
     if (!window.GuestAuth.requireUnlock()) {
       // redirecting to index.html
@@ -464,7 +464,7 @@
     <div class="rsvp-script">Can't wait to party?</div>
     <h2 class="rsvp-title">RSVP</h2>
     <div class="sub-header" style="text-align:center;">Tell us who's coming<br>to each event</div>
-    <p class="rsvp-deadline">Please RSVP by <strong>December 15</strong></p>
+    <p class="rsvp-deadline">Please RSVP by <strong id="rsvp-deadline-date">December 15</strong></p>
 
     <div class="rsvp-photo-frame">
       <img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach">
@@ -511,6 +511,9 @@
     <div id="rsvp-success">
       <div class="big">Thank you!</div>
       <p style="color:var(--taupe);">Your RSVP has been saved.<br>We can't wait to celebrate with you!</p>
+      <div class="submit-wrap" id="edit-rsvp-wrap" style="display:none;margin-top:16px;">
+        <button class="btn-gold-outline" type="button" onclick="editRsvp()">Edit RSVP</button>
+      </div>
     </div>
   </div>
   </section>
@@ -639,6 +642,7 @@ function updateCountdown() {
     }
 
     function initRsvp() {
+      renderRsvpDeadline();
       const code = sessionStorage.getItem('family_code');
       const db = window.GuestAuth.getGuestDatabase();
       family = db.find(f => f.family_code === code);
@@ -756,6 +760,34 @@ function updateCountdown() {
 
     function snapshotKey() { return 'wedding_rsvp_family_' + family.family_code; }
 
+    // The "Edit RSVP" button on the thank-you screen stays up through the
+    // day after the RSVP deadline, then disappears. Reads RSVP_DEADLINE
+    // from events.js so the date itself is never hardcoded here.
+    function rsvpEditable() {
+      try {
+        if (typeof RSVP_DEADLINE !== 'string' || !RSVP_DEADLINE) return true;
+        const cutoff = new Date(RSVP_DEADLINE + 'T23:59:59').getTime() + 24 * 60 * 60 * 1000;
+        return Date.now() <= cutoff;
+      } catch (e) { return true; }
+    }
+
+    function renderRsvpDeadline() {
+      try {
+        if (typeof RSVP_DEADLINE !== 'string' || !RSVP_DEADLINE) return;
+        const d = new Date(RSVP_DEADLINE + 'T12:00:00');
+        if (isNaN(d.getTime())) return;
+        const label = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+        const el = document.getElementById('rsvp-deadline-date');
+        if (el && label) el.textContent = label;
+      } catch (e) {}
+    }
+
+    function editRsvp() {
+      document.getElementById('rsvp-success').style.display = 'none';
+      document.getElementById('rsvp-body').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function restorePrevious() {
       try {
         const snap = JSON.parse(localStorage.getItem(snapshotKey()) || 'null');
@@ -810,7 +842,7 @@ function updateCountdown() {
       } catch (e) {}
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
       document.getElementById('form-error').style.display = 'none';
 
       // validate named additional guests
@@ -856,11 +888,19 @@ function updateCountdown() {
       localStorage.setItem('wedding_rsvps_database', JSON.stringify([...db_records, ...newRecords]));
 
       if (typeof db !== 'undefined' && db !== null) {
+        try {
+          // remove this family's previous RSVP docs so edits don't duplicate
+          const snap = await db.collection('rsvps').where('family_code', '==', family.family_code).get();
+          const batch = db.batch();
+          snap.forEach(doc => batch.delete(doc.ref));
+          await batch.commit();
+        } catch (e) {}
         newRecords.forEach(r => { db.collection('rsvps').add(r).catch(() => {}); });
       }
 
       document.getElementById('rsvp-body').style.display = 'none';
       document.getElementById('rsvp-success').style.display = 'block';
+      document.getElementById('edit-rsvp-wrap').style.display = rsvpEditable() ? '' : 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
