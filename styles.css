@@ -305,8 +305,7 @@ footer.footer-visible { transform: none; }
 .nav-menu-wrap {
   position: absolute;
   right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 12px;
 }
 .nav-menu-wrap[hidden] { display: none; }
 .nav-menu-btn {
@@ -369,4 +368,13 @@ footer.footer-visible { transform: none; }
   .section-title { font-size: 1.7rem; }
   .script-heading { font-size: 2.6rem; }
   .card { padding: 20px 16px; }
+}
+
+/* narrow phones: scale the navbar down so the links clear the hamburger */
+@media (max-width: 480px) {
+  nav { padding: 8px 44px 8px 4px; }
+  nav a { padding: 5px 7px; font-size: 0.62rem; letter-spacing: 0.5px; }
+  .nav-menu-wrap { right: 10px; top: 10px; }
+  .nav-menu-btn { padding: 6px 7px; gap: 3px; }
+  .nav-menu-btn span { width: 15px; }
 }
