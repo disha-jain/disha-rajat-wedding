@@ -8,9 +8,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/lookbook.css?v=20261002a">
+  <link rel="stylesheet" href="css/lookbook.css?v=20261002b">
+
+  <!-- Firebase: the shared guest list lives in Firestore (invite gate) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
 </head>
 <body>
+  <script src="js/guest-auth.js"></script>
+  <script src="js/events.js?v=20261002f"></script>
+  <script>
+    if (!window.GuestAuth.requireUnlock('lookbook.html')) {
+      // redirecting to the invite gate; it will send the guest back here
+    } else {
+      // NB: wrap in a closure — initLookbook is defined in a later script
+      // block, so referencing it directly here would throw ReferenceError.
+      document.addEventListener('DOMContentLoaded', () => initLookbook());
+    }
+  </script>
 
   <div class="lb-topbar">Disha &amp; Rajat · March 2027</div>
 
@@ -22,7 +38,7 @@
 
   <main class="lb-main">
 
-    <section class="lb-chapter" id="mehendi">
+    <section class="lb-chapter" id="mehendi" data-event-id="welcome-lunch">
       <div class="lb-kicker">Day 1 · Saturday, March 13 · 12:00 – 2:30 PM</div>
       <h2>Welcome Lunch &amp; Mehendi</h2>
       <p class="lb-dresscode"><strong>Dress Code</strong><em>Sunset colors</em></p>
@@ -38,7 +54,7 @@
       </figure>
     </section>
 
-    <section class="lb-chapter" id="sangeet">
+    <section class="lb-chapter" id="sangeet" data-event-id="sangeet">
       <div class="lb-kicker">Day 1 · Saturday, March 13 · 7:00 – 11:00 PM</div>
       <h2>Sangeet</h2>
       <p class="lb-dresscode"><strong>Dress Code</strong><em>Festive Glamour &amp; Shine — lehengas, anarkalis, bandhgalas, or glamorous western cocktail attire</em></p>
@@ -47,7 +63,7 @@
       </figure>
     </section>
 
-    <section class="lb-chapter" id="haldi">
+    <section class="lb-chapter" id="haldi" data-event-id="phoolon-haldi">
       <div class="lb-kicker">Day 2 · Sunday, March 14 · 11:30 AM – 2:30 PM</div>
       <h2>Phoolon Ki Haldi &amp; Lunch</h2>
       <p class="lb-dresscode"><strong>Dress Code</strong><em>Shades of yellow</em></p>
@@ -63,7 +79,7 @@
       </figure>
     </section>
 
-    <section class="lb-chapter" id="shaadi">
+    <section class="lb-chapter" id="shaadi" data-event-id="shaadi">
       <div class="lb-kicker">Day 2 · Sunday, March 14 · 7:00 – 11:00 PM</div>
       <h2>Shaadi</h2>
       <p class="lb-dresscode"><strong>Dress Code</strong><em>Traditional Indian Formal — sarees, lehengas, sherwanis</em></p>
@@ -72,7 +88,7 @@
       </figure>
     </section>
 
-    <section class="lb-chapter" id="reception">
+    <section class="lb-chapter" id="reception" data-event-id="virginia-reception">
       <div class="lb-kicker">Saturday, March 27 · 6:00 PM – 12:00 AM</div>
       <h2>Virginia Reception</h2>
       <p class="lb-venue">The Bellevue · Chantilly, Virginia</p>
@@ -84,10 +100,44 @@
 
   </main>
 
+  <div id="lb-empty" class="lb-empty" hidden>
+    <p>There are no lookbook chapters for the celebrations on your invitation.</p>
+  </div>
+
   <footer class="lb-footer">
     <div class="lb-script">Disha &amp; Rajat</div>
     <p>March 2027 · Jaipur &amp; Virginia</p>
   </footer>
+
+  <script>
+    // Invite-gated lookbook: each chapter maps to an event in events.js and
+    // is shown only when the guest shares a tag with that event — the same
+    // visibility rule the schedule uses.
+    async function initLookbook() {
+      try { await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
+
+      var tags = [];
+      try { tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]'); } catch (e) {}
+
+      var byId = {};
+      (window.WEDDING_EVENTS || []).forEach(function (e) { byId[e.id] = e; });
+
+      var shown = 0;
+      document.querySelectorAll('.lb-chapter').forEach(function (chapter) {
+        var ev = byId[chapter.getAttribute('data-event-id')];
+        var visible = !!ev && (ev.tags || []).some(function (t) { return tags.indexOf(t) !== -1; });
+        chapter.style.display = visible ? '' : 'none';
+        if (visible) {
+          shown++;
+          // Keep the dress-code wording exactly in sync with events.js.
+          var em = chapter.querySelector('.lb-dresscode em');
+          if (em && ev.dressCode) em.textContent = ev.dressCode;
+        }
+      });
+
+      document.getElementById('lb-empty').hidden = shown > 0;
+    }
+  </script>
 
 </body>
 </html>
