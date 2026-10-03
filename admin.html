@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css?v=20260930c">
-  <link rel="stylesheet" href="css/admin.css?v=20260930c">
+  <link rel="stylesheet" href="css/admin.css?v=20260930d">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -314,7 +314,7 @@
           <td style="font-size:0.85rem;">${esc(r.m.email || '\u2014')}</td>
           <td>${chips}</td>
           <td>${r.m.max_plus_ones || 0}</td>
-          <td style="text-align:center;"><button class="edit-icon-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="openEditModal(this)" title="Edit guest" aria-label="Edit ${esc(r.m.first_name)} ${esc(r.m.last_name)}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td>
+          <td style="text-align:center;white-space:nowrap;"><button class="edit-icon-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="openEditModal(this)" title="Edit guest" aria-label="Edit ${esc(r.m.first_name)} ${esc(r.m.last_name)}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button><button class="delete-icon-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="confirmDeleteGuest(this)" title="Delete guest" aria-label="Delete ${esc(r.m.first_name)} ${esc(r.m.last_name)}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></td>
         </tr>`;
       });
 
@@ -539,6 +539,62 @@
       if (e.target.id === 'add-modal') closeAddModal();
     });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAddModal(); });
+
+    // ---------- Delete guest ----------
+    function confirmDeleteGuest(btn) {
+      const famCode = btn.dataset.fam, idx = parseInt(btn.dataset.idx, 10);
+      const families = getStoredGuestList();
+      const fam = families.find(f => f.family_code === famCode);
+      const m = fam && (fam.members || [])[idx];
+      if (!m) return;
+      const name = `${m.first_name} ${m.last_name}`.trim();
+      const lastMember = (fam.members || []).length === 1;
+      const msg = lastMember
+        ? `Delete ${name}? This is the last guest in ${fam.family_name} (${famCode}) — the family will be removed as well. Their RSVP records will also be deleted.`
+        : `Delete ${name} from ${fam.family_name} (${famCode})? Their RSVP records will also be deleted.`;
+      if (!confirm(msg)) return;
+      deleteGuest(famCode, idx, name);
+    }
+
+    async function deleteGuest(famCode, idx, name) {
+      const families = getStoredGuestList();
+      const famIdx = families.findIndex(f => f.family_code === famCode);
+      if (famIdx < 0) return;
+      const fam = families[famIdx];
+      if (!fam.members || !fam.members[idx]) return;
+      fam.members.splice(idx, 1);
+      const removedFamily = fam.members.length === 0;
+      if (removedFamily) families.splice(famIdx, 1);
+
+      localStorage.setItem("wedding_guest_database", JSON.stringify(families));
+
+      // drop this guest's RSVP records locally
+      try {
+        const rsvps = JSON.parse(localStorage.getItem("wedding_rsvps_database") || "[]");
+        localStorage.setItem("wedding_rsvps_database", JSON.stringify(
+          rsvps.filter(r => !(r.family_code === famCode && r.guest_name === name))
+        ));
+      } catch (e) {}
+
+      // cloud: update/remove the family doc and delete the guest's rsvp docs
+      if (typeof db !== 'undefined' && db !== null) {
+        try {
+          if (removedFamily) await db.collection("families").doc(famCode).delete();
+          else await db.collection("families").doc(famCode).set(fam);
+          const snap = await db.collection("rsvps").where("family_code", "==", famCode).get();
+          const batch = db.batch();
+          let n = 0;
+          snap.forEach(doc => {
+            if (doc.data().guest_name === name) { batch.delete(doc.ref); n++; }
+          });
+          if (n) await batch.commit();
+        } catch (e) {}
+      }
+
+      rosterSelection.clear(); // member indices shift after a delete
+      setAdminStatus(`Deleted ${name}${removedFamily ? ` and removed family ${famCode}` : ''}.`, false);
+      loadDashboardData();
+    }
 
     // modal: close on overlay click / Escape
     document.getElementById('edit-modal').addEventListener('click', e => {
