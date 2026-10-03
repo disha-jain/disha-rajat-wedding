@@ -74,6 +74,7 @@
 
     <div class="card">
       <h3 class="gold-title">Live Guest & RSVP Summary</h3>
+      <button class="btn-gold-outline btn-sm" onclick="refreshDashboard()" style="margin-bottom:12px;">&#8635; Refresh data</button>
       <div class="admin-stat-grid">
         <div class="stat-card">
           <div class="stat-num" id="stat-families">0</div>
@@ -213,8 +214,39 @@
     // Load and refresh stats on page load
     window.addEventListener("DOMContentLoaded", async () => {
       await syncGuestDatabaseFromCloud();
+      await syncRsvpsFromCloud();
       loadDashboardData();
     });
+
+    // Pull the shared RSVP records from Firestore and merge them with this
+    // device's list (dedupe by family/guest/event, latest timestamp wins),
+    // so RSVPs submitted on any device show up here.
+    async function syncRsvpsFromCloud() {
+      if (typeof db === 'undefined' || db === null) return;
+      try {
+        const snap = await db.collection('rsvps').get();
+        const cloudRecs = [];
+        snap.forEach(doc => { const r = doc.data(); if (r && r.family_code) cloudRecs.push(r); });
+        if (!cloudRecs.length) return;
+        let local = [];
+        try { local = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]'); } catch (e) {}
+        const byKey = new Map();
+        const key = r => `${r.family_code}||${r.guest_name}||${r.event_id}`;
+        const ts = r => r.timestamp || '';
+        [...local, ...cloudRecs].forEach(r => {
+          const k = key(r);
+          if (!byKey.has(k) || ts(r) > ts(byKey.get(k))) byKey.set(k, r);
+        });
+        localStorage.setItem('wedding_rsvps_database', JSON.stringify([...byKey.values()]));
+      } catch (e) {}
+    }
+
+    async function refreshDashboard() {
+      await syncGuestDatabaseFromCloud();
+      await syncRsvpsFromCloud();
+      loadDashboardData();
+      setAdminStatus('Dashboard refreshed.', false);
+    }
 
     function getStoredGuestList() {
       const stored = localStorage.getItem("wedding_guest_database");
@@ -237,7 +269,8 @@
 
       document.getElementById("stat-families").innerText = families.length;
       document.getElementById("stat-total-guests").innerText = totalGuests;
-      document.getElementById("stat-rsvps-submitted").innerText = rsvps.length;
+      // count families who submitted (one RSVP), not per-event/per-person records
+      document.getElementById("stat-rsvps-submitted").innerText = new Set(rsvps.map(r => r.family_code)).size;
 
       renderRosterTable(families);
     }
