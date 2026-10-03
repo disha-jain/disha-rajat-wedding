@@ -135,3 +135,11 @@ body {
     }
     #rsvp-success { display: none; text-align: center; padding: 30px 10px; }
     #rsvp-success .big { font-family: var(--font-script); font-size: 3rem; color: var(--gold-dark); }
+    .rsvp-deadline {
+      text-align: center;
+      font-family: var(--font-body-serif);
+      font-size: 1.25rem;
+      color: var(--dark-gray);
+      margin: 12px 0 0;
+    }
+    .rsvp-deadline strong { color: var(--gold-dark); }
