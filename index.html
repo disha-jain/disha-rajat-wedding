@@ -64,6 +64,16 @@
       el.style.display = 'block';
     }
 
+    // Where to send the guest after unlocking. Honors ?next= from pages
+    // that bounced here (e.g. index.html?next=lookbook.html).
+    // Only same-directory .html pages — never external URLs.
+    function returnTarget() {
+      const params = new URLSearchParams(location.search);
+      const next = (params.get('next') || '').trim();
+      if (/^[\w.\-]+\.html(\?.*)?$/.test(next)) return next;
+      return 'home.html';
+    }
+
     async function refreshGuestDb() {
       try {
         if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase();
@@ -80,7 +90,7 @@
         return;
       }
       window.GuestAuth.signInFamily(fam);
-      window.location.href = 'home.html';
+      window.location.href = returnTarget();
     }
 
     function handleCodeSubmit(e) {
@@ -104,7 +114,7 @@
         return;
       }
       window.GuestAuth.signInFamily(result);
-      window.location.href = 'home.html';
+      window.location.href = returnTarget();
     }
 
     (async function init() {
@@ -117,14 +127,15 @@
         const fam = window.GuestAuth.findFamilyByCode(code);
         if (fam) {
           window.GuestAuth.signInFamily(fam);
+          const target = returnTarget();
           history.replaceState(null, '', location.pathname);
-          window.location.href = 'home.html';
+          window.location.href = target;
           return;
         }
       }
       // Already unlocked
       if (window.GuestAuth.isUnlocked()) {
-        window.location.href = 'home.html';
+        window.location.href = returnTarget();
         return;
       }
       const stored = window.GuestAuth.getStoredCode();
@@ -132,7 +143,7 @@
         const fam = window.GuestAuth.findFamilyByCode(stored);
         if (fam) {
           window.GuestAuth.signInFamily(fam);
-          window.location.href = 'home.html';
+          window.location.href = returnTarget();
         }
       }
     })();
