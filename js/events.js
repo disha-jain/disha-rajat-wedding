@@ -208,10 +208,19 @@ function renderPalette(e) {
   return `<span class="palette-swatches" aria-label="Dress code color palette">${swatches}</span>`;
 }
 
-/* Events visible to a guest with the given tags (any tag overlap). */
+/* Events visible to a guest with the given tags (any tag overlap),
+   with one guardrail: a side-specific event (tagged bride-side or
+   groom-side) is never shown to a guest who carries no side tag at all —
+   even if some other tag would overlap. */
 function eventsForTags(tags) {
   const set = new Set((tags || []).map(t => String(t).toLowerCase()));
-  return WEDDING_EVENTS.filter(e => e.tags.some(t => set.has(String(t).toLowerCase())));
+  const guestSide = set.has('bride-side') || set.has('groom-side');
+  return WEDDING_EVENTS.filter(e => {
+    const eTags = (e.tags || []).map(t => String(t).toLowerCase());
+    const eventSide = eTags.includes('bride-side') || eTags.includes('groom-side');
+    if (eventSide && !guestSide) return false;
+    return eTags.some(t => set.has(t));
+  });
 }
 
 /* Group events by date, preserving order. Returns [{dateLabel, events:[...]}] */
