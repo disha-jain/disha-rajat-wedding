@@ -14,13 +14,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css?v=20261003a">
-  <link rel="stylesheet" href="css/admin.css?v=20260930d">
+  <link rel="stylesheet" href="css/admin.css?v=20261004a">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="js/events.js?v=20261002h"></script>
 </head>
 <body>
   <script src="js/guest-auth.js"></script>
@@ -104,6 +105,19 @@
           <p style="color:var(--text-sub); font-size:0.8rem;">RSVPs Submitted</p>
         </div>
       </div>
+    </div>
+
+    <div class="card">
+      <h3 class="gold-title">RSVP Responses</h3>
+      <p style="font-size:0.82rem;color:var(--taupe);margin:-4px 0 10px;">Who has responded for which event, built from the shared RSVP records. Refreshes with the dashboard.</p>
+      <div class="rsvp-tabs" role="tablist" aria-label="RSVP views">
+        <button type="button" class="rsvp-tab active" data-tab="by-event" role="tab" aria-selected="true" onclick="switchRsvpTab('by-event')">By Event</button>
+        <button type="button" class="rsvp-tab" data-tab="by-family" role="tab" aria-selected="false" onclick="switchRsvpTab('by-family')">By Family</button>
+        <button type="button" class="rsvp-tab" data-tab="all" role="tab" aria-selected="false" onclick="switchRsvpTab('all')">All Responses</button>
+      </div>
+      <div class="rsvp-tab-panel" id="rsvp-tab-by-event" role="tabpanel"></div>
+      <div class="rsvp-tab-panel" id="rsvp-tab-by-family" role="tabpanel" hidden></div>
+      <div class="rsvp-tab-panel" id="rsvp-tab-all" role="tabpanel" hidden></div>
     </div>
 
     <div class="card">
@@ -310,6 +324,213 @@
       document.getElementById("stat-rsvps-submitted").innerText = new Set(rsvps.map(r => r.family_code)).size;
 
       renderRosterTable(families);
+      renderRsvpTabs();
+    }
+
+    // ---------- RSVP response tabs: By Event / By Family / All Responses ----------
+    const rsvpTabFilters = { event: 'all', status: 'all', q: '' };
+
+    function rsvpAbleEvents() {
+      if (typeof WEDDING_EVENTS !== 'undefined' && Array.isArray(WEDDING_EVENTS)) {
+        const list = WEDDING_EVENTS.filter(e => e.rsvp !== false);
+        if (list.length) return list;
+      }
+      // Fallback: derive from records seen (if events.js failed to load)
+      const seen = new Map();
+      getStoredRSVPs().forEach(r => {
+        if (r && r.event_id && !seen.has(r.event_id)) {
+          seen.set(r.event_id, { id: r.event_id, title: r.event_title || r.event_id, dateLabel: '', time: '', tags: [] });
+        }
+      });
+      return [...seen.values()];
+    }
+
+    function familyTagSet(fam) {
+      return new Set(((fam.members || []).flatMap(m => m.tags || [])).map(t => String(t).toLowerCase()));
+    }
+
+    // Mirrors eventsForTags() for a single event: is this family invited?
+    function eventInvitesFamily(ev, tagSet) {
+      const eTags = (ev.tags || []).map(t => String(t).toLowerCase());
+      const eventSide = eTags.includes('bride-side') || eTags.includes('groom-side');
+      const guestSide = tagSet.has('bride-side') || tagSet.has('groom-side');
+      if (eventSide && !guestSide) return false;
+      return eTags.some(t => tagSet.has(t));
+    }
+
+    function switchRsvpTab(name) {
+      document.querySelectorAll('.rsvp-tab').forEach(b => {
+        const on = b.dataset.tab === name;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.rsvp-tab-panel').forEach(p => { p.hidden = p.id !== 'rsvp-tab-' + name; });
+    }
+
+    function fmtRsvpDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return isNaN(d) ? '' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function rsvpNameRow(r, cls) {
+      const plus = (r.guest_type === 'plus-one') ? '<span class="plusone-badge">+1</span>' : '';
+      const diet = (r.dietary_notes && String(r.dietary_notes).trim()) ? `<span class="diet-note">${esc(r.dietary_notes)}</span>` : '';
+      return `<li class="${cls}">${esc(r.guest_name)}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${diet}</li>`;
+    }
+
+    function shortEventTitle(t) {
+      return String(t || '')
+        .replace('Welcome Lunch & Mehendi', 'Welcome Lunch')
+        .replace('Phoolon Ki Haldi & Lunch', 'Haldi & Lunch')
+        .replace('Virginia Reception', 'VA Reception');
+    }
+
+    // Tab 1: per-event headcounts + guest lists
+    function renderRsvpByEvent(families, rsvps) {
+      const host = document.getElementById('rsvp-tab-by-event');
+      if (!host) return;
+      const events = rsvpAbleEvents();
+      const respondedFams = new Set(rsvps.map(r => r.family_code));
+      let html = '';
+      events.forEach(ev => {
+        const recs = rsvps.filter(r => r.event_id === ev.id);
+        const att = recs.filter(r => r.status === 'attending');
+        const dec = recs.filter(r => r.status !== 'attending');
+        const pendingFams = families.filter(f => !respondedFams.has(f.family_code) && eventInvitesFamily(ev, familyTagSet(f)));
+        const pendingCount = pendingFams.reduce((n, f) => n + ((f.members || []).length), 0);
+        const when = [ev.dateLabel, ev.time].filter(Boolean).join(' · ');
+        html += `<div class="rsvp-event-card">
+          <div class="rsvp-event-head" onclick="this.nextElementSibling.hidden = !this.nextElementSibling.hidden" title="Click to expand/collapse">
+            <span class="rsvp-event-title">${esc(ev.icon || '')} ${esc(ev.title)}</span>
+            ${when ? `<span class="rsvp-event-when">${esc(when)}</span>` : ''}
+            <span class="rsvp-event-counts">
+              <span class="count-yes">${att.length} attending</span>
+              <span class="count-no">${dec.length} declining</span>
+              <span class="count-pending">${pendingCount} awaiting</span>
+            </span>
+          </div>
+          <div class="rsvp-event-body">
+            ${att.length
+              ? `<ul class="rsvp-name-list">${att.map(r => rsvpNameRow(r, 'attending')).join('')}</ul>`
+              : '<p style="font-size:0.85rem;color:var(--taupe);">No confirmed guests yet.</p>'}
+            ${dec.length
+              ? `<p style="font-size:0.74rem;color:var(--taupe);margin:12px 0 4px;letter-spacing:1px;text-transform:uppercase;">Declining (${dec.length})</p><ul class="rsvp-name-list">${dec.map(r => rsvpNameRow(r, 'declining')).join('')}</ul>`
+              : ''}
+            ${pendingCount
+              ? `<p style="font-size:0.74rem;color:#a86e00;margin:12px 0 4px;letter-spacing:1px;text-transform:uppercase;">Awaiting response (${pendingCount})</p><ul class="rsvp-name-list">${pendingFams.map(f => (f.members || []).map(m => `<li class="pending">${esc(m.first_name + ' ' + m.last_name)} <span class="fam">· ${esc(f.family_name)}</span></li>`).join('')).join('')}</ul>`
+              : ''}
+          </div>
+        </div>`;
+      });
+      host.innerHTML = html || '<p style="color:var(--text-sub);">No RSVP-able events found.</p>';
+    }
+
+    // Tab 2: family x event grid
+    function renderRsvpByFamily(families, rsvps) {
+      const host = document.getElementById('rsvp-tab-by-family');
+      if (!host) return;
+      const events = rsvpAbleEvents();
+      const byFam = new Map();
+      rsvps.forEach(r => {
+        if (!byFam.has(r.family_code)) byFam.set(r.family_code, []);
+        byFam.get(r.family_code).push(r);
+      });
+      const sorted = [...families].sort((a, b) => String(a.family_name || '').localeCompare(String(b.family_name || '')));
+      let pendingCount = 0;
+      let html = `<div class="rsvp-grid-wrap"><table class="rsvp-grid"><thead><tr><th>Family</th>`;
+      events.forEach(ev => { html += `<th title="${esc(ev.title)}">${esc(shortEventTitle(ev.title))}</th>`; });
+      html += `<th>Status</th></tr></thead><tbody>`;
+      sorted.forEach(fam => {
+        const recs = byFam.get(fam.family_code) || [];
+        const responded = recs.length > 0;
+        if (!responded) pendingCount++;
+        const tags = familyTagSet(fam);
+        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length} guests</span></th>`;
+        events.forEach(ev => {
+          if (!eventInvitesFamily(ev, tags)) { html += `<td><span class="cell-na">—</span></td>`; return; }
+          if (!responded) { html += `<td><span class="cell-pending">···</span></td>`; return; }
+          const att = recs.filter(r => r.event_id === ev.id && r.status === 'attending').length;
+          html += att > 0 ? `<td><span class="cell-yes">${att} ✓</span></td>` : `<td><span class="cell-no">✗</span></td>`;
+        });
+        html += `<td>${responded ? '<span class="status-badge attending">Responded</span>' : '<span class="status-badge pending">Pending</span>'}</td></tr>`;
+      });
+      html += `</tbody></table></div>
+        <p style="font-size:0.82rem;color:var(--taupe);margin:10px 2px 0;">${pendingCount} of ${sorted.length} families have not responded yet.</p>`;
+      host.innerHTML = html;
+      const tabBtn = document.querySelector('.rsvp-tab[data-tab="by-family"]');
+      if (tabBtn) tabBtn.innerHTML = `By Family <span class="tab-count">${pendingCount}</span>`;
+    }
+
+    // Tab 3: master filterable table
+    function renderRsvpAll(families, rsvps) {
+      const host = document.getElementById('rsvp-tab-all');
+      if (!host) return;
+      const events = rsvpAbleEvents();
+      host.innerHTML = `<div class="rsvp-filters">
+          <select id="rsvp-filter-event" aria-label="Filter by event"
+            onchange="rsvpTabFilters.event=this.value; renderRsvpAllRows(getStoredRSVPs())">
+            <option value="all">All events</option>
+            ${events.map(e => `<option value="${esc(e.id)}"${rsvpTabFilters.event === e.id ? ' selected' : ''}>${esc(e.title)}</option>`).join('')}
+          </select>
+          <select id="rsvp-filter-status" aria-label="Filter by status"
+            onchange="rsvpTabFilters.status=this.value; renderRsvpAllRows(getStoredRSVPs())">
+            <option value="all"${rsvpTabFilters.status === 'all' ? ' selected' : ''}>Attending + declining</option>
+            <option value="attending"${rsvpTabFilters.status === 'attending' ? ' selected' : ''}>Attending only</option>
+            <option value="declining"${rsvpTabFilters.status === 'declining' ? ' selected' : ''}>Declining only</option>
+          </select>
+          <input type="search" id="rsvp-filter-q" placeholder="Search guest or family…" value="${esc(rsvpTabFilters.q)}"
+            oninput="rsvpTabFilters.q=this.value; renderRsvpAllRows(getStoredRSVPs())">
+          <span class="result-count" id="rsvp-result-count"></span>
+        </div>
+        <div class="rsvp-grid-wrap"><table class="roster-table" id="rsvp-all-table">
+          <thead><tr><th>Guest</th><th>Family</th><th>Event</th><th>Status</th><th>Type</th><th>Dietary notes</th><th>Submitted</th></tr></thead>
+          <tbody id="rsvp-all-body"></tbody>
+        </table></div>`;
+      renderRsvpAllRows(rsvps);
+      const tabBtn = document.querySelector('.rsvp-tab[data-tab="all"]');
+      if (tabBtn) tabBtn.innerHTML = `All Responses <span class="tab-count">${rsvps.length}</span>`;
+    }
+
+    function renderRsvpAllRows(rsvps) {
+      const body = document.getElementById('rsvp-all-body');
+      const countEl = document.getElementById('rsvp-result-count');
+      if (!body) return;
+      const events = rsvpAbleEvents();
+      const evIndex = new Map(events.map((e, i) => [e.id, i]));
+      const q = (rsvpTabFilters.q || '').toLowerCase().trim();
+      const rows = rsvps.filter(r => {
+        if (rsvpTabFilters.event !== 'all' && r.event_id !== rsvpTabFilters.event) return false;
+        if (rsvpTabFilters.status !== 'all' && r.status !== rsvpTabFilters.status) return false;
+        if (q) {
+          const hay = `${r.guest_name} ${r.family_name} ${r.family_code}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      }).sort((a, b) =>
+        ((evIndex.get(a.event_id) ?? 99) - (evIndex.get(b.event_id) ?? 99)) ||
+        String(a.family_name || '').localeCompare(String(b.family_name || '')) ||
+        String(a.guest_name || '').localeCompare(String(b.guest_name || ''))
+      );
+      body.innerHTML = rows.map(r => `<tr>
+          <td>${esc(r.guest_name)}</td>
+          <td>${esc(r.family_name || '')} <span style="color:var(--taupe);font-size:0.74rem;">${esc(r.family_code || '')}</span></td>
+          <td>${esc(r.event_title || r.event_id)}</td>
+          <td><span class="status-badge ${r.status === 'attending' ? 'attending' : 'declining'}">${esc(r.status)}</span></td>
+          <td>${r.guest_type === 'plus-one' ? '<span class="plusone-badge">+1</span>' : esc(r.guest_type || 'guest')}</td>
+          <td style="font-size:0.8rem;max-width:220px;">${esc(r.dietary_notes || '')}</td>
+          <td style="white-space:nowrap;font-size:0.8rem;">${esc(fmtRsvpDate(r.timestamp))}</td>
+        </tr>`).join('') ||
+        `<tr><td colspan="7" style="text-align:center;color:var(--taupe);padding:18px;">No responses match these filters.</td></tr>`;
+      if (countEl) countEl.textContent = `${rows.length} of ${rsvps.length} responses`;
+    }
+
+    function renderRsvpTabs() {
+      const families = getStoredGuestList();
+      const rsvps = getStoredRSVPs();
+      renderRsvpByEvent(families, rsvps);
+      renderRsvpByFamily(families, rsvps);
+      renderRsvpAll(families, rsvps);
     }
 
     // ---------- Guest roster: search, select, edit, bulk tags ----------
