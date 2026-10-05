@@ -908,6 +908,20 @@ function updateCountdown() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+/* Bride-family hero: guests tagged "bride-family" see the invitation framed
+   as coming from Disha's parents rather than from the couple. */
+function applyBrideFamilyHero() {
+  let tags = [];
+  try { tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]'); } catch (e) {}
+  if (!tags.includes('bride-family')) return;
+  const script = document.querySelector('.hero-script-heading');
+  const lead = document.querySelector('.hero-lead-text');
+  const invite = document.querySelector('.hero-invite-text');
+  if (script) script.textContent = 'The Wedding of';
+  if (lead) lead.textContent = 'DHRUV & GARIMA JAIN CORDIALLY INVITE YOU TO CELEBRATE THE MARRIAGE OF';
+  if (invite) invite.textContent = 'AND GRACE THE OCCASION WITH YOUR BLESSINGS';
+}
+
 /* show/hide travel sections per guest tags; relabel for single-destination
    guests and put India first (tabs + scroll order) when invited to both */
 function applyTagSections() {
@@ -960,6 +974,7 @@ async function initPage() {
   initNavMenu();
   initSmartFooter();
   applyTagSections();
+  applyBrideFamilyHero();
   try { if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
   window.GuestAuth.renderNav(); // re-run after DB refresh so the Admin-item owner check uses fresh data
   initRegistry();
