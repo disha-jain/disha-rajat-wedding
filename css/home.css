@@ -505,3 +505,8 @@ nav a.active {
   font-size: 0.95rem;
   font-weight: 700;
 }
+
+/* Bride-family hero variant: breathing room between script and parents' line */
+.hero-script-heading.hero-script-parents {
+  margin-bottom: 10px;
+}
