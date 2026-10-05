@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css?v=20261003a">
-  <link rel="stylesheet" href="css/admin.css?v=20261004a">
+  <link rel="stylesheet" href="css/admin.css?v=20261004b">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -532,6 +532,150 @@
       renderRsvpByFamily(families, rsvps);
       renderRsvpAll(families, rsvps);
     }
+
+    // ---------- Tag autocomplete: suggest existing tags, or add a new one ----------
+    const CANONICAL_TAGS = ['india-guest', 'bride-side', 'groom-side', 'us-guest'];
+
+    function collectExistingTags() {
+      const set = new Set(CANONICAL_TAGS);
+      (getStoredGuestList() || []).forEach(f =>
+        (f.members || []).forEach(m => (m.tags || []).forEach(t => {
+          const tag = String(t).trim().toLowerCase();
+          if (tag) set.add(tag);
+        })));
+      return [...set].sort();
+    }
+
+    let tagAC = null; // { input, box, items, newTag, activeIdx }
+
+    function closeTagAutocomplete() {
+      if (tagAC) {
+        tagAC.input.setAttribute('aria-expanded', 'false');
+        tagAC.box.remove();
+        tagAC = null;
+        document.removeEventListener('click', tagACOutside, true);
+        window.removeEventListener('scroll', positionTagAutocomplete, true);
+        window.removeEventListener('resize', positionTagAutocomplete);
+      }
+    }
+
+    function tagACOutside(e) {
+      if (tagAC && !tagAC.box.contains(e.target) && e.target !== tagAC.input) closeTagAutocomplete();
+    }
+
+    function positionTagAutocomplete() {
+      if (!tagAC) return;
+      const r = tagAC.input.getBoundingClientRect();
+      tagAC.box.style.top = (r.bottom + window.scrollY + 4) + 'px';
+      tagAC.box.style.left = (r.left + window.scrollX) + 'px';
+      tagAC.box.style.minWidth = Math.max(r.width, 200) + 'px';
+    }
+
+    function tagTokens(input) {
+      return String(input.value || '').split(/[;,]/);
+    }
+
+    function renderTagAutocomplete() {
+      if (!tagAC) return;
+      const parts = tagTokens(tagAC.input);
+      const token = parts[parts.length - 1].trim().toLowerCase();
+      const used = new Set(parts.slice(0, -1).map(p => p.trim().toLowerCase()).filter(Boolean));
+      const available = collectExistingTags().filter(t => !used.has(t));
+      const matches = available.filter(t => !token || t.includes(token));
+      matches.sort((a, b) => ((b.startsWith(token) ? 1 : 0) - (a.startsWith(token) ? 1 : 0)) || a.localeCompare(b));
+      tagAC.items = matches.slice(0, 8);
+      tagAC.newTag = (token && !available.includes(token)) ? token : null;
+      const total = tagAC.items.length + (tagAC.newTag ? 1 : 0);
+      if (tagAC.activeIdx >= total) tagAC.activeIdx = total - 1;
+
+      let html = '';
+      tagAC.items.forEach((t, idx) => {
+        html += `<div class="tag-ac-item${idx === tagAC.activeIdx ? ' active' : ''}" role="option" aria-selected="${idx === tagAC.activeIdx}" onmousedown="event.preventDefault(); pickTagAC(${idx})">${esc(t)}</div>`;
+      });
+      if (tagAC.newTag) {
+        const idx = tagAC.items.length;
+        html += `<div class="tag-ac-item tag-ac-new${idx === tagAC.activeIdx ? ' active' : ''}" role="option" aria-selected="${idx === tagAC.activeIdx}" onmousedown="event.preventDefault(); pickTagAC(${idx})">+ Add &ldquo;${esc(tagAC.newTag)}&rdquo; as new tag</div>`;
+      }
+      if (!total) html = `<div class="tag-ac-empty">No matching tags &mdash; keep typing to add a new one</div>`;
+      tagAC.box.innerHTML = html;
+    }
+
+    function openTagAutocomplete(input) {
+      closeTagAutocomplete();
+      const box = document.createElement('div');
+      box.className = 'tag-ac-box';
+      box.setAttribute('role', 'listbox');
+      document.body.appendChild(box);
+      tagAC = { input, box, items: [], newTag: null, activeIdx: -1 };
+      input.setAttribute('aria-expanded', 'true');
+      document.addEventListener('click', tagACOutside, true);
+      window.addEventListener('scroll', positionTagAutocomplete, true);
+      window.addEventListener('resize', positionTagAutocomplete);
+      renderTagAutocomplete();
+      positionTagAutocomplete();
+    }
+
+    function pickTagAC(idx) {
+      if (!tagAC) return;
+      let tag = null;
+      if (idx < tagAC.items.length) tag = tagAC.items[idx];
+      else if (tagAC.newTag) tag = tagAC.newTag;
+      if (!tag) return;
+      const input = tagAC.input;
+      const committed = tagTokens(input).slice(0, -1).map(p => p.trim()).filter(Boolean);
+      committed.push(tag);
+      input.value = committed.join('; ') + '; ';
+      openTagAutocomplete(input); // keep suggesting for the next tag
+      input.focus();
+    }
+
+    function enableTagAutocomplete(input) {
+      if (!input || input.dataset.tagAC) return;
+      input.dataset.tagAC = '1';
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('role', 'combobox');
+      input.setAttribute('aria-expanded', 'false');
+      input.addEventListener('focus', () => openTagAutocomplete(input));
+      input.addEventListener('input', () => {
+        if (tagAC && tagAC.input === input) {
+          tagAC.activeIdx = -1;
+          renderTagAutocomplete();
+          positionTagAutocomplete();
+        } else {
+          openTagAutocomplete(input);
+        }
+      });
+      input.addEventListener('keydown', e => {
+        if (!tagAC || tagAC.input !== input) return;
+        const total = tagAC.items.length + (tagAC.newTag ? 1 : 0);
+        if (e.key === 'ArrowDown' && total) {
+          e.preventDefault();
+          tagAC.activeIdx = (tagAC.activeIdx + 1) % total;
+          renderTagAutocomplete();
+        } else if (e.key === 'ArrowUp' && total) {
+          e.preventDefault();
+          tagAC.activeIdx = (tagAC.activeIdx - 1 + total) % total;
+          renderTagAutocomplete();
+        } else if (e.key === 'Enter' && tagAC.activeIdx >= 0) {
+          e.preventDefault();
+          pickTagAC(tagAC.activeIdx);
+        } else if (e.key === 'Enter' && tagAC.newTag) {
+          e.preventDefault();
+          pickTagAC(tagAC.items.length); // commit the typed text as a brand-new tag
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeTagAutocomplete();
+        }
+      });
+      input.addEventListener('blur', () => {
+        setTimeout(() => { if (tagAC && tagAC.input === input) closeTagAutocomplete(); }, 150);
+      });
+    }
+
+    ['edit-tags', 'add-tags', 'bulk-add-tags', 'bulk-remove-tags'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) enableTagAutocomplete(el);
+    });
 
     // ---------- Guest roster: search, select, edit, bulk tags ----------
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
