@@ -110,7 +110,7 @@
 
   <footer class="lb-footer">
     <div class="lb-script">Disha &amp; Rajat</div>
-    <p>March 2027 · Jaipur &amp; Virginia</p>
+    <p id="lb-footer-line">March 2027 · Jaipur &amp; Virginia</p>
   </footer>
 
   <script>
@@ -142,6 +142,18 @@
       });
 
       document.getElementById('lb-empty').hidden = shown > 0;
+
+      // Footer location follows the guest's invitation: Jaipur for
+      // India-only guests, Virginia for US-only guests, both otherwise.
+      var hasIndia = tags.indexOf('india-guest') !== -1;
+      var hasUs = tags.indexOf('us-guest') !== -1;
+      var footerLine = document.getElementById('lb-footer-line');
+      if (footerLine) {
+        footerLine.textContent =
+          (hasIndia && !hasUs) ? 'March 2027 · Jaipur' :
+          (hasUs && !hasIndia) ? 'March 2027 · Virginia' :
+          'March 2027 · Jaipur & Virginia';
+      }
     }
   </script>
 
