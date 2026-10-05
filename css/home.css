@@ -499,3 +499,9 @@ nav a.active {
   .fund-payments-modal { grid-template-columns: 1fr; max-width: 230px; margin-left: auto; margin-right: auto; }
   .registry-script { font-size: 2.6rem; }
 }
+
+/* Bride-family hero variant: parents' invitation line, slightly larger + bold */
+.hero-lead-text.hero-lead-parents {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
