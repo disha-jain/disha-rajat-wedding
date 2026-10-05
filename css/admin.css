@@ -204,3 +204,19 @@
 .status-badge.attending { background: #e6f4ea; color: #2e7d32; }
 .status-badge.declining { background: #fbe9e7; color: #b3261e; }
 .status-badge.pending { background: #fdf0d5; color: #a86e00; }
+
+/* ---------- Tag autocomplete dropdown ---------- */
+.tag-ac-box {
+  position: absolute; z-index: 400;
+  background: var(--white); border: 1px solid var(--border-gold); border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(27, 26, 23, 0.18);
+  padding: 6px; max-height: 240px; overflow-y: auto;
+}
+.tag-ac-item {
+  padding: 8px 12px; border-radius: 7px; font-size: 0.88rem; cursor: pointer;
+  white-space: nowrap;
+}
+.tag-ac-item:hover, .tag-ac-item.active { background: var(--ivory); }
+.tag-ac-item.active { outline: 1.5px solid var(--gold-primary); outline-offset: -1.5px; }
+.tag-ac-item.tag-ac-new { color: var(--gold-dark); font-weight: 600; border-top: 1px solid var(--line); margin-top: 4px; padding-top: 10px; }
+.tag-ac-empty { padding: 10px 12px; font-size: 0.84rem; color: var(--taupe); }
