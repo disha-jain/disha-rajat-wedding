@@ -510,3 +510,6 @@ nav a.active {
 .hero-script-heading.hero-script-parents {
   margin-bottom: 10px;
 }
+
+/* Hero date blocks: spacing between the two celebrations */
+.date-block + .date-block { margin-top: 18px; }
