@@ -926,6 +926,10 @@ function applyHeroDates() {
     usBlock.style.display = 'none';
   } else if (hasUs && !hasIndia) {
     indiaBlock.style.display = 'none';
+    // The 18px gap comes from `.date-block + .date-block`, which still matches
+    // even when the first block is display:none — clear it so the single
+    // visible date sits flush under the frame's own padding.
+    usBlock.style.marginTop = '0';
   }
 }
 
