@@ -183,7 +183,7 @@ const WEDDING_EVENTS = [
   // ---------------- March 27 — Virginia ----------------
   {
     id: 'virginia-reception',
-    title: 'Virginia Reception',
+    title: 'Reception',
     date: '2027-03-27',
     dateLabel: 'March 27, 2027',
     time: '6:00 PM – 12:00 AM', // EDIT ME
