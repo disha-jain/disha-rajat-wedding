@@ -50,7 +50,6 @@
 .hero-invite-text {
   font-family: var(--font-serif);
   font-size: 0.95rem;
-  font-weight: 700;
   letter-spacing: 2px;
   color: var(--taupe);
   text-transform: uppercase;
