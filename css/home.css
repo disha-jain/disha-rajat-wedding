@@ -31,7 +31,8 @@
 
 .hero-lead-text {
   font-family: var(--font-serif);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 700;
   letter-spacing: 3px;
   color: var(--taupe);
   text-transform: uppercase;
@@ -49,7 +50,8 @@
 
 .hero-invite-text {
   font-family: var(--font-serif);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 700;
   letter-spacing: 2px;
   color: var(--taupe);
   text-transform: uppercase;
@@ -498,17 +500,6 @@ nav a.active {
   .fund-grid { grid-template-columns: 1fr; }
   .fund-payments-modal { grid-template-columns: 1fr; max-width: 230px; margin-left: auto; margin-right: auto; }
   .registry-script { font-size: 2.6rem; }
-}
-
-/* Bride-family hero variant: parents' invitation line, slightly larger + bold */
-.hero-lead-text.hero-lead-parents {
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-/* Bride-family hero variant: breathing room between script and parents' line */
-.hero-script-heading.hero-script-parents {
-  margin-bottom: 10px;
 }
 
 /* Hero date blocks: spacing between the two celebrations */
