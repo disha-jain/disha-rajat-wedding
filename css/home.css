@@ -73,6 +73,7 @@
 .date-line-primary {
   font-family: var(--font-serif);
   font-size: 1.7rem;
+  font-weight: 700;
   color: var(--dark-gray);
   letter-spacing: 3px;
   margin-bottom: 8px;
@@ -81,6 +82,7 @@
 .date-line-secondary {
   font-family: var(--font-serif);
   font-size: 1.4rem;
+  font-weight: 700;
   color: var(--dark-gray);
   letter-spacing: 2px;
 }
