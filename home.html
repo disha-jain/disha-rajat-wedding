@@ -46,7 +46,7 @@
     <a href="#travel-us" data-section="travel-us" id="nav-travel-us" style="display:none;">US Travel & Lodging</a>
     <a href="#travel-india" data-section="travel-india" id="nav-travel-india" style="display:none;">India Travel</a>
     <a href="#qa" data-section="qa">Q&amp;A</a>
-    <a href="#registry" data-section="registry">Registry</a>
+    <a href="#registry" data-section="registry" id="nav-registry">Registry</a>
     <a href="#rsvp" data-section="rsvp">RSVP</a>
     <div class="nav-menu-wrap" id="nav-menu-wrap" hidden>
       <button type="button" class="nav-menu-btn" id="nav-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Menu">
@@ -980,6 +980,14 @@ function applyTagSections() {
     usSec.parentNode.insertBefore(indiaSec, usSec);
     usTab.parentNode.insertBefore(indiaTab, usTab);
   }
+
+  // registry is hidden for bride-side India guests not invited to the US reception
+  const hideRegistry = tags.includes('bride-side') && hasIndia && !hasUs;
+  const regSec = document.getElementById('registry');
+  const regTab = document.getElementById('nav-registry');
+  if (regSec) regSec.style.display = hideRegistry ? 'none' : '';
+  if (regTab) regTab.style.display = hideRegistry ? 'none' : '';
+
   maybeInitHotelMap();
 }
 
