@@ -176,7 +176,7 @@ const WEDDING_EVENTS = [
       { time: '7:00 PM', title: 'Varmala', icon: '💐' },
       { time: '7:30 PM – 9:30 PM', title: 'Reception', icon: '🥂' },
       { time: '9:45 PM – 10:40 PM', title: 'Pheras', icon: '🔥' },
-      { time: '11:00 PM', title: 'Vidai', icon: '👋' }
+      { time: '11:00 PM', title: 'Vidai', icon: '🧳' }
     ]
   },
 
