@@ -32,7 +32,7 @@ const WEDDING_EVENTS = [
     palette: ['#F0A8A0', '#E7583E', '#E38322', '#F2C79C', '#166963'], // EDIT ME — swatch colors shown with the dress code
     notes: '',                  // EDIT ME — anything guests should know
     tags: ['india-guest'],
-    icon: '🌿'
+    icon: '🤲🏽'
   },
   {
     id: 'tel-baan',
@@ -46,7 +46,7 @@ const WEDDING_EVENTS = [
     notes: '',
     tags: ['bride-side'],
     rsvp: false,                // shown on the schedule, hidden from the RSVP form
-    icon: '🪔'
+    icon: '🌻'
   },
   {
     id: 'high-tea',
@@ -144,7 +144,7 @@ const WEDDING_EVENTS = [
     dressCode: '',              // EDIT ME
     notes: '',
     tags: ['groom-side'],
-    icon: '👑'
+    icon: '👳🏽'
   },
   {
     id: 'baarat',
@@ -171,7 +171,7 @@ const WEDDING_EVENTS = [
     dressCode: 'Traditional Indian Formal (Sarees, Lehengas, Sherwanis)',
     notes: '',                  // EDIT ME — anything guests should know
     tags: ['india-guest'],
-    icon: '💒',
+    icon: '💍'
     parts: [                    // sub-events shown on the schedule; RSVP stays a single row
       { time: '7:00 PM', title: 'Varmala', icon: '💐' },
       { time: '7:30 PM – 9:30 PM', title: 'Reception', icon: '🥂' },
