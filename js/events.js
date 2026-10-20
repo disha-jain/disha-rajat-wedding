@@ -171,7 +171,7 @@ const WEDDING_EVENTS = [
     dressCode: 'Traditional Indian Formal (Sarees, Lehengas, Sherwanis)',
     notes: '',                  // EDIT ME — anything guests should know
     tags: ['india-guest'],
-    icon: '💍'
+    icon: '💍',
     parts: [                    // sub-events shown on the schedule; RSVP stays a single row
       { time: '7:00 PM', title: 'Varmala', icon: '💐' },
       { time: '7:30 PM – 9:30 PM', title: 'Reception', icon: '🥂' },
