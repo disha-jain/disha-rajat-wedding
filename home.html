@@ -22,7 +22,7 @@
   <!-- Firebase SDKs (RSVP writes) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <script src="firebase-config.js?v=20261020a"></script>
 </head>
 <body>
   <script src="js/guest-auth.js"></script>
@@ -764,8 +764,6 @@ function updateCountdown() {
       });
     }
 
-    function snapshotKey() { return 'wedding_rsvp_family_' + family.family_code; }
-
     // The "Edit RSVP" button on the thank-you screen stays up through the
     // day after the RSVP deadline, then disappears. Reads RSVP_DEADLINE
     // from events.js so the date itself is never hardcoded here.
@@ -794,57 +792,92 @@ function updateCountdown() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function restorePrevious() {
-      try {
-        const snap = JSON.parse(localStorage.getItem(snapshotKey()) || 'null');
-        if (snap) {
-          (snap.additional || []).slice(0, plusOneLimit).forEach(g => addExtraRow(g.first || '', g.last || ''));
-          attendance = snap.attendance || {};
-          document.getElementById('dietary-notes').value = snap.dietary || '';
-          document.getElementById('wishes').value = snap.wishes || '';
-          return;
-        }
-      } catch (e) {}
-      // fallback: scan legacy per-guest records
-      try {
-        const recs = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]')
-          .filter(r => r.family_code === family.family_code);
-        const memberNames = new Set(family.members.map(m => fullName(m).toLowerCase()));
-        const extrasSeen = new Map();
-        recs.forEach(r => {
-          const nm = (r.guest_name || '').trim();
-          if (!nm) return;
-          let key;
-          if (memberNames.has(nm.toLowerCase())) key = 'm:' + nm.toLowerCase();
-          else {
-            if (!extrasSeen.has(nm.toLowerCase()) && extrasSeen.size < plusOneLimit) {
-              const parts = nm.split(/\s+/);
-              const x = { id: 'x' + (++extraSeq) + 'r', first: parts[0] || '', last: parts.slice(1).join(' ') || '' };
-              additional.push(x);
-              extrasSeen.set(nm.toLowerCase(), extraKey(x));
-            }
-            key = extrasSeen.get(nm.toLowerCase());
+    // Rebuild the form state from a family's RSVP records. Pure function of
+    // the records — extras are keyed 'a:name:<lowercased name>' here and
+    // translated to live extra-row keys when applied. No records = empty form.
+    function rsvpStateFromRecords(recs) {
+      const state = { attendance: {}, extras: [], dietary: '', wishes: '' };
+      const memberNames = new Set(family.members.map(m => fullName(m).toLowerCase()));
+      const extrasSeen = new Map();
+      (recs || []).forEach(r => {
+        const nm = (r.guest_name || '').trim();
+        if (!nm) return;
+        let key;
+        if (memberNames.has(nm.toLowerCase())) {
+          key = 'm:' + nm.toLowerCase();
+        } else {
+          if (!extrasSeen.has(nm.toLowerCase()) && extrasSeen.size < plusOneLimit) {
+            const parts = nm.split(/\s+/);
+            extrasSeen.set(nm.toLowerCase(), {
+              key: 'a:name:' + nm.toLowerCase(),
+              first: parts[0] || '',
+              last: parts.slice(1).join(' ') || ''
+            });
           }
-          if (!key) return;
-          attendance[r.event_id] = attendance[r.event_id] || {};
-          if (r.status === 'attending') attendance[r.event_id][key] = true;
-        });
-        additional.forEach(x => {
-          // render rows for restored extras (without stealing focus)
+          const x = extrasSeen.get(nm.toLowerCase());
+          if (!x) return;
+          key = x.key;
+        }
+        if (r.status === 'attending') {
+          state.attendance[r.event_id] = state.attendance[r.event_id] || {};
+          state.attendance[r.event_id][key] = true;
+        }
+      });
+      state.extras = [...extrasSeen.values()];
+      const withDiet = (recs || []).find(r => r.dietary_notes);
+      if (withDiet) {
+        const raw = withDiet.dietary_notes;
+        const m = raw.match(/ \| Wishes: ([\s\S]*)$/);
+        state.wishes = m ? m[1] : '';
+        state.dietary = raw.replace(/ \| Wishes: [\s\S]*$/, '');
+      }
+      return state;
+    }
+
+    // Firestore is the only source of truth for a family's RSVP. Fetch this
+    // family's records and pre-fill the form from them; if Firestore has no
+    // records for the family (or can't be reached), the form stays empty.
+    async function restorePrevious() {
+      let recs = [];
+      try {
+        if (typeof db !== 'undefined' && db !== null) {
+          const snap = await Promise.race([
+            db.collection('rsvps').where('family_code', '==', family.family_code).get(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('rsvp fetch timeout')), 8000))
+          ]);
+          snap.forEach(doc => recs.push(doc.data()));
+        }
+      } catch (e) { recs = []; }
+      if (!recs.length) return;
+      try {
+        const state = rsvpStateFromRecords(recs);
+        const keyMap = new Map();
+        state.extras.forEach(x0 => {
+          const x = { id: 'x' + (++extraSeq) + 'r', first: x0.first, last: x0.last };
+          additional.push(x);
+          keyMap.set(x0.key, extraKey(x));
+          // render the row for this restored extra (without stealing focus)
           const row = document.createElement('div');
           row.className = 'extra-row'; row.dataset.id = x.id;
-          row.innerHTML = `<input type="text" placeholder="First name" value="${esc(x.first)}"><input type="text" placeholder="Last name" value="${esc(x.last)}"><button type="button" class="extra-remove">×</button>`;
+          row.innerHTML = `<input type="text" placeholder="First name" value="${esc(x.first)}"><input type="text" placeholder="Last name" value="${esc(x.last)}"><button type="button" class="extra-remove">\u00D7</button>`;
           const [fi, li] = row.querySelectorAll('input');
           fi.addEventListener('input', () => { x.first = fi.value; renderEvents(); });
-          li.addEventListener('input', () => { x.last = li.value; renderEvents(); });
+          li.addEventListener('input', () => { x.last = fi.value; renderEvents(); });
           row.querySelector('.extra-remove').addEventListener('click', () => {
             additional = additional.filter(a => a.id !== x.id);
             row.remove(); renderEvents(); updateAddButton();
           });
           document.getElementById('additional-list').appendChild(row);
         });
-        const withDiet = recs.find(r => r.dietary_notes);
-        if (withDiet) document.getElementById('dietary-notes').value = withDiet.dietary_notes.replace(/ \| Wishes:.*$/, '');
+        attendance = {};
+        Object.entries(state.attendance).forEach(([ev, persons]) => {
+          attendance[ev] = {};
+          Object.entries(persons).forEach(([k, v]) => { attendance[ev][keyMap.get(k) || k] = v; });
+        });
+        document.getElementById('dietary-notes').value = state.dietary;
+        document.getElementById('wishes').value = state.wishes;
+        renderEvents();
+        updateAddButton();
       } catch (e) {}
     }
 
@@ -864,15 +897,8 @@ function updateCountdown() {
       const wishes = document.getElementById('wishes').value.trim();
       const timestamp = new Date().toISOString();
 
-      // structured snapshot for pre-fill
-      localStorage.setItem(snapshotKey(), JSON.stringify({
-        additional: namedExtras.map(x => ({ first: x.first.trim(), last: x.last.trim() })),
-        attendance, dietary, wishes, timestamp
-      }));
-
-      // per-event per-person records (keeps admin export working)
-      const db_records = JSON.parse(localStorage.getItem('wedding_rsvps_database') || '[]')
-        .filter(r => r.family_code !== family.family_code);
+      // Per-event per-person records, written to Firestore — the only place
+      // RSVP data lives. Nothing is kept in local storage.
       const newRecords = [];
       familyEvents.forEach(e => {
         keys.forEach(k => {
@@ -891,7 +917,6 @@ function updateCountdown() {
           });
         });
       });
-      localStorage.setItem('wedding_rsvps_database', JSON.stringify([...db_records, ...newRecords]));
 
       if (typeof db !== 'undefined' && db !== null) {
         try {
