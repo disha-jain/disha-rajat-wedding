@@ -67,5 +67,6 @@ in `js/events.js` and assign them to guests via the admin CSV.
 - Additional guests: named (first + last required), capped at the family's
   `max_plus_ones` total from the guest CSV. Families with a 0 limit see no
   add-guest UI.
-- Saved per event per person to `wedding_rsvps_database` (localStorage) and
-  Firestore `rsvps`, so the admin CSV export keeps working.
+- Saved per event per person to the Firestore `rsvps` collection (the
+  only source of truth); the admin dashboard keeps a local mirror of the
+  cloud pull for rendering only, so the admin CSV export keeps working.
