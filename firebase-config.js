@@ -21,4 +21,13 @@ let db = null;
 if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
+  // Offline persistence: a write made while a guest's connection is down is
+  // durably queued on their device and synced to Firestore when they are back
+  // online, so an RSVP never lives only in local storage. Firestore stays the
+  // single source of truth — reads reflect it (including its queued writes).
+  // If a browser doesn't support persistence, the site still works normally,
+  // just without the offline queue.
+  if (db && typeof db.enablePersistence === 'function') {
+    db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+  }
 }
