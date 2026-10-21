@@ -71,6 +71,8 @@ in `js/events.js` and assign them to guests via the admin CSV.
   only source of truth); the admin dashboard keeps a local mirror of the
   cloud pull for rendering only, so the admin CSV export keeps working.
 - Phone numbers: one collected per person in the RSVP form — at least one
-  per party is required, the rest are optional. Stored on the Firestore
-  `rsvps` records, pre-filled for returning guests to view and update, and
-  used only to reach guests on WhatsApp about the wedding.
+  per party is required, the rest are optional. Every number must carry a
+  country code (+1 US, +91 India, +65 Singapore) and is stored normalized
+  (`+<digits>`) on the Firestore `rsvps` records, pre-filled for returning
+  guests to view and update, and used only to reach guests on WhatsApp
+  about the wedding.
