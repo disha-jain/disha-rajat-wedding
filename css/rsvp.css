@@ -108,6 +108,10 @@ body {
 
     .extra-row { display: flex; gap: 8px; margin-bottom: 10px; }
     .extra-row input { flex: 1; }
+
+    .phone-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .phone-row label { flex: 0 0 40%; font-weight: 600; color: var(--ink); }
+    .phone-row input { flex: 1; }
     .extra-remove {
       flex-shrink: 0; width: 44px; border-radius: 10px; border: 1.5px solid var(--line);
       background: var(--white); font-size: 1.2rem; cursor: pointer; color: var(--taupe);
