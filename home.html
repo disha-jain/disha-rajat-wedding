@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="styles.css?v=20261003a">
   <link rel="stylesheet" href="css/home.css?v=20261016f">
   <link rel="stylesheet" href="css/schedule.css?v=20261002c">
-  <link rel="stylesheet" href="css/rsvp.css?v=20260930j">
+  <link rel="stylesheet" href="css/rsvp.css?v=20261020a">
   <link rel="stylesheet" href="css/travel.css?v=20261002c">
 
   <!-- Firebase SDKs (RSVP writes) -->
@@ -492,6 +492,12 @@
         <button class="add-extra-btn" id="add-extra-btn" type="button">+ Add a guest</button>
       </div>
 
+      <div class="section-card" id="phone-card">
+        <h3>Phone numbers</h3>
+        <p class="limit-note">One phone number is required for your party; numbers for everyone else are optional. We'll only use these numbers to reach you on WhatsApp about the wedding.</p>
+        <div id="phone-list"></div>
+      </div>
+
       <div id="events-list"></div>
 
       <div class="section-card">
@@ -622,6 +628,7 @@ function updateCountdown() {
     let familyEvents = [];
     let additional = [];          // [{id, first, last}]
     let attendance = {};          // {eventId: {personKey: true}}
+    let phones = {};              // {personKey: phone string}
     let plusOneLimit = 0;
     let extraSeq = 0;
 
@@ -710,7 +717,42 @@ function updateCountdown() {
       if (btn) btn.disabled = additional.length >= plusOneLimit;
     }
 
+    // One phone row per person in the party (members + additional guests).
+    // Reconciles rows by person key so re-renders never clobber a typed
+    // number or steal focus; labels follow additional-guest renames.
+    function renderPhones() {
+      const wrap = document.getElementById('phone-list');
+      if (!wrap || !family) return;
+      const people = [
+        ...family.members.map(m => ({ key: memberKey(m), name: fullName(m) })),
+        ...additional.map(x => ({ key: extraKey(x), name: `${x.first} ${x.last}`.trim() || 'Additional guest' }))
+      ];
+      const wanted = new Set(people.map(p => p.key));
+      [...wrap.querySelectorAll('.phone-row')].forEach(row => {
+        if (!wanted.has(row.dataset.key)) row.remove();
+      });
+      people.forEach(p => {
+        let row = [...wrap.querySelectorAll('.phone-row')].find(r => r.dataset.key === p.key);
+        if (!row) {
+          row = document.createElement('div');
+          row.className = 'phone-row';
+          row.dataset.key = p.key;
+          row.innerHTML = `<label></label><input type="tel" autocomplete="tel" placeholder="+1 555 123 4567">`;
+          const input = row.querySelector('input');
+          input.value = phones[p.key] || '';
+          input.addEventListener('input', () => { phones[p.key] = input.value; });
+          wrap.appendChild(row);
+        }
+        row.querySelector('label').textContent = p.name;
+        const input = row.querySelector('input');
+        if (document.activeElement !== input && input.value !== (phones[p.key] || '')) {
+          input.value = phones[p.key] || '';
+        }
+      });
+    }
+
     function renderEvents() {
+      renderPhones();
       const wrap = document.getElementById('events-list');
       if (!familyEvents.length) {
         wrap.innerHTML = `<div class="section-card"><p class="limit-note" style="margin:0;">No events to RSVP for yet — check back soon.</p></div>`;
@@ -796,7 +838,7 @@ function updateCountdown() {
     // the records — extras are keyed 'a:name:<lowercased name>' here and
     // translated to live extra-row keys when applied. No records = empty form.
     function rsvpStateFromRecords(recs) {
-      const state = { attendance: {}, extras: [], dietary: '', wishes: '' };
+      const state = { attendance: {}, extras: [], dietary: '', wishes: '', phones: {} };
       const memberNames = new Set(family.members.map(m => fullName(m).toLowerCase()));
       const extrasSeen = new Map();
       (recs || []).forEach(r => {
@@ -818,6 +860,7 @@ function updateCountdown() {
           if (!x) return;
           key = x.key;
         }
+        if (r.phone && !state.phones[key]) state.phones[key] = String(r.phone);
         if (r.status === 'attending') {
           state.attendance[r.event_id] = state.attendance[r.event_id] || {};
           state.attendance[r.event_id][key] = true;
@@ -874,6 +917,8 @@ function updateCountdown() {
           attendance[ev] = {};
           Object.entries(persons).forEach(([k, v]) => { attendance[ev][keyMap.get(k) || k] = v; });
         });
+        phones = {};
+        Object.entries(state.phones).forEach(([k, v]) => { phones[keyMap.get(k) || k] = v; });
         document.getElementById('dietary-notes').value = state.dietary;
         document.getElementById('wishes').value = state.wishes;
         renderEvents();
@@ -892,6 +937,18 @@ function updateCountdown() {
       const namedExtras = additional.filter(x => x.first.trim() && x.last.trim());
       const keys = [...family.members.map(memberKey), ...namedExtras.map(extraKey)];
       if (!keys.length) { showError('Your party is empty.'); return; }
+
+      // Phone numbers: optional per person, but at least one per party is
+      // required. Numbers are only ever used to reach guests on WhatsApp.
+      const phoneDigits = k => (phones[k] || '').replace(/\D/g, '');
+      for (const k of keys) {
+        if ((phones[k] || '').trim() && phoneDigits(k).length < 7) {
+          showError('One of the phone numbers looks incomplete — please check it, or clear the field.'); return;
+        }
+      }
+      if (!keys.some(k => phoneDigits(k).length >= 7)) {
+        showError('Please add a phone number for at least one person in your party — we\'ll only use it to reach you on WhatsApp about the wedding.'); return;
+      }
 
       const dietary = document.getElementById('dietary-notes').value.trim();
       const wishes = document.getElementById('wishes').value.trim();
@@ -913,6 +970,7 @@ function updateCountdown() {
             event_title: e.title,
             status: attending ? 'attending' : 'declining',
             dietary_notes: dietary + (wishes ? ' | Wishes: ' + wishes : ''),
+            phone: (phones[k] || '').trim(),
             timestamp
           });
         });
