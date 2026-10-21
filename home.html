@@ -494,7 +494,7 @@
 
       <div class="section-card" id="phone-card">
         <h3>Phone numbers</h3>
-        <p class="limit-note">One phone number is required for your party; numbers for everyone else are optional. We'll only use these numbers to reach you on WhatsApp about the wedding.</p>
+        <p class="limit-note">One phone number is required for your party; numbers for everyone else are optional. Please include the country code (+1 US, +91 India, +65 Singapore). We'll only use these numbers to reach you on WhatsApp about the wedding.</p>
         <div id="phone-list"></div>
       </div>
 
@@ -715,6 +715,17 @@ function updateCountdown() {
     function updateAddButton() {
       const btn = document.getElementById('add-extra-btn');
       if (btn) btn.disabled = additional.length >= plusOneLimit;
+    }
+
+    // A phone number must carry a country code: +1 (US), +91 (India), or
+    // +65 (Singapore). Returns the number normalized to '+<digits>' (the
+    // form WhatsApp uses), or null when it isn't a valid number.
+    function normalizePhone(raw) {
+      const s = String(raw || '').trim().replace(/[\s\-()]/g, '');
+      const m = s.match(/^\+(1|91|65)(\d+)$/);
+      if (!m) return null;
+      const want = { '1': 10, '91': 10, '65': 8 }[m[1]];
+      return m[2].length === want ? '+' + m[1] + m[2] : null;
     }
 
     // One phone row per person in the party (members + additional guests).
@@ -939,14 +950,16 @@ function updateCountdown() {
       if (!keys.length) { showError('Your party is empty.'); return; }
 
       // Phone numbers: optional per person, but at least one per party is
-      // required. Numbers are only ever used to reach guests on WhatsApp.
-      const phoneDigits = k => (phones[k] || '').replace(/\D/g, '');
+      // required, and every number given must carry a country code —
+      // +1 (US), +91 (India), or +65 (Singapore). Numbers are only ever
+      // used to reach guests on WhatsApp.
       for (const k of keys) {
-        if ((phones[k] || '').trim() && phoneDigits(k).length < 7) {
-          showError('One of the phone numbers looks incomplete — please check it, or clear the field.'); return;
+        const raw = (phones[k] || '').trim();
+        if (raw && !normalizePhone(raw)) {
+          showError('Please check the phone numbers — each one must start with a country code: +1 (US), +91 (India), or +65 (Singapore), followed by the full number.'); return;
         }
       }
-      if (!keys.some(k => phoneDigits(k).length >= 7)) {
+      if (!keys.some(k => normalizePhone(phones[k] || ''))) {
         showError('Please add a phone number for at least one person in your party — we\'ll only use it to reach you on WhatsApp about the wedding.'); return;
       }
 
@@ -970,7 +983,7 @@ function updateCountdown() {
             event_title: e.title,
             status: attending ? 'attending' : 'declining',
             dietary_notes: dietary + (wishes ? ' | Wishes: ' + wishes : ''),
-            phone: (phones[k] || '').trim(),
+            phone: normalizePhone(phones[k] || '') || '',
             timestamp
           });
         });
