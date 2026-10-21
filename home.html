@@ -494,7 +494,7 @@
 
       <div class="section-card" id="phone-card">
         <h3>Phone numbers</h3>
-        <p class="limit-note">One phone number is required for your party; numbers for everyone else are optional. Please include the country code (+1 US, +91 India, +65 Singapore). We'll only use these numbers to reach you on WhatsApp about the wedding.</p>
+        <p class="limit-note">One phone number is required for your party; numbers for everyone else are optional. Please include the country code (+1 US, +91 India, +65 Singapore, +44 UK). We'll only use these numbers to reach you on WhatsApp about the wedding.</p>
         <div id="phone-list"></div>
       </div>
 
@@ -718,13 +718,13 @@ function updateCountdown() {
     }
 
     // A phone number must carry a country code: +1 (US), +91 (India), or
-    // +65 (Singapore). Returns the number normalized to '+<digits>' (the
+    // +65 (Singapore), +44 (UK). Returns the number normalized to '+<digits>' (the
     // form WhatsApp uses), or null when it isn't a valid number.
     function normalizePhone(raw) {
       const s = String(raw || '').trim().replace(/[\s\-()]/g, '');
-      const m = s.match(/^\+(1|91|65)(\d+)$/);
+      const m = s.match(/^\+(1|91|65|44)(\d+)$/);
       if (!m) return null;
-      const want = { '1': 10, '91': 10, '65': 8 }[m[1]];
+      const want = { '1': 10, '91': 10, '65': 8, '44': 10 }[m[1]];
       return m[2].length === want ? '+' + m[1] + m[2] : null;
     }
 
@@ -951,12 +951,12 @@ function updateCountdown() {
 
       // Phone numbers: optional per person, but at least one per party is
       // required, and every number given must carry a country code —
-      // +1 (US), +91 (India), or +65 (Singapore). Numbers are only ever
+      // +1 (US), +91 (India), +65 (Singapore), +44 (UK). Numbers are only ever
       // used to reach guests on WhatsApp.
       for (const k of keys) {
         const raw = (phones[k] || '').trim();
         if (raw && !normalizePhone(raw)) {
-          showError('Please check the phone numbers — each one must start with a country code: +1 (US), +91 (India), or +65 (Singapore), followed by the full number.'); return;
+          showError('Please check the phone numbers — each one must start with a country code: +1 (US), +91 (India), +65 (Singapore), or +44 (UK), followed by the full number.'); return;
         }
       }
       if (!keys.some(k => normalizePhone(phones[k] || ''))) {
