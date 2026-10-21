@@ -367,7 +367,8 @@
     function rsvpNameRow(r, cls) {
       const plus = (r.guest_type === 'plus-one') ? '<span class="plusone-badge">+1</span>' : '';
       const diet = (r.dietary_notes && String(r.dietary_notes).trim()) ? `<span class="diet-note">${esc(r.dietary_notes)}</span>` : '';
-      return `<li class="${cls}">${esc(r.guest_name)}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${diet}</li>`;
+      const phone = (r.phone && String(r.phone).trim()) ? ` <span class="fam">· ${esc(r.phone)}</span>` : '';
+      return `<li class="${cls}">${esc(r.guest_name)}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${phone}${diet}</li>`;
     }
 
     function shortEventTitle(t) {
@@ -475,7 +476,7 @@
           <span class="result-count" id="rsvp-result-count"></span>
         </div>
         <div class="rsvp-grid-wrap"><table class="roster-table" id="rsvp-all-table">
-          <thead><tr><th>Guest</th><th>Family</th><th>Event</th><th>Status</th><th>Type</th><th>Dietary notes</th><th>Submitted</th></tr></thead>
+          <thead><tr><th>Guest</th><th>Family</th><th>Event</th><th>Status</th><th>Type</th><th>Phone</th><th>Dietary notes</th><th>Submitted</th></tr></thead>
           <tbody id="rsvp-all-body"></tbody>
         </table></div>`;
       renderRsvpAllRows(rsvps);
@@ -509,10 +510,11 @@
           <td>${esc(r.event_title || r.event_id)}</td>
           <td><span class="status-badge ${r.status === 'attending' ? 'attending' : 'declining'}">${esc(r.status)}</span></td>
           <td>${r.guest_type === 'plus-one' ? '<span class="plusone-badge">+1</span>' : esc(r.guest_type || 'guest')}</td>
+          <td style="white-space:nowrap;font-size:0.8rem;">${esc(r.phone || '')}</td>
           <td style="font-size:0.8rem;max-width:220px;">${esc(r.dietary_notes || '')}</td>
           <td style="white-space:nowrap;font-size:0.8rem;">${esc(fmtRsvpDate(r.timestamp))}</td>
         </tr>`).join('') ||
-        `<tr><td colspan="7" style="text-align:center;color:var(--taupe);padding:18px;">No responses match these filters.</td></tr>`;
+        `<tr><td colspan="8" style="text-align:center;color:var(--taupe);padding:18px;">No responses match these filters.</td></tr>`;
       if (countEl) countEl.textContent = `${rows.length} of ${rsvps.length} responses`;
     }
 
@@ -1115,14 +1117,14 @@
 
     function exportRSVPDataCSV() {
       const rsvps = getStoredRSVPs();
-      let csvContent = "data:text/csv;charset=utf-8,family_code,family_name,guest_name,guest_type,event_id,status,dietary_notes\n";
+      let csvContent = "data:text/csv;charset=utf-8,family_code,family_name,guest_name,guest_type,event_id,status,phone,dietary_notes\n";
 
       if (rsvps.length === 0) {
         // Default sample row if empty
         csvContent += "FAM01,Khanna Family,Rajat Khanna,e7,attending,None\n";
       } else {
         rsvps.forEach(r => {
-          csvContent += `"${r.family_code}","${r.family_name}","${r.guest_name}","${r.guest_type||''}","${r.event_id}","${r.status}","${r.dietary_notes || ''}"\n`;
+          csvContent += `"${r.family_code}","${r.family_name}","${r.guest_name}","${r.guest_type||''}","${r.event_id}","${r.status}","${r.phone || ''}","${r.dietary_notes || ''}"\n`;
         });
       }
 
