@@ -728,6 +728,20 @@ function updateCountdown() {
       return m[2].length === want ? '+' + m[1] + m[2] : null;
     }
 
+    // Phone numbers stored on the guest record (CSV import, admin edits)
+    // pre-fill the RSVP form. Valid numbers are normalized like the form
+    // does; anything else passes through raw so the guest can fix it
+    // (submit validation still enforces the country-code rules).
+    function phonesFromMembers(members) {
+      const out = {};
+      (members || []).forEach(m => {
+        if (!m || !m.phone) return;
+        const key = 'm:' + `${m.first_name} ${m.last_name}`.trim().toLowerCase();
+        out[key] = normalizePhone(m.phone) || String(m.phone).trim();
+      });
+      return out;
+    }
+
     // One phone row per person in the party (members + additional guests).
     // Reconciles rows by person key so re-renders never clobber a typed
     // number or steal focus; labels follow additional-guest renames.
@@ -902,7 +916,12 @@ function updateCountdown() {
           snap.forEach(doc => recs.push(doc.data()));
         }
       } catch (e) { recs = []; }
-      if (!recs.length) return;
+      if (!recs.length) {
+        // No prior RSVP: pre-fill from numbers stored on the guest record.
+        phones = phonesFromMembers(family.members);
+        renderEvents();
+        return;
+      }
       try {
         const state = rsvpStateFromRecords(recs);
         const keyMap = new Map();
@@ -928,7 +947,9 @@ function updateCountdown() {
           attendance[ev] = {};
           Object.entries(persons).forEach(([k, v]) => { attendance[ev][keyMap.get(k) || k] = v; });
         });
-        phones = {};
+        // Numbers stored on the guest record fill the gaps; a number from
+        // a prior RSVP submission wins over the stored one.
+        phones = phonesFromMembers(family.members);
         Object.entries(state.phones).forEach(([k, v]) => { phones[keyMap.get(k) || k] = v; });
         document.getElementById('dietary-notes').value = state.dietary;
         document.getElementById('wishes').value = state.wishes;
