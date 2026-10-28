@@ -75,4 +75,11 @@ in `js/events.js` and assign them to guests via the admin CSV.
   country code (+1 US, +91 India, +65 Singapore, +44 UK) and is stored normalized
   (`+<digits>`) on the Firestore `rsvps` records, pre-filled for returning
   guests to view and update, and used only to reach guests on WhatsApp
-  about the wedding.
+  about the wedding. A `phone` column in the admin CSV import (header
+  `family_code,family_name,first_name,last_name,email,tags,max_plus_ones,phone`)
+  stores a number on the guest record, also editable in the admin Edit/Add
+  guest forms; it pre-fills the RSVP form for guests with no prior RSVP, and
+  a prior RSVP number wins over it. Imported numbers are stored as given;
+  the RSVP form normalizes valid ones on pre-fill and enforces the
+  country-code rules on submit. Fields containing spaces or commas in the
+  CSV must be double-quoted.
