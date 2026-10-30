@@ -89,13 +89,13 @@
   color: var(--taupe);
 }
 
-.rings-icon {
+.infinity-icon {
   margin: 18px 0;
-  width: 55px;
-  height: 35px;
   display: inline-block;
-  background: radial-gradient(circle at 35% 50%, transparent 12px, var(--gold-primary) 13px, var(--gold-primary) 16px, transparent 17px),
-              radial-gradient(circle at 65% 50%, transparent 12px, var(--gold-primary) 13px, var(--gold-primary) 16px, transparent 17px);
+  font-family: var(--font-body-serif);
+  font-size: 72px;
+  line-height: 1;
+  color: var(--gold-primary);
 }
 
 .couple-photo-frame {
