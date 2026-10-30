@@ -41,7 +41,7 @@
 .hero-names {
   font-family: var(--font-serif);
   font-size: 3.2rem;
-  color: var(--dark-gray);
+  color: var(--ink);
   letter-spacing: 2px;
   line-height: 1.15;
   margin-bottom: 16px;
@@ -71,7 +71,7 @@
 .date-line-primary {
   font-family: var(--font-serif);
   font-size: 1.7rem;
-  color: var(--dark-gray);
+  color: var(--ink);
   letter-spacing: 3px;
   margin-bottom: 8px;
 }
@@ -79,7 +79,7 @@
 .date-line-secondary {
   font-family: var(--font-serif);
   font-size: 1.4rem;
-  color: var(--dark-gray);
+  color: var(--ink);
   letter-spacing: 2px;
 }
 
@@ -197,7 +197,7 @@
   font-size: 1.6rem;
   letter-spacing: 5px;
   font-weight: 700;
-  color: var(--dark-gray);
+  color: var(--ink);
   margin-bottom: 10px;
 }
 .moments-sub { color: var(--taupe); font-size: 0.92rem; margin-bottom: 32px; }
@@ -302,7 +302,7 @@ nav a.active {
   font-weight: 700;
   letter-spacing: 5px;
   text-align: center;
-  color: var(--dark-gray);
+  color: var(--ink);
   margin: -6px 0 52px;
 }
 .story-prose p {
@@ -331,7 +331,7 @@ nav a.active {
   font-weight: 700;
   letter-spacing: 5px;
   text-align: center;
-  color: var(--dark-gray);
+  color: var(--ink);
   margin: 0 0 10px;
 }
 .qa-item { margin-bottom: 50px; }
@@ -340,7 +340,7 @@ nav a.active {
   font-family: var(--font-body-serif);
   font-size: 1.18rem;
   font-weight: 700;
-  color: var(--dark-gray);
+  color: var(--ink);
   margin: 0 0 14px;
   line-height: 1.6;
 }
@@ -374,7 +374,7 @@ nav a.active {
   font-weight: 700;
   letter-spacing: 5px;
   text-align: center;
-  color: var(--dark-gray);
+  color: var(--ink);
   margin: 6px 0 18px;
 }
 .registry-intro {
@@ -399,7 +399,7 @@ nav a.active {
   letter-spacing: 2px;
   text-transform: uppercase;
   font-size: 1.05rem;
-  color: var(--dark-gray);
+  color: var(--ink);
   margin: 0 0 10px;
 }
 .registry-amazon p, .fund-card > p {
@@ -468,7 +468,7 @@ nav a.active {
   letter-spacing: 2px;
   text-transform: uppercase;
   font-size: 1.15rem;
-  color: var(--dark-gray);
+  color: var(--ink);
   margin: 0 0 8px;
 }
 .fund-modal-sub {
@@ -489,7 +489,7 @@ nav a.active {
   font-weight: 700;
   letter-spacing: 1px;
   margin-top: 10px;
-  color: var(--dark-gray);
+  color: var(--ink);
 }
 .pay-handle {
   font-size: 0.9rem;
