@@ -20,7 +20,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=20261020a"></script>
+  <script src="firebase-config.js?v=20261029a"></script>
   <script src="js/events.js?v=20261020a"></script>
 </head>
 <body>
@@ -75,16 +75,16 @@
     <div id="admin-dashboard" style="display:none;">
     
     <div class="card">
-      <h3 class="gold-title">Guest List CSV Upload</h3>
-      <p style="color: var(--text-sub); margin: 10px 0;">
+      <h3 class="gold-title admin-write-only">Guest List CSV Upload</h3>
+      <p class="admin-write-only" style="color: var(--text-sub); margin: 10px 0;">
         Upload your guest CSV file. Header required:<br>
         <code>family_code,family_name,first_name,last_name,email,tags,max_plus_ones,phone</code>
       </p>
       <br>
-      <input type="file" id="csv-file-input" accept=".csv" onchange="handleAdminCSVUpload(event)">
+      <input type="file" id="csv-file-input" class="admin-write-only" accept=".csv" onchange="handleAdminCSVUpload(event)">
       <br><br>
       <button class="btn-primary" onclick="exportRSVPDataCSV()">📥 Export RSVPs to CSV</button>
-      <button class="btn-danger-outline" style="margin-left:10px;" onclick="clearGuestDatabase()">🗑️ Clear Uploaded Guests</button>
+      <button class="btn-danger-outline admin-write-only" style="margin-left:10px;" onclick="clearGuestDatabase()">🗑️ Clear Uploaded Guests</button>
       <div id="admin-status" style="margin-top: 15px; color: var(--gold-dark); font-weight: 500;"></div>
     </div>
 
@@ -125,7 +125,7 @@
       <p id="guest-sync-note" style="font-size:0.82rem;color:var(--taupe);margin:-4px 0 10px;"></p>
       <div class="roster-controls">
         <input type="search" id="guest-search" placeholder="Search name, email, family, code, or tag\u2026" oninput="rosterQuery=this.value; renderRosterTable(getStoredGuestList())">
-        <button class="btn-primary btn-sm" onclick="openAddModal()">+ Add guest</button>
+        <button class="btn-primary btn-sm admin-write-only" onclick="openAddModal()">+ Add guest</button>
       </div>
       <div class="bulk-bar" id="bulk-bar" style="display:none;">
         <span id="bulk-count" style="font-size:0.88rem; white-space:nowrap;"></span>
@@ -247,7 +247,10 @@
         } else {
           const raw = localStorage.getItem(KEY);
           const local = raw ? JSON.parse(raw) : [];
-          if (local.length) {
+          if (local.length && adminReadOnly) {
+            // Read-only view never uploads a local list to the cloud.
+            setNote('Showing this device\u2019s saved list (read-only view).');
+          } else if (local.length) {
             for (const fam of local) {
               try { await db.collection("families").doc(fam.family_code).set(fam); } catch (e) {}
             }
@@ -256,7 +259,7 @@
               ? `Uploaded ${local.length} ${local.length === 1 ? 'family' : 'families'} to the cloud.`
               : 'Could not reach the cloud database — showing this device\u2019s saved list.');
           } else {
-            setNote('No guests yet — upload a CSV above.');
+            setNote(adminReadOnly ? 'No guests yet.' : 'No guests yet — upload a CSV above.');
           }
         }
       } catch (e) {
@@ -696,6 +699,7 @@
     }
 
     function persistFamilies(families) {
+      if (adminReadOnly) return;
       localStorage.setItem("wedding_guest_database", JSON.stringify(families));
       if (typeof db !== 'undefined' && db !== null) {
         families.forEach(fam => { db.collection("families").doc(fam.family_code).set(fam).catch(() => {}); });
@@ -729,8 +733,8 @@
       }
 
       let html = `<table class="roster-table"><thead><tr>
-        <th class="row-select" style="width:44px;"><span class="cb-wrap"><input type="checkbox" id="select-all" title="Select all" aria-label="Select all"></span></th>
-        <th>Family</th><th>Name</th><th>Email</th><th>Tags</th><th title="Max additional guests">+1s</th><th></th>
+        ${adminReadOnly ? '' : '<th class="row-select" style="width:44px;"><span class="cb-wrap"><input type="checkbox" id="select-all" title="Select all" aria-label="Select all"></span></th>'}
+        <th>Family</th><th>Name</th><th>Email</th><th>Tags</th><th title="Max additional guests">+1s</th>${adminReadOnly ? '' : '<th></th>'}
       </tr></thead><tbody>`;
 
       rows.forEach(r => {
@@ -738,13 +742,13 @@
         const chips = (r.m.tags || []).map(tag => `<span class="tag-chip">${esc(tag)}</span>`).join('')
           || '<span style="color:var(--taupe);">&mdash;</span>';
         html += `<tr data-key="${esc(r.key)}">
-          <td class="row-select"><span class="cb-wrap"><input type="checkbox" data-key="${esc(r.key)}" ${checked} onchange="toggleSelect(this)" aria-label="Select ${esc(r.m.first_name)} ${esc(r.m.last_name)}"></span></td>
+          ${adminReadOnly ? '' : `<td class="row-select"><span class="cb-wrap"><input type="checkbox" data-key="${esc(r.key)}" ${checked} onchange="toggleSelect(this)" aria-label="Select ${esc(r.m.first_name)} ${esc(r.m.last_name)}"></span></td>`}
           <td><code>${esc(r.fam.family_code)}</code><div style="font-size:0.78rem;color:var(--taupe);">${esc(r.fam.family_name)}</div></td>
           <td style="font-weight:600;white-space:nowrap;">${esc(r.m.first_name)} ${esc(r.m.last_name)}</td>
           <td style="font-size:0.85rem;">${esc(r.m.email || '\u2014')}</td>
           <td>${chips}</td>
           <td>${r.m.max_plus_ones || 0}</td>
-          <td style="text-align:center;white-space:nowrap;"><button class="edit-icon-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="openEditModal(this)" title="Edit guest" aria-label="Edit ${esc(r.m.first_name)} ${esc(r.m.last_name)}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button><button class="delete-icon-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="confirmDeleteGuest(this)" title="Delete guest" aria-label="Delete ${esc(r.m.first_name)} ${esc(r.m.last_name)}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></td>
+          ${adminReadOnly ? '' : `<td style="text-align:center;white-space:nowrap;"><button class="edit-icon-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="openEditModal(this)" title="Edit guest" aria-label="Edit ${esc(r.m.first_name)} ${esc(r.m.last_name)}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button><button class="delete-icon-btn" data-fam="${esc(r.fam.family_code)}" data-idx="${r.idx}" onclick="confirmDeleteGuest(this)" title="Delete guest" aria-label="Delete ${esc(r.m.first_name)} ${esc(r.m.last_name)}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></td>`}
         </tr>`;
       });
 
@@ -765,6 +769,7 @@
     }
 
     function onRowClick(e) {
+      if (adminReadOnly) return;
       const tr = e.target.closest('tr[data-key]');
       if (!tr) return;
       // let interactive elements behave normally (checkbox has its own handler)
@@ -814,12 +819,14 @@
     function updateBulkBar() {
       const bar = document.getElementById('bulk-bar');
       if (!bar) return;
+      if (adminReadOnly) { bar.style.display = 'none'; return; }
       const n = rosterSelection.size;
       bar.style.display = n ? 'flex' : 'none';
       document.getElementById('bulk-count').innerHTML = `<strong>${n}</strong> guest${n === 1 ? '' : 's'} selected`;
     }
 
     function applyBulkTags() {
+      if (adminReadOnly) return;
       const add = parseTagsInput(document.getElementById('bulk-add-tags').value);
       const remove = new Set(parseTagsInput(document.getElementById('bulk-remove-tags').value));
       if (!add.length && !remove.size) { setAdminStatus('Enter tags to add and/or remove first.', true); return; }
@@ -846,6 +853,7 @@
     }
 
     function openEditModal(btn) {
+      if (adminReadOnly) return;
       const famCode = btn.dataset.fam, idx = parseInt(btn.dataset.idx, 10);
       const fam = getStoredGuestList().find(f => f.family_code === famCode);
       if (!fam || !fam.members[idx]) return;
@@ -870,6 +878,7 @@
     }
 
     function saveEditModal() {
+      if (adminReadOnly) return;
       if (!editingKey) return;
       const parts = editingKey.split('::');
       const idx = parseInt(parts.pop(), 10);
@@ -906,6 +915,7 @@
     }
 
     function openAddModal() {
+      if (adminReadOnly) return;
       const families = getStoredGuestList();
       const sel = document.getElementById('add-family');
       sel.innerHTML = families.map(f =>
@@ -934,6 +944,7 @@
     }
 
     function saveAddModal() {
+      if (adminReadOnly) return;
       const first = document.getElementById('add-first').value.trim();
       const last = document.getElementById('add-last').value.trim();
       if (!first || !last) { alert('First and last name are required.'); return; }
@@ -976,6 +987,7 @@
 
     // ---------- Delete guest ----------
     function confirmDeleteGuest(btn) {
+      if (adminReadOnly) return;
       const famCode = btn.dataset.fam, idx = parseInt(btn.dataset.idx, 10);
       const families = getStoredGuestList();
       const fam = families.find(f => f.family_code === famCode);
@@ -1064,6 +1076,7 @@
       const file = e.target.files[0];
       const statusEl = document.getElementById('admin-status');
       if (!file) return;
+      if (adminReadOnly) return;
 
       const reader = new FileReader();
       reader.onload = function(evt) {
@@ -1141,6 +1154,7 @@
     }
 
     function clearGuestDatabase() {
+      if (adminReadOnly) return;
       if (confirm("Are you sure you want to clear all loaded guest data?")) {
         localStorage.removeItem("wedding_guest_database");
         localStorage.removeItem("wedding_rsvps_database");
@@ -1173,9 +1187,20 @@
   
     // --- Google Admin Auth (mirrors reference site) ---
     let adminUser = null;
+    let adminReadOnly = false;
 
     function isFirebaseConfigured() {
       return typeof db !== 'undefined' && db !== null;
+    }
+
+    // Read-only admins (readOnlyAdminEmails in firebase-config.js) can view
+    // everything but change nothing: elements tagged .admin-write-only are
+    // hidden for them, the roster renders without edit controls, and every
+    // mutating function checks adminReadOnly before acting.
+    function applyReadOnlyMode() {
+      document.querySelectorAll('.admin-write-only').forEach(el => {
+        el.style.display = adminReadOnly ? 'none' : '';
+      });
     }
 
     function updateAdminUI() {
@@ -1200,7 +1225,8 @@
         dashboard.style.display = 'block';
         signinBtn.style.display = 'none';
         signoutBtn.style.display = 'inline-block';
-        statusEl.textContent = 'Signed in as ' + adminUser.email;
+        statusEl.textContent = 'Signed in as ' + adminUser.email + (adminReadOnly ? ' — read-only view' : '');
+        applyReadOnlyMode();
       } else {
         dashboard.style.display = 'none';
         signinBtn.style.display = 'inline-block';
@@ -1245,6 +1271,11 @@
           if (!isAdmin && typeof adminEmails !== 'undefined' && Array.isArray(adminEmails)) {
             isAdmin = adminEmails.includes(user.email);
           }
+          let isReadOnly = false;
+          if (!isAdmin && typeof readOnlyAdminEmails !== 'undefined' && Array.isArray(readOnlyAdminEmails)) {
+            isReadOnly = readOnlyAdminEmails.includes(user.email);
+          }
+          adminReadOnly = isReadOnly;
           // Remember verified admins so the guest nav can offer the Admin
           // link only to them (see renderNav in guest-auth.js).
           try {
@@ -1252,22 +1283,26 @@
             else localStorage.removeItem('admin_verified_email');
           } catch (e) {}
           // If no allowlist configured, treat first signer as admin for setup ease (local only warning)
-          if (!isAdmin) {
+          if (!isAdmin && !isReadOnly) {
             const statusEl = document.getElementById('admin-auth-status');
             statusEl.style.color = '#ff6b6b';
-            statusEl.textContent = user.email + ' is not listed as an admin. Add it to admins collection or adminEmails in firebase-config.js.';
+            statusEl.textContent = user.email + ' is not listed as an admin. Add it to admins collection, adminEmails, or readOnlyAdminEmails in firebase-config.js.';
             document.getElementById('admin-dashboard').style.display = 'none';
             document.getElementById('google-signout-btn').style.display = 'inline-block';
             document.getElementById('google-signin-btn').style.display = 'none';
             return;
           }
         } else {
+          adminReadOnly = false;
           try { localStorage.removeItem('admin_verified_email'); } catch (e) {}
         }
         const statusEl = document.getElementById('admin-auth-status');
         if (statusEl) statusEl.style.color = '';
         updateAdminUI();
         if (user) {
+          // Render immediately from the local mirror so a read-only sign-in
+          // never flashes the editing controls, then re-render after sync.
+          loadDashboardData();
           syncGuestDatabaseFromCloud().then(() => loadDashboardData());
         }
       });
