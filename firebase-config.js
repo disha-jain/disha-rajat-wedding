@@ -17,6 +17,13 @@ const firebaseConfig = {
 // (Alternatively, create Firestore docs at admins/{email}.)
 const adminEmails = ["dishajain2016@gmail.com", "khanna.rjt@gmail.com"];
 
+// Google account emails allowed a READ-ONLY view of the Host Admin
+// dashboard: they can sign in and see everything, but the dashboard hides
+// every editing control for them, and Firestore rules do not grant them
+// writes either. (Do NOT also add these to admins/{email} docs — that
+// would make them full admins.)
+const readOnlyAdminEmails = ["rajatdishawedding@gmail.com"];
+
 let db = null;
 if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
   firebase.initializeApp(firebaseConfig);
