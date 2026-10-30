@@ -92,10 +92,14 @@
 .infinity-icon {
   margin: 18px 0;
   display: inline-block;
-  font-family: var(--font-body-serif);
-  font-size: 72px;
-  line-height: 1;
+  width: 80px;
   color: var(--gold-primary);
+}
+
+.infinity-icon svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .couple-photo-frame {
