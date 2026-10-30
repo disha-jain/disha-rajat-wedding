@@ -26,7 +26,7 @@
 </head>
 <body>
   <script src="js/guest-auth.js"></script>
-  <script src="js/events.js?v=20261030a"></script>
+  <script src="js/events.js?v=20261030b"></script>
   <script>
     if (!window.GuestAuth.requireUnlock()) {
       // redirecting to index.html
@@ -394,7 +394,7 @@
       <h2 class="qa-title">QUESTIONS</h2>
       <div class="qa-item">
         <h4>What’s the RSVP deadline?</h4>
-        <p>Please RSVP by January 2 so we can get an accurate headcount.</p>
+        <p>Please RSVP by <span id="qa-rsvp-deadline-date">January 2</span> so we can get an accurate headcount.</p>
       </div>
       <div class="qa-item">
         <h4>Can I bring a guest?</h4>
@@ -839,25 +839,48 @@ function updateCountdown() {
       });
     }
 
+    // Which deadline applies to this guest: US-only guests (us-guest
+    // without india-guest) get RSVP_DEADLINE_US_ONLY (Feb 1); everyone
+    // else gets RSVP_DEADLINE (Jan 2). Both dates live in events.js.
+    function deadlineForTags(tags) {
+      try {
+        const t = Array.isArray(tags) ? tags : [];
+        if (t.includes('us-guest') && !t.includes('india-guest') &&
+            typeof RSVP_DEADLINE_US_ONLY === 'string' && RSVP_DEADLINE_US_ONLY) {
+          return RSVP_DEADLINE_US_ONLY;
+        }
+      } catch (e) {}
+      return (typeof RSVP_DEADLINE === 'string' && RSVP_DEADLINE) ? RSVP_DEADLINE : '';
+    }
+
+    function currentGuestTags() {
+      try { return JSON.parse(sessionStorage.getItem('guest_tags') || '[]'); } catch (e) { return []; }
+    }
+
     // The "Edit RSVP" button on the thank-you screen stays up through the
-    // day after the RSVP deadline, then disappears. Reads RSVP_DEADLINE
-    // from events.js so the date itself is never hardcoded here.
+    // day after the RSVP deadline, then disappears. Reads the guest's
+    // deadline from events.js via deadlineForTags so the date itself is
+    // never hardcoded here.
     function rsvpEditable() {
       try {
-        if (typeof RSVP_DEADLINE !== 'string' || !RSVP_DEADLINE) return true;
-        const cutoff = new Date(RSVP_DEADLINE + 'T23:59:59').getTime() + 24 * 60 * 60 * 1000;
+        const deadline = deadlineForTags(currentGuestTags());
+        if (!deadline) return true;
+        const cutoff = new Date(deadline + 'T23:59:59').getTime() + 24 * 60 * 60 * 1000;
         return Date.now() <= cutoff;
       } catch (e) { return true; }
     }
 
     function renderRsvpDeadline() {
       try {
-        if (typeof RSVP_DEADLINE !== 'string' || !RSVP_DEADLINE) return;
-        const d = new Date(RSVP_DEADLINE + 'T12:00:00');
+        const deadline = deadlineForTags(currentGuestTags());
+        if (!deadline) return;
+        const d = new Date(deadline + 'T12:00:00');
         if (isNaN(d.getTime())) return;
         const label = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
         const el = document.getElementById('rsvp-deadline-date');
         if (el && label) el.textContent = label;
+        const qa = document.getElementById('qa-rsvp-deadline-date');
+        if (qa && label) qa.textContent = label;
       } catch (e) {}
     }
 
