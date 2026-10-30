@@ -11,7 +11,7 @@
    Palette sampled from the approved swatches:
      Gold #C9A961 · Dark gray #3B3A37 · Smoke #C8BFB4
      Glacier #D4D5CE · Taupe #9F968A · Cream #DDCFBA
-     Ink #1B1A17 · Ivory #FAF7F0 · White #FFFFFF
+     Midnight navy #13294B · Ivory #FAF7F0 · White #FFFFFF
    Fonts: Boheme Floral (script accents) · Cinzel (headings)
           Montserrat (body)
    ============================================================ */
@@ -20,8 +20,8 @@
   --gold-light: #E7D6AC;
   --gold-dark: #A5813F;
   --border-gold: #E3D5B8;
-  --ink: #1B1A17;
-  --dark-gray: #3B3A37;
+  --ink: #13294B;
+  --dark-gray: #13294B;
   --smoke: #C8BFB4;
   --taupe: #9F968A;
   --glacier: #D4D5CE;
@@ -32,7 +32,7 @@
   --line: #E7DCC8;
 
   /* legacy aliases (kept so older markup keeps working) */
-  --bg-dark: #1B1A17;
+  --bg-dark: #13294B;
   --bg-card: #FFFFFF;
   --text-main: #3B3A37;
   --text-sub: #9F968A;
@@ -165,7 +165,7 @@ nav a:hover, nav a.active {
   text-align: center;
 }
 
-.btn-primary:hover { background: #000; transform: translateY(-1px); }
+.btn-primary:hover { background: #0B1B33; transform: translateY(-1px); }
 
 .btn-gold-outline {
   border: 1.5px solid var(--gold-primary);
