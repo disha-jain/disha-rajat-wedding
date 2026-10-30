@@ -201,6 +201,11 @@ const WEDDING_EVENTS = [
    RSVP section renders it. Change it here once and every page follows. */
 const RSVP_DEADLINE = '2027-01-02';
 
+/* US-only guests (invited to the Virginia reception but not to India) get
+   a later deadline: February 1. deadlineForTags() in home.html picks the
+   right one per guest. */
+const RSVP_DEADLINE_US_ONLY = '2027-02-01';
+
 /* Render an event's color palette as a row of small swatches.
    Used after the dress-code line wherever events are listed. */
 function renderPalette(e) {
