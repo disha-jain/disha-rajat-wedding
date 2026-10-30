@@ -79,7 +79,7 @@
   transition: background 0.2s;
 }
 
-.btn-map:hover { background: #000; }
+.btn-map:hover { background: #0B1B33; }
 
 .btn-map-sm {
   padding: 8px 16px;
@@ -264,7 +264,7 @@
   border-radius: 999px;
   transition: background 0.2s;
 }
-.btn-dark-sm:hover { background: #000; }
+.btn-dark-sm:hover { background: #0B1B33; }
 @media (max-width: 860px) {
   .stay-scroll-card { padding: 14px 14px 10px; }
   .stay-scroll-row .stay-card { flex-basis: 82%; }
