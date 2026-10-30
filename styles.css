@@ -21,7 +21,7 @@
   --gold-dark: #A5813F;
   --border-gold: #E3D5B8;
   --ink: #13294B;
-  --dark-gray: #13294B;
+  --dark-gray: #3B3A37;
   --smoke: #C8BFB4;
   --taupe: #9F968A;
   --glacier: #D4D5CE;
@@ -101,7 +101,7 @@ nav a:hover, nav a.active {
 .section-title {
   font-family: var(--font-serif);
   font-size: 2.1rem;
-  color: var(--dark-gray);
+  color: var(--ink);
   text-align: center;
   margin-bottom: 8px;
   letter-spacing: 2px;
@@ -213,7 +213,7 @@ nav a:hover, nav a.active {
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.5px;
-  color: var(--dark-gray);
+  color: var(--ink);
   margin-bottom: 8px;
 }
 
