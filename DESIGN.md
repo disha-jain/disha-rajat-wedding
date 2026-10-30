@@ -10,8 +10,8 @@ Sampled from the approved swatch screenshots.
 | Gold             | `#C9A961` | Accents, borders, active states      |
 | Gold light       | `#E7D6AC` | Highlights on dark surfaces          |
 | Gold dark        | `#A5813F` | Script headings, emphasized text     |
-| Midnight navy    | `#13294B` | Nav, footer, dark panels, primary buttons, serif headings (via --ink and --dark-gray) |
-| Dark gray        | `#3B3A37` | Body text (via --text-main)            |
+| Midnight navy    | `#13294B` | Nav, footer, dark panels, primary buttons; bold text and headings (via --ink) |
+| Dark gray        | `#3B3A37` | Body and regular-weight text (via --text-main and --dark-gray) |
 | Smoke            | `#C8BFB4` | Muted decorative gray                |
 | Taupe            | `#9F968A` | Secondary / muted text               |
 | Glacier          | `#D4D5CE` | Cool light gray                      |
