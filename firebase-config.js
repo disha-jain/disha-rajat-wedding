@@ -22,7 +22,7 @@ const adminEmails = ["dishajain2016@gmail.com", "khanna.rjt@gmail.com"];
 // every editing control for them, and Firestore rules do not grant them
 // writes either. (Do NOT also add these to admins/{email} docs — that
 // would make them full admins.)
-const readOnlyAdminEmails = ["rajatdishawedding@gmail.com"];
+const readOnlyAdminEmails = ["rajatdishawedding@gmail.com", "kj1672931@gmail.com"];
 
 let db = null;
 if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
