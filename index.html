@@ -60,7 +60,7 @@
     </div>
   </div>
 
-  <script src="js/guest-auth.js"></script>
+  <script src="js/guest-auth.js?v=20261101a"></script>
   <script>
     function showError(msg) {
       const el = document.getElementById('invite-error');
@@ -84,20 +84,52 @@
       } catch (e) {}
     }
 
-    async function trySignInWithCode(code) {
+    function hideError() {
+      document.getElementById('invite-error').style.display = 'none';
+    }
+
+    // While a live check runs, the button shows progress instead of
+    // letting a slow connection look like a failure. Slow connections
+    // get time to finish — there is no short timeout on a login check.
+    let slowTimer = null;
+    function setChecking(btn, on) {
+      if (!btn) return;
+      clearTimeout(slowTimer);
+      if (on) {
+        if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Checking…';
+        slowTimer = setTimeout(() => { btn.textContent = 'Still checking — slow connection…'; }, 6000);
+      } else {
+        btn.disabled = false;
+        if (btn.dataset.label) btn.textContent = btn.dataset.label;
+      }
+    }
+
+    const CONNECTION_MSG = "We couldn't check that just now — the connection seems too slow or offline. Please wait a moment and try again.";
+
+    // Every login attempt checks Firestore directly, at that moment —
+    // never a local download that may not have finished. If Firestore
+    // can't be reached at all, the local cache (when this device has
+    // one) is the fallback, and a miss then shows the connection
+    // message above rather than a false "not found".
+    async function trySignInWithCode(code, btn) {
       code = (code || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
       if (!code) { showError('Please enter your invite code.'); return; }
-      await refreshGuestDb();
-      let fam = window.GuestAuth.findFamilyByCode(code);
-      if (!fam) {
-        // The guest list may not have finished downloading on a first
-        // visit (slow phone connection) — fetch it once more and retry
-        // the lookup before telling the guest the code isn't found.
-        await refreshGuestDb();
+      hideError();
+      setChecking(btn, true);
+      let fam = null, checkedLive = false;
+      try {
+        fam = await window.GuestAuth.findFamilyByCodeLive(code);
+        checkedLive = true;
+      } catch (e) {
         fam = window.GuestAuth.findFamilyByCode(code);
       }
+      setChecking(btn, false);
       if (!fam) {
-        showError("We couldn't find that invite code. Please check it and try again.");
+        showError(checkedLive
+          ? "We couldn't find that invite code. Please check it and try again."
+          : CONNECTION_MSG);
         return;
       }
       window.GuestAuth.signInFamily(fam);
@@ -106,7 +138,9 @@
 
     function handleCodeSubmit(e) {
       e.preventDefault();
-      trySignInWithCode(document.getElementById('invite-code-input').value);
+      trySignInWithCode(
+        document.getElementById('invite-code-input').value,
+        document.querySelector('#code-form button'));
     }
 
     async function handleNameSubmit(e) {
@@ -114,17 +148,21 @@
       const first = document.getElementById('invite-first').value.trim();
       const last = document.getElementById('invite-last').value.trim();
       if (!first || !last) { showError('Please enter both your first and last name.'); return; }
-      await refreshGuestDb();
-      let result = window.GuestAuth.findFamilyByName(first, last);
-      if (!result) {
-        // Same first-visit case as the code lookup: if the guest list
-        // hadn't finished downloading, fetch it again and retry once
-        // before reporting the name as not found.
-        await refreshGuestDb();
+      hideError();
+      const btn = document.querySelector('#name-form button');
+      setChecking(btn, true);
+      let result = null, checkedLive = false;
+      try {
+        result = await window.GuestAuth.findFamilyByNameLive(first, last);
+        checkedLive = true;
+      } catch (err) {
         result = window.GuestAuth.findFamilyByName(first, last);
       }
+      setChecking(btn, false);
       if (!result) {
-        showError("We couldn't find that name. Try the name on your invitation, or use your invite code.");
+        showError(checkedLive
+          ? "We couldn't find that name. Try the name on your invitation, or use your invite code."
+          : CONNECTION_MSG);
         return;
       }
       if (result.ambiguous) {
@@ -137,13 +175,15 @@
     }
 
     (async function init() {
-      // Warm the shared guest list first so lookups work on any device
-      await refreshGuestDb();
-      // Personal invite links like ?invite=FAM01
       const params = new URLSearchParams(location.search);
+      // Personal invite links like ?invite=FAM01 — checked live against
+      // Firestore (a single-document query), with the local cache as
+      // fallback if Firestore can't be reached.
       if (params.has('invite')) {
-        const code = params.get('invite').trim().toUpperCase();
-        const fam = window.GuestAuth.findFamilyByCode(code);
+        const code = params.get('invite').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        let fam = null;
+        try { fam = await window.GuestAuth.findFamilyByCodeLive(code); }
+        catch (e) { fam = window.GuestAuth.findFamilyByCode(code); }
         if (fam) {
           window.GuestAuth.signInFamily(fam);
           const target = returnTarget();
@@ -157,14 +197,24 @@
         window.location.href = returnTarget();
         return;
       }
+      // Returning guest on this device: restore from the stored code,
+      // checking the local list first and Firestore if it isn't there.
       const stored = window.GuestAuth.getStoredCode();
       if (stored) {
-        const fam = window.GuestAuth.findFamilyByCode(stored);
+        let fam = window.GuestAuth.findFamilyByCode(stored);
+        if (!fam) {
+          try { fam = await window.GuestAuth.findFamilyByCodeLive(stored); } catch (e) {}
+        }
         if (fam) {
           window.GuestAuth.signInFamily(fam);
           window.location.href = returnTarget();
+          return;
         }
       }
+      // Warm the local guest-list cache in the background (used as the
+      // offline fallback and by later pages); login checks above and on
+      // the forms don't wait on it — they ask Firestore directly.
+      refreshGuestDb();
     })();
   </script>
 </body>
