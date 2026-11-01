@@ -702,7 +702,7 @@
       if (adminReadOnly) return;
       localStorage.setItem("wedding_guest_database", JSON.stringify(families));
       if (typeof db !== 'undefined' && db !== null) {
-        families.forEach(fam => { db.collection("families").doc(fam.family_code).set(fam).catch(() => {}); });
+        families.forEach(fam => { if (!fam || !fam.family_code) return; db.collection("families").doc(fam.family_code).set(fam).catch(() => {}); });
       }
     }
 
@@ -1090,6 +1090,8 @@
 
           const familyMap = {};
           let rowsParsed = 0;
+          const noCodeLines = [];
+          const shortLines = [];
 
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
@@ -1099,37 +1101,37 @@
             // Columns: family_code,family_name,first_name,last_name,email,
             // tags,max_plus_ones,phone (phone optional, may be blank).
             const cols = parseCsvLine(line);
-            if (cols.length >= 4) {
-              const code = cols[0];
-              const famName = cols[1];
-              const firstName = cols[2];
-              const lastName = cols[3];
-              const email = cols[4] || '';
-              const rawTags = cols[5] || '';
-              const plusOnes = cols[6] ? parseInt(cols[6]) || 0 : 0;
-              const phone = cols[7] || '';
+            if (cols.length < 4) { shortLines.push(i + 1); continue; }
+            const code = cols[0];
+            if (!code) { noCodeLines.push(i + 1); continue; }
+            const famName = cols[1];
+            const firstName = cols[2];
+            const lastName = cols[3];
+            const email = cols[4] || '';
+            const rawTags = cols[5] || '';
+            const plusOnes = cols[6] ? parseInt(cols[6]) || 0 : 0;
+            const phone = cols[7] || '';
 
-              const tagsArr = rawTags ? rawTags.split(/[;,]/).map(t => t.trim()) : [];
+            const tagsArr = rawTags ? rawTags.split(/[;,]/).map(t => t.trim()) : [];
 
-              if (!familyMap[code]) {
-                familyMap[code] = {
-                  family_code: code,
-                  family_name: famName || `${lastName} Family`,
-                  members: []
-                };
-              }
-
-              familyMap[code].members.push({
-                first_name: firstName,
-                last_name: lastName,
-                email: email,
-                tags: tagsArr,
-                max_plus_ones: plusOnes,
-                phone: phone
-              });
-
-              rowsParsed++;
+            if (!familyMap[code]) {
+              familyMap[code] = {
+                family_code: code,
+                family_name: famName || `${lastName} Family`,
+                members: []
+              };
             }
+
+            familyMap[code].members.push({
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              tags: tagsArr,
+              max_plus_ones: plusOnes,
+              phone: phone
+            });
+
+            rowsParsed++;
           }
 
           const newFamilies = Object.values(familyMap);
@@ -1138,12 +1140,22 @@
           // Also save to Firebase if db is connected
           if (typeof db !== 'undefined' && db !== null) {
             newFamilies.forEach(fam => {
+              if (!fam.family_code) return;
               db.collection("families").doc(fam.family_code).set(fam);
             });
           }
 
-          statusEl.style.color = "#51cf66";
-          statusEl.innerText = `Successfully imported ${rowsParsed} guests in ${newFamilies.length} families!`;
+          const skippedCount = noCodeLines.length + shortLines.length;
+          if (skippedCount) {
+            const reasons = [];
+            if (noCodeLines.length) reasons.push(`blank family code on line${noCodeLines.length > 1 ? 's' : ''} ${noCodeLines.join(', ')}`);
+            if (shortLines.length) reasons.push(`too few columns on line${shortLines.length > 1 ? 's' : ''} ${shortLines.join(', ')}`);
+            statusEl.style.color = "#f0a840";
+            statusEl.innerText = `Imported ${rowsParsed} guests in ${newFamilies.length} families. Skipped ${skippedCount} row${skippedCount > 1 ? 's' : ''} (${reasons.join('; ')}) — every guest row needs a family code. Fix those rows and re-upload to include them.`;
+          } else {
+            statusEl.style.color = "#51cf66";
+            statusEl.innerText = `Successfully imported ${rowsParsed} guests in ${newFamilies.length} families!`;
+          }
           loadDashboardData();
         } catch (err) {
           statusEl.style.color = "#ff6b6b";
