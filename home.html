@@ -736,6 +736,34 @@ function updateCountdown() {
       return m[2].length === want ? '+' + m[1] + m[2] : null;
     }
 
+    // Pre-fill is more forgiving than submit validation: a stored number
+    // that carries its country-code digits without the '+' (common from
+    // spreadsheets, e.g. '15713556923') is recognized and normalized.
+    // A bare local number is left alone — the guest adds the code, and
+    // submit validation still enforces it.
+    function prefillPhone(raw) {
+      const direct = normalizePhone(raw);
+      if (direct) return direct;
+      const digits = String(raw || '').replace(/\D/g, '');
+      const m = digits.match(/^(1\d{10}|91\d{10}|44\d{10})$/);
+      return m ? normalizePhone('+' + m[1]) : null;
+    }
+
+    // Display form for a valid number: the country code set off and the
+    // rest grouped (+1 (571) 355-6923, +91 77338 16562, +65 8123 4567,
+    // +44 7911 123456). Anything invalid passes through exactly as-is so
+    // the guest sees the value they need to fix.
+    function formatPhoneDisplay(value) {
+      const n = normalizePhone(value);
+      if (!n) return String(value || '');
+      const rest = n.slice(1);
+      if (rest.startsWith('1')) return `+1 (${rest.slice(1, 4)}) ${rest.slice(4, 7)}-${rest.slice(7)}`;
+      if (rest.startsWith('91')) return `+91 ${rest.slice(2, 7)} ${rest.slice(7)}`;
+      if (rest.startsWith('65')) return `+65 ${rest.slice(2, 6)} ${rest.slice(6)}`;
+      if (rest.startsWith('44')) return `+44 ${rest.slice(2, 6)} ${rest.slice(6)}`;
+      return n;
+    }
+
     // Phone numbers stored on the guest record (CSV import, admin edits)
     // pre-fill the RSVP form. Valid numbers are normalized like the form
     // does; anything else passes through raw so the guest can fix it
@@ -745,7 +773,7 @@ function updateCountdown() {
       (members || []).forEach(m => {
         if (!m || !m.phone) return;
         const key = 'm:' + `${m.first_name} ${m.last_name}`.trim().toLowerCase();
-        out[key] = normalizePhone(m.phone) || String(m.phone).trim();
+        out[key] = prefillPhone(m.phone) || String(m.phone).trim();
       });
       return out;
     }
@@ -772,14 +800,19 @@ function updateCountdown() {
           row.dataset.key = p.key;
           row.innerHTML = `<label></label><input type="tel" autocomplete="tel" placeholder="+1 555 123 4567">`;
           const input = row.querySelector('input');
-          input.value = phones[p.key] || '';
+          input.value = formatPhoneDisplay(phones[p.key] || '');
           input.addEventListener('input', () => { phones[p.key] = input.value; });
+          input.addEventListener('blur', () => {
+            const n = normalizePhone(input.value);
+            if (n) { phones[p.key] = n; input.value = formatPhoneDisplay(n); }
+          });
           wrap.appendChild(row);
         }
         row.querySelector('label').textContent = p.name;
         const input = row.querySelector('input');
-        if (document.activeElement !== input && input.value !== (phones[p.key] || '')) {
-          input.value = phones[p.key] || '';
+        const disp = formatPhoneDisplay(phones[p.key] || '');
+        if (document.activeElement !== input && input.value !== disp) {
+          input.value = disp;
         }
       });
     }
@@ -916,7 +949,7 @@ function updateCountdown() {
           if (!x) return;
           key = x.key;
         }
-        if (r.phone && !state.phones[key]) state.phones[key] = String(r.phone);
+        if (r.phone && !state.phones[key]) state.phones[key] = prefillPhone(r.phone) || String(r.phone);
         if (r.status === 'attending') {
           state.attendance[r.event_id] = state.attendance[r.event_id] || {};
           state.attendance[r.event_id][key] = true;
