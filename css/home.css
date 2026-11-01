@@ -410,6 +410,7 @@ nav a.active {
   line-height: 1.7;
 }
 .registry-amazon { margin-bottom: 24px; }
+.registry-btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .registry-btn {
   display: inline-block;
   font-family: var(--font-serif);
