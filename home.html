@@ -927,14 +927,31 @@ function updateCountdown() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // Stable Firestore document ID for one RSVP record (family + guest +
+    // event). A re-submission overwrites the same document instead of
+    // adding another copy.
+    function rsvpDocId(r) {
+      const slug = String(r.guest_name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      return `${r.family_code}__${slug}__${r.event_id}`;
+    }
+
     // Rebuild the form state from a family's RSVP records. Pure function of
     // the records — extras are keyed 'a:name:<lowercased name>' here and
     // translated to live extra-row keys when applied. No records = empty form.
     function rsvpStateFromRecords(recs) {
+      // Collapse duplicate records for the same guest + event (older form
+      // versions could leave a copy per submission); the latest wins.
+      const latestByGuestEvent = new Map();
+      (recs || []).forEach(r => {
+        const k = (r.guest_name || '') + '|' + (r.event_id || '');
+        const prev = latestByGuestEvent.get(k);
+        if (!prev || String(r.timestamp || '') >= String(prev.timestamp || '')) latestByGuestEvent.set(k, r);
+      });
+      recs = [...latestByGuestEvent.values()];
       const state = { attendance: {}, extras: [], dietary: '', wishes: '', phones: {} };
       const memberNames = new Set(family.members.map(m => fullName(m).toLowerCase()));
       const extrasSeen = new Map();
-      (recs || []).forEach(r => {
+      recs.forEach(r => {
         const nm = (r.guest_name || '').trim();
         if (!nm) return;
         let key;
@@ -960,7 +977,7 @@ function updateCountdown() {
         }
       });
       state.extras = [...extrasSeen.values()];
-      const withDiet = (recs || []).find(r => r.dietary_notes);
+      const withDiet = recs.find(r => r.dietary_notes);
       if (withDiet) {
         const raw = withDiet.dietary_notes;
         const m = raw.match(/ \| Wishes: ([\s\S]*)$/);
@@ -1079,14 +1096,25 @@ function updateCountdown() {
       });
 
       if (typeof db !== 'undefined' && db !== null) {
+        const col = db.collection('rsvps');
+        const keep = new Set(newRecords.map(rsvpDocId));
         try {
-          // remove this family's previous RSVP docs so edits don't duplicate
-          const snap = await db.collection('rsvps').where('family_code', '==', family.family_code).get();
-          const batch = db.batch();
-          snap.forEach(doc => batch.delete(doc.ref));
-          await batch.commit();
+          // Remove records from earlier submissions that this one no longer
+          // covers — a dropped plus-one, or duplicate docs written by older
+          // versions of this form (random document IDs). Best-effort only:
+          // the fixed IDs below make a miss harmless, since a re-submit
+          // overwrites the same documents instead of duplicating them.
+          const snap = await col.where('family_code', '==', family.family_code).get();
+          const stale = db.batch();
+          let staleCount = 0;
+          snap.forEach(doc => { if (!keep.has(doc.id)) { stale.delete(doc.ref); staleCount++; } });
+          if (staleCount) await stale.commit();
         } catch (e) {}
-        newRecords.forEach(r => { db.collection('rsvps').add(r).catch(() => {}); });
+        // One document per family + guest + event, written with set(), so
+        // overlapping submissions can never pile up copies.
+        const batch = db.batch();
+        newRecords.forEach(r => { batch.set(col.doc(rsvpDocId(r)), r); });
+        batch.commit().catch(() => {});
       }
 
       document.getElementById('rsvp-body').style.display = 'none';
