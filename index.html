@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css?v=20261030b">
+  <link rel="stylesheet" href="styles.css?v=20261101a">
   <link rel="stylesheet" href="css/passcode.css?v=20260930c">
 
   <!-- Firebase: the shared guest list lives in Firestore -->
@@ -88,7 +88,14 @@
       code = (code || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
       if (!code) { showError('Please enter your invite code.'); return; }
       await refreshGuestDb();
-      const fam = window.GuestAuth.findFamilyByCode(code);
+      let fam = window.GuestAuth.findFamilyByCode(code);
+      if (!fam) {
+        // The guest list may not have finished downloading on a first
+        // visit (slow phone connection) — fetch it once more and retry
+        // the lookup before telling the guest the code isn't found.
+        await refreshGuestDb();
+        fam = window.GuestAuth.findFamilyByCode(code);
+      }
       if (!fam) {
         showError("We couldn't find that invite code. Please check it and try again.");
         return;
@@ -108,7 +115,14 @@
       const last = document.getElementById('invite-last').value.trim();
       if (!first || !last) { showError('Please enter both your first and last name.'); return; }
       await refreshGuestDb();
-      const result = window.GuestAuth.findFamilyByName(first, last);
+      let result = window.GuestAuth.findFamilyByName(first, last);
+      if (!result) {
+        // Same first-visit case as the code lookup: if the guest list
+        // hadn't finished downloading, fetch it again and retry once
+        // before reporting the name as not found.
+        await refreshGuestDb();
+        result = window.GuestAuth.findFamilyByName(first, last);
+      }
       if (!result) {
         showError("We couldn't find that name. Try the name on your invitation, or use your invite code.");
         return;
