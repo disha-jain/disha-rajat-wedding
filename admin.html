@@ -300,9 +300,23 @@
       return stored ? JSON.parse(stored) : fallbackDatabase;
     }
 
+    // Collapse duplicate RSVP records for the same family + guest + event,
+    // keeping the latest submission. Older versions of the RSVP form could
+    // write a fresh copy on every submit; every view, count, and export
+    // below works from this deduped list.
+    function dedupeRsvps(recs) {
+      const latest = new Map();
+      (recs || []).forEach(r => {
+        const key = [r.family_code, r.guest_name, r.event_id].join('|');
+        const prev = latest.get(key);
+        if (!prev || String(r.timestamp || '') >= String(prev.timestamp || '')) latest.set(key, r);
+      });
+      return [...latest.values()];
+    }
+
     function getStoredRSVPs() {
       const stored = localStorage.getItem("wedding_rsvps_database");
-      return stored ? JSON.parse(stored) : [];
+      return dedupeRsvps(stored ? JSON.parse(stored) : []);
     }
 
     function loadDashboardData() {
