@@ -416,6 +416,10 @@
         <h4>Will there be salon services (hair, make-up, and draping) available?</h4>
         <p>If you would like to book any such services, please reach out to our RSVP coordinator, Khushi Jain, by WhatsApp at +91 77338 16562 to let her know of your interest. She, or someone from her team, will follow up with you regarding pricing and availability closer to the wedding date.</p>
       </div>
+      <div class="qa-item" id="qa-high-tea">
+        <h4>What is High Tea?</h4>
+        <p>An informal chai break! We’ll be having tea, coffee, and light snacks served at that time.</p>
+      </div>
     </div>
   </section>
 
@@ -1148,8 +1152,8 @@ function applyTagSections() {
   if (regSec) regSec.style.display = hideRegistry ? 'none' : '';
   if (regTab) regTab.style.display = hideRegistry ? 'none' : '';
 
-  // Q&A entries only for India guests: RSVP coordinator contact, salon services
-  ['qa-contact', 'qa-salon'].forEach(id => {
+  // Q&A entries only for India guests: RSVP coordinator contact, salon services, High Tea
+  ['qa-contact', 'qa-salon', 'qa-high-tea'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = hasIndia ? '' : 'none';
   });
