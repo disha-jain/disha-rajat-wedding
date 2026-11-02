@@ -18,6 +18,8 @@ body { font-family: var(--font-sans); }
     .timeline-label { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-dark); margin-top: 2px; }
     .timeline-meta { font-size: 13px; color: var(--taupe); margin-top: 6px; line-height: 1.6; }
     .timeline-meta strong { color: var(--ink); font-weight: 600; }
+    .timeline-meta a.dresscode-link { color: inherit; text-decoration: underline; text-decoration-color: var(--gold-primary); text-underline-offset: 2px; }
+    .timeline-meta a.dresscode-link:hover { color: var(--gold-dark); }
     .timeline-parts { margin-top: 10px; display: grid; gap: 7px; }
     .timeline-part { display: flex; align-items: baseline; gap: 8px; font-size: 13px; color: var(--dark-gray); }
     .timeline-part .part-icon { font-size: 14px; }
