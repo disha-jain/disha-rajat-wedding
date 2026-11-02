@@ -8,10 +8,70 @@
     { family_code: 'FAM02', family_name: 'Jain Family', members: [{ first_name: 'Disha', last_name: 'Jain', email: 'disha@example.com', tags: ['india-guest', 'us-guest', 'bride-side'], max_plus_ones: 2 }] }
   ];
 
+
+  // --- Storage-safe access (optimized) ---
+  // In private mode / some in-app browsers, localStorage/sessionStorage
+  // throws on access. Previously signInFamily() used them directly, so a
+  // throw there made "Continue" silently do nothing. These helpers never
+  // throw: they fall back to an in-memory map for the current page.
+  const _memStore = {};
+  function _safeGet(store, key) {
+    try {
+      const v = (store === 'local' ? localStorage : sessionStorage).getItem(key);
+      if (v !== null) return v;
+    } catch (e) {}
+    const mk = store + ':' + key;
+    return Object.prototype.hasOwnProperty.call(_memStore, mk) ? _memStore[mk] : null;
+  }
+  function _safeSet(store, key, value) {
+    try { (store === 'local' ? localStorage : sessionStorage).setItem(key, value); return true; }
+    catch (e) { _memStore[store + ':' + key] = value; return false; }
+  }
+  function _safeRemove(store, key) {
+    try { (store === 'local' ? localStorage : sessionStorage).removeItem(key); } catch (e) {}
+    delete _memStore[store + ':' + key];
+  }
+  function storageAvailable() {
+    // Must test the real storages directly: _safeSet() never throws (it
+    // falls back to memory), so testing through it would always pass.
+    try {
+      localStorage.setItem('__wedding_storage_test__', '1'); localStorage.removeItem('__wedding_storage_test__');
+      sessionStorage.setItem('__wedding_storage_test__', '1'); sessionStorage.removeItem('__wedding_storage_test__');
+      return true;
+    } catch (e) { return false; }
+  }
+
+  // --- Single-family cache (optimized) ---
+  // A successful invite-code lookup used to be discarded, so the next tab
+  // could only restore from the full guest list (which may never have
+  // downloaded). Cache just that family, keyed by code, so code logins
+  // restore instantly without overwriting the full list.
+  const _familyCacheKey = 'wedding_family_cache_v1';
+  function getCachedFamily(code) {
+    const q = normalize(code).toUpperCase();
+    if (!q) return null;
+    try {
+      const raw = _safeGet('local', _familyCacheKey);
+      const map = raw ? JSON.parse(raw) : {};
+      return map[q] || null;
+    } catch (e) { return null; }
+  }
+  function cacheFamily(fam) {
+    if (!fam || !fam.family_code) return;
+    try {
+      const raw = _safeGet('local', _familyCacheKey);
+      const map = raw ? JSON.parse(raw) : {};
+      map[fam.family_code.toUpperCase()] = fam;
+      const keys = Object.keys(map);
+      if (keys.length > 10) keys.slice(0, keys.length - 10).forEach(k => delete map[k]);
+      _safeSet('local', _familyCacheKey, JSON.stringify(map));
+    } catch (e) {}
+  }
+
   function getGuestDatabase() {
     if (typeof _memDb !== 'undefined' && _memDb) return _memDb;
     try {
-      const stored = localStorage.getItem('wedding_guest_database');
+      const stored = _safeGet('local', 'wedding_guest_database');
       if (stored) return JSON.parse(stored);
     } catch (e) {}
     return FALLBACK_DB;
@@ -25,7 +85,7 @@
     const q = normalize(code).toUpperCase();
     if (!q) return null;
     const db = getGuestDatabase();
-    return db.find(f => (f.family_code || '').toUpperCase() === q) || null;
+    return db.find(f => (f.family_code || '').toUpperCase() === q) || getCachedFamily(q);
   }
 
   function findFamilyByName(first, last) {
@@ -46,20 +106,25 @@
 
   function signInFamily(family, member) {
     const tags = [...new Set((family.members || []).flatMap(m => m.tags || []))];
-    localStorage.setItem('inviteCode', family.family_code.toUpperCase());
-    sessionStorage.setItem('site_unlocked', 'true');
-    sessionStorage.setItem('family_code', family.family_code);
-    sessionStorage.setItem('family_name', family.family_name);
-    sessionStorage.setItem('guest_tags', JSON.stringify(tags));
+    _safeSet('local', 'inviteCode', family.family_code.toUpperCase());
+    // Persistent unlock: previously this lived only in sessionStorage, so
+    // a new tab / browser restart / in-app-browser switch forced a fresh
+    // sign-in. The local flag is what lets requireUnlock() restore the
+    // session in a new tab; signOut() clears it.
+    _safeSet('local', 'site_unlocked', 'true');
+    _safeSet('session', 'site_unlocked', 'true');
+    _safeSet('session', 'family_code', family.family_code);
+    _safeSet('session', 'family_name', family.family_name);
+    _safeSet('session', 'guest_tags', JSON.stringify(tags));
     // Track the individual when known (name login), so person-level
     // features can tell family members apart. Code / ?invite= logins
     // leave this blank — the individual is unknown there.
     if (member && member.first_name && member.last_name) {
-      sessionStorage.setItem('guest_first_name', member.first_name);
-      sessionStorage.setItem('guest_last_name', member.last_name);
+      _safeSet('session', 'guest_first_name', member.first_name);
+      _safeSet('session', 'guest_last_name', member.last_name);
     } else {
-      sessionStorage.removeItem('guest_first_name');
-      sessionStorage.removeItem('guest_last_name');
+      _safeRemove('session', 'guest_first_name');
+      _safeRemove('session', 'guest_last_name');
     }
     return tags;
   }
@@ -71,29 +136,44 @@
   }
 
   function signOut() {
-    localStorage.removeItem('inviteCode');
-    sessionStorage.removeItem('site_unlocked');
-    sessionStorage.removeItem('family_code');
-    sessionStorage.removeItem('family_name');
-    sessionStorage.removeItem('guest_tags');
-    sessionStorage.removeItem('guest_first_name');
-    sessionStorage.removeItem('guest_last_name');
+    _safeRemove('local', 'inviteCode');
+    _safeRemove('local', 'site_unlocked');
+    _safeRemove('session', 'site_unlocked');
+    _safeRemove('session', 'family_code');
+    _safeRemove('session', 'family_name');
+    _safeRemove('session', 'guest_tags');
+    _safeRemove('session', 'guest_first_name');
+    _safeRemove('session', 'guest_last_name');
   }
 
   function isUnlocked() {
-    return sessionStorage.getItem('site_unlocked') === 'true';
+    return _safeGet('session', 'site_unlocked') === 'true' ||
+      _safeGet('local', 'site_unlocked') === 'true';
   }
 
   function getStoredCode() {
-    return localStorage.getItem('inviteCode') || null;
+    return _safeGet('local', 'inviteCode') || null;
   }
 
   // Call on protected pages: redirects to index.html if not unlocked.
   // Also hides nav until unlocked, then reveals per-guest tabs.
   // Pass returnTo (e.g. 'lookbook.html') to send the guest back there
   // after they unlock on the gate page.
+  function currentReturnTo() {
+    try {
+      const page = (location.pathname.split('/').pop() || 'home.html');
+      return page + (location.hash || '');
+    } catch (e) { return 'home.html'; }
+  }
+
+  // Call on protected pages: redirects to index.html if not unlocked.
+  // Optimized: (a) an invite link is never dropped — a stale local cache
+  // now forwards the code to the gate for a live check instead of falling
+  // through to a gate redirect that loses it; (b) a new tab restores the
+  // session from the stored code instead of bouncing to the gate;
+  // (c) the redirect back preserves the page AND anchor (e.g. home.html#rsvp).
   function requireUnlock(returnTo) {
-    // Support personal invite links like ?invite=FAM01
+    const target = returnTo || currentReturnTo();
     const params = new URLSearchParams(location.search);
     if (params.has('invite')) {
       const code = params.get('invite').trim().toUpperCase();
@@ -101,43 +181,35 @@
       if (fam) {
         signInFamily(fam);
         history.replaceState(null, '', location.pathname + location.hash);
-      } else {
-        // First visit on this device: the shared guest list hasn't been
-        // downloaded yet, so this lookup only searched the tiny built-in
-        // fallback and a valid code looks invalid. Don't drop the code —
-        // hand it to the gate page, which downloads the list first and
-        // then honors ?invite=.
-        let hasLocalDb = false;
-        try { hasLocalDb = !!localStorage.getItem('wedding_guest_database'); } catch (e) {}
-        if (!hasLocalDb) {
-          window.location.href = 'index.html?invite=' + encodeURIComponent(code) +
-            (returnTo ? '&next=' + encodeURIComponent(returnTo) : '');
-          return false;
-        }
+        return true;
       }
+      window.location.href = 'index.html?invite=' + encodeURIComponent(code) +
+        '&next=' + encodeURIComponent(target);
+      return false;
     }
 
-    // Restore session from stored code (new tab)
-    if (!isUnlocked()) {
+    // Restore session in this tab from the stored code (new tab, browser
+    // restart, or a session that was lost). This is what makes the
+    // persistent unlock in signInFamily() actually work.
+    if (!_safeGet('session', 'site_unlocked')) {
       const code = getStoredCode();
       if (code) {
         const fam = findFamilyByCode(code);
         if (fam) signInFamily(fam);
       }
-    }
-
-    if (!isUnlocked()) {
-      window.location.href = returnTo
-        ? 'index.html?next=' + encodeURIComponent(returnTo)
-        : 'index.html';
-      return false;
+      if (!_safeGet('session', 'site_unlocked')) {
+        // No local match: let the gate do the live lookup (it preserves
+        // the stored code and the return target).
+        window.location.href = 'index.html?next=' + encodeURIComponent(target);
+        return false;
+      }
     }
     return true;
   }
 
   // Show/hide nav tabs based on guest tags. Call after requireUnlock.
   function renderNav() {
-    const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
+    const tags = JSON.parse(_safeGet('session', 'guest_tags') || '[]');
     const usEl = document.getElementById('nav-travel-us');
     const indiaEl = document.getElementById('nav-travel-india');
     if (usEl) usEl.style.display = tags.includes('us-guest') ? '' : 'none';
@@ -149,7 +221,7 @@
     // Disha Jain.
     const menuWrap = document.getElementById('nav-menu-wrap');
     if (menuWrap) {
-      const familyCode = sessionStorage.getItem('family_code');
+      const familyCode = _safeGet('session', 'family_code');
       menuWrap.hidden = !familyCode;
       const adminItem = document.getElementById('nav-admin');
       if (adminItem) {
@@ -160,13 +232,13 @@
         // of the owners' families.
         let isOwner = false;
         try {
-          const fn = normalize(sessionStorage.getItem('guest_first_name') || '');
-          const ln = normalize(sessionStorage.getItem('guest_last_name') || '');
+          const fn = normalize(_safeGet('session', 'guest_first_name') || '');
+          const ln = normalize(_safeGet('session', 'guest_last_name') || '');
           isOwner = (fn === 'rajat' && ln === 'khanna') || (fn === 'disha' && ln === 'jain');
         } catch (e) {}
         if (!isOwner) {
           try {
-            const verified = localStorage.getItem('admin_verified_email') || '';
+            const verified = _safeGet('local', 'admin_verified_email') || '';
             const allowlist = (typeof adminEmails !== 'undefined' && Array.isArray(adminEmails))
               ? adminEmails : [];
             isOwner = !!verified && allowlist.includes(verified);
@@ -217,7 +289,7 @@
             if (remote.length) {
               loaded = true;
               _memDb = remote;
-              try { localStorage.setItem('wedding_guest_database', JSON.stringify(remote)); } catch (e) {}
+              try { _safeSet('local', 'wedding_guest_database', JSON.stringify(remote)); } catch (e) {}
             }
           }
         } catch (e) { /* offline / denied: keep local cache */ }
@@ -265,6 +337,7 @@
       const f = doc.data();
       if (f && f.family_code && !found) found = f;
     });
+    if (found) cacheFamily(found);
     return found;
   }
 
@@ -286,14 +359,14 @@
     _memDb = remote;
     _guestDbLoaded = true;
     _guestDbPromise = null;
-    try { localStorage.setItem('wedding_guest_database', JSON.stringify(remote)); } catch (e) {}
+    try { _safeSet('local', 'wedding_guest_database', JSON.stringify(remote)); } catch (e) {}
     return findFamilyByName(first, last);
   }
 
   window.GuestAuth = {
     getGuestDatabase, findFamilyByCode, findFamilyByName, findFamilyMember,
     findFamilyByCodeLive, findFamilyByNameLive,
-    signInFamily, signOut, isUnlocked, getStoredCode,
+    signInFamily, signOut, isUnlocked, getStoredCode, storageAvailable,
     requireUnlock, renderNav, ensureGuestDatabase
   };
 })();
