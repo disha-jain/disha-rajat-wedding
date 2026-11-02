@@ -142,6 +142,17 @@
         if (visible) shown++;
       });
 
+      // Arriving from a schedule dress-code link (lookbook.html#chapter):
+      // now that filtering has settled, scroll the named chapter into view.
+      try {
+        if (location.hash) {
+          var target = document.querySelector(location.hash);
+          if (target && target.classList.contains('lb-chapter') && target.style.display !== 'none') {
+            target.scrollIntoView();
+          }
+        }
+      } catch (e) {}
+
       document.getElementById('lb-empty').hidden = shown > 0;
 
       // Footer location follows the guest's invitation: Jaipur for
