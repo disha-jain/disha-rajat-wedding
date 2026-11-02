@@ -1229,6 +1229,11 @@ async function initPage() {
 }
 
 async function initRsvpWhenReady() {
+  // The deadline depends only on the guest's tags (already in session), so
+  // render it immediately — initRsvp() re-renders it later, but if the
+  // family lookup below fails, a US-only guest must not be left with the
+  // default January 2 date instead of their February 1 deadline.
+  renderRsvpDeadline();
   const memberList = document.getElementById('member-list');
   if (memberList) memberList.innerHTML = '<p class="limit-note">Loading your party…</p>';
   try { if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
