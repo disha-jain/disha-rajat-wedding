@@ -35,6 +35,9 @@ if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY_H
   // If a browser doesn't support persistence, the site still works normally,
   // just without the offline queue.
   if (db && typeof db.enablePersistence === 'function') {
-    db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+    // No synchronizeTabs (optimized): multi-tab persistence sync is a
+    // known source of slow / failed first loads in Safari; per-tab
+    // persistence still queues RSVP writes made offline.
+    db.enablePersistence().catch(() => {});
   }
 }

@@ -14,13 +14,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/lookbook.css?v=20261030a">
 
-  <!-- Firebase: the shared guest list lives in Firestore (invite gate) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=20261020a"></script>
 </head>
 <body>
-  <script src="js/guest-auth.js?v=20261101a"></script>
+  <script src="js/guest-auth.js?v=20261101b"></script>
   <script src="js/events.js?v=20261030b"></script>
   <script>
     if (!window.GuestAuth.requireUnlock('lookbook.html')) {
@@ -54,7 +50,7 @@
         <li style="background:#166963" title="Deep teal"></li>
       </ul>
       <figure class="lb-figure">
-        <img src="images/lookbook-mehendi.webp" alt="Lookbook illustration: guests in sunset colors at a daytime garden party — floral kurtas, a pink lehenga, an anarkali, a floral sundress, and a linen shirt" loading="lazy">
+        <img src="images/lookbook-mehendi.webp" alt="Lookbook illustration: guests in sunset colors at a daytime garden party — floral kurtas, a pink lehenga, an anarkali, a floral sundress, and a linen shirt" width="1200" height="655" decoding="async" loading="lazy">
       </figure>
     </section>
 
@@ -63,7 +59,7 @@
       <h2>Sangeet</h2>
       <p class="lb-dresscode"><strong>Dress Code</strong><em>Festive Glamour &amp; Shine — lehengas, anarkalis, bandhgalas, or glamorous western cocktail attire</em></p>
       <figure class="lb-figure" style="margin-top:26px">
-        <img src="images/lookbook-sangeet.webp" alt="Lookbook illustration: guests in festive glamorous attire — bandhgala, green lehenga, blue kurta, burgundy gown, and gray suit" loading="lazy">
+        <img src="images/lookbook-sangeet.webp" alt="Lookbook illustration: guests in festive glamorous attire — bandhgala, green lehenga, blue kurta, burgundy gown, and gray suit" width="1200" height="655" decoding="async" loading="lazy">
       </figure>
     </section>
 
@@ -79,7 +75,7 @@
         <li style="background:#FEEFC6" title="Pale cream yellow"></li>
       </ul>
       <figure class="lb-figure">
-        <img src="images/lookbook-haldi.webp" alt="Lookbook illustration: guests in shades of yellow for the haldi — kurtas, a lehenga, an anarkali, a yellow sundress, a Nehru jacket, and a linen shirt" loading="lazy">
+        <img src="images/lookbook-haldi.webp" alt="Lookbook illustration: guests in shades of yellow for the haldi — kurtas, a lehenga, an anarkali, a yellow sundress, a Nehru jacket, and a linen shirt" width="1200" height="655" decoding="async" loading="lazy">
       </figure>
     </section>
 
@@ -88,7 +84,7 @@
       <h2>Shaadi</h2>
       <p class="lb-dresscode"><strong>Dress Code</strong><em>Traditional Indian Formal — sarees, lehengas, sherwanis</em></p>
       <figure class="lb-figure" style="margin-top:26px">
-        <img src="images/lookbook-shaadi.webp" alt="Lookbook illustration: guests in traditional Indian formal wear — sari, sherwanis, purple lehenga, and anarkali" loading="lazy">
+        <img src="images/lookbook-shaadi.webp" alt="Lookbook illustration: guests in traditional Indian formal wear — sari, sherwanis, purple lehenga, and anarkali" width="1200" height="655" decoding="async" loading="lazy">
       </figure>
     </section>
 
@@ -98,7 +94,7 @@
       <p class="lb-venue">The Bellevue · Chantilly, Virginia</p>
       <p class="lb-dresscode"><strong>Dress Code</strong><em>Sparkling Indian Formal or Western Black-Tie</em></p>
       <figure class="lb-figure" style="margin-top:26px">
-        <img src="images/lookbook-reception.webp" alt="Lookbook illustration: guests in sparkling reception attire — sequin sari, sequin sherwani, ruby lehenga, black tuxedo, and champagne gown" loading="lazy">
+        <img src="images/lookbook-reception.webp" alt="Lookbook illustration: guests in sparkling reception attire — sequin sari, sequin sherwani, ruby lehenga, black tuxedo, and champagne gown" width="1200" height="655" decoding="async" loading="lazy">
       </figure>
     </section>
 
@@ -113,6 +109,11 @@
     <p id="lb-footer-line">March 2027 · Jaipur &amp; Virginia</p>
   </footer>
 
+  <!-- Firebase, at the end of the body (optimized): the lookbook markup above
+       parses and paints first, instead of waiting on gstatic in <head>. -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=20261101b"></script>
   <script>
     // Invite-gated lookbook: each chapter maps to an event in events.js and
     // is shown only when the guest shares a tag with that event — the same

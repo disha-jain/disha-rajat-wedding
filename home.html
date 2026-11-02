@@ -11,7 +11,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css?v=20261101a">
   <link rel="stylesheet" href="css/home.css?v=20261101a">
@@ -19,16 +19,12 @@
   <link rel="stylesheet" href="css/rsvp.css?v=20261030a">
   <link rel="stylesheet" href="css/travel.css?v=20261030b">
 
-  <!-- Firebase SDKs (RSVP writes) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=20261020a"></script>
 </head>
 <body>
-  <script src="js/guest-auth.js?v=20261101a"></script>
+  <script src="js/guest-auth.js?v=20261101b"></script>
   <script src="js/events.js?v=20261030b"></script>
   <script>
-    if (!window.GuestAuth.requireUnlock()) {
+    if (!window.GuestAuth.requireUnlock()) { // target defaults to this page + #anchor inside requireUnlock()
       // redirecting to index.html
     } else {
       // NB: wrap in a closure — initPage is defined in a later script block,
@@ -85,7 +81,7 @@
       <div class="infinity-icon" aria-hidden="true"><svg viewBox="0 0 240 130" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M121 64 C96 30 52 16 32 38 C12 60 26 96 56 104 C86 112 108 90 121 64 Z M118 62 C100 42 68 32 51 45 C35 57 41 81 59 87 C77 93 102 81 118 62 Z M119 64 C144 30 188 16 208 38 C228 60 214 96 184 104 C154 112 132 90 119 64 Z M122 62 C140 42 172 32 189 45 C205 57 199 81 181 87 C163 93 138 81 122 62 Z"/></svg></div>
 
       <div class="couple-photo-frame">
-        <img src="couple-hero.jpg" alt="Disha Jain and Rajat Khanna">
+        <img src="couple-hero.jpg" alt="Disha Jain and Rajat Khanna" width="400" height="600" fetchpriority="high" decoding="async">
       </div>
 
       <div class="save-the-date-title">SAVE THE DATE</div>
@@ -122,7 +118,7 @@
       <p class="moments-sub">A few of our favorites, from marble halls to coastlines.</p>
       <div class="carousel" id="moments-carousel">
         <div class="carousel-stage">
-          <div class="carousel-slide"><img src="images/couple-marble-hall.jpg" alt="Disha and Rajat in a marble hall"></div>
+          <div class="carousel-slide"><img src="images/couple-marble-hall.jpg" alt="Disha and Rajat in a marble hall" loading="lazy" decoding="async"></div>
           <div class="carousel-slide"><img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach" loading="lazy"></div>
           <div class="carousel-slide"><img src="images/couple-lake-lift.jpg" alt="Rajat lifting Disha by the lake" loading="lazy"></div>
           <div class="carousel-slide"><img src="images/couple-holidays.jpg" alt="Disha and Rajat in front of a holiday tree" loading="lazy"></div>
@@ -488,7 +484,7 @@
     <p class="rsvp-deadline">Please RSVP by <strong id="rsvp-deadline-date">January 2</strong></p>
 
     <div class="rsvp-photo-frame">
-      <img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach">
+      <img src="images/couple-beach.jpg" alt="Disha and Rajat at the beach" loading="lazy" decoding="async">
     </div>
 
     <div class="form-error" id="form-error"></div>
@@ -1215,17 +1211,38 @@ async function initPage() {
   initSmartFooter();
   applyTagSections();
   applyHeroDates();
-  try { if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
-  window.GuestAuth.renderNav(); // re-run after DB refresh so the Admin-item owner check uses fresh data
+  // Optimized: previously this awaited the full guest-list download (up to
+  // 8s) before ANY of the sections below initialized, so the whole page
+  // felt frozen on a slow connection. Render everything that only needs
+  // tags now; the RSVP form waits for the list in the background (it
+  // shows "Loading your party…" meanwhile, and falls back to a live
+  // single-family lookup if the bulk download failed).
   initRegistry();
   updateCountdown();
   setInterval(updateCountdown, 1000);
   renderSchedule();
-  initRsvp();
   initScrollSpy();
   initTravelTabs();
   initCarousel();
   initStayScroll();
+  initRsvpWhenReady();
+}
+
+async function initRsvpWhenReady() {
+  const memberList = document.getElementById('member-list');
+  if (memberList) memberList.innerHTML = '<p class="limit-note">Loading your party…</p>';
+  try { if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
+  window.GuestAuth.renderNav(); // re-run after DB refresh so the Admin-item owner check uses fresh data
+  const code = (function () { try { return sessionStorage.getItem('family_code'); } catch (e) { return null; } })();
+  if (code && !window.GuestAuth.findFamilyByCode(code)) {
+    try { await window.GuestAuth.findFamilyByCodeLive(code); } catch (e) {}
+  }
+  if (window.GuestAuth.findFamilyByCode(code)) {
+    initRsvp();
+  } else {
+    const el = document.getElementById('form-error');
+    if (el) { el.textContent = "We couldn't load your invitation just now. Please reload the page, or sign in again from the invite page."; el.style.display = 'block'; }
+  }
 }
 
 /* ---------- Where To Stay: Google Map ---------- */
@@ -1440,7 +1457,36 @@ function initTravelTabs() {
   }));
 }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHR8Nq7ZLWOY_bCGX5v2CLJ5RngMg5l5s&callback=initHotelMap" async defer></script>
+<!-- Firebase (optimized): moved from <head> so the page renders first;
+     initPage runs on DOMContentLoaded, after these execute. -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=20261101b"></script>
+  <script>
+    // Google Maps, lazy (optimized): previously loaded on every home visit
+    // even for guests who never open the US travel section. Load it only
+    // when the hotel map scrolls near the viewport.
+    (function () {
+      let loaded = false;
+      function loadMaps() {
+        if (loaded) return; loaded = true;
+        const el = document.createElement('script');
+        el.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAHR8Nq7ZLWOY_bCGX5v2CLJ5RngMg5l5s&callback=initHotelMap';
+        el.async = true; el.defer = true;
+        document.body.appendChild(el);
+      }
+      const mapEl = document.getElementById('hotel-map');
+      if (!mapEl) return;
+      if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver(function (entries) {
+          if (entries.some(function (e) { return e.isIntersecting; })) { loadMaps(); obs.disconnect(); }
+        }, { rootMargin: '600px' });
+        obs.observe(mapEl);
+      } else {
+        window.addEventListener('load', loadMaps);
+      }
+    })();
+  </script>
 </body>
 </html>
 

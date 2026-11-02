@@ -16,10 +16,6 @@
   <link rel="stylesheet" href="styles.css?v=20261101a">
   <link rel="stylesheet" href="css/passcode.css?v=20260930c">
 
-  <!-- Firebase: the shared guest list lives in Firestore -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=20261020a"></script>
 </head>
 <body class="passcode-body">
   <div class="lights-overlay"></div>
@@ -27,13 +23,16 @@
   <div class="passcode-container">
     <div class="card passcode-card">
       <div class="passcode-photo-frame">
-        <img src="images/couple-stairs.jpg" alt="Disha and Rajat">
+        <img src="images/couple-stairs.jpg" alt="Disha and Rajat" width="320" height="480" fetchpriority="high" decoding="async">
       </div>
       <div class="hero-script-heading">#rishta</div>
       <h2 class="gold-title">Welcome</h2>
       <p class="passcode-sub">Enter the invite code from your invitation, or your name, to open your invite.</p>
 
       <div id="invite-error" class="error-msg" style="display:none;"></div>
+      <p id="invite-status" aria-live="polite" style="display:none; font-size:0.85rem; color:#8a7a5c; margin:0 0 12px;"></p>
+      <p id="storage-warning" style="display:none; font-size:0.85rem; color:#8a5c5c; margin:0 0 12px;">This browser is blocking storage, so sign-in may not stick. If you opened this inside WhatsApp or Instagram, open it in Safari or Chrome instead, and turn off Private Browsing.</p>
+      <noscript><p style="font-size:0.9rem; color:#8a5c5c;">This invite page needs JavaScript to check your invite code. Please enable JavaScript and reload.</p></noscript>
 
       <form id="code-form" onsubmit="handleCodeSubmit(event)">
         <div class="form-group">
@@ -60,7 +59,12 @@
     </div>
   </div>
 
-  <script src="js/guest-auth.js?v=20261101a"></script>
+  <!-- Firebase, at the end of the body (optimized): the gate markup above
+       parses and paints first, instead of waiting on gstatic in <head>. -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=20261101b"></script>
+  <script src="js/guest-auth.js?v=20261101b"></script>
   <script>
     function showError(msg) {
       const el = document.getElementById('invite-error');
@@ -174,16 +178,30 @@
       window.location.href = returnTarget();
     }
 
+    function showStatus(msg) {
+      const el = document.getElementById('invite-status');
+      el.textContent = msg; el.style.display = msg ? 'block' : 'none';
+    }
+
     (async function init() {
       const params = new URLSearchParams(location.search);
+      // Surface a storage problem instead of letting sign-in silently fail
+      // on the next page (see guest-auth.js storage-safe helpers).
+      try {
+        if (window.GuestAuth.storageAvailable && !window.GuestAuth.storageAvailable()) {
+          document.getElementById('storage-warning').style.display = 'block';
+        }
+      } catch (e) {}
       // Personal invite links like ?invite=FAM01 — checked live against
       // Firestore (a single-document query), with the local cache as
       // fallback if Firestore can't be reached.
       if (params.has('invite')) {
         const code = params.get('invite').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-        let fam = null;
-        try { fam = await window.GuestAuth.findFamilyByCodeLive(code); }
+        showStatus('Checking your invite…');
+        let fam = null, checkedLive = false;
+        try { fam = await window.GuestAuth.findFamilyByCodeLive(code); checkedLive = true; }
         catch (e) { fam = window.GuestAuth.findFamilyByCode(code); }
+        showStatus('');
         if (fam) {
           window.GuestAuth.signInFamily(fam);
           const target = returnTarget();
@@ -191,6 +209,13 @@
           window.location.href = target;
           return;
         }
+        // Optimized: previously a failed invite link silently showed the
+        // blank gate. Say so, and prefill the code so one tap retries it.
+        showError(checkedLive
+          ? "We couldn't verify that invite link. Your code is filled in below — tap Continue to try again, or check the code on your invitation."
+          : CONNECTION_MSG);
+        const input = document.getElementById('invite-code-input');
+        if (input) input.value = code;
       }
       // Already unlocked
       if (window.GuestAuth.isUnlocked()) {
@@ -201,15 +226,21 @@
       // checking the local list first and Firestore if it isn't there.
       const stored = window.GuestAuth.getStoredCode();
       if (stored) {
+        showStatus('Welcome back — checking your saved invite…');
         let fam = window.GuestAuth.findFamilyByCode(stored);
+        let storedLive = false;
         if (!fam) {
-          try { fam = await window.GuestAuth.findFamilyByCodeLive(stored); } catch (e) {}
+          try { fam = await window.GuestAuth.findFamilyByCodeLive(stored); storedLive = true; } catch (e) {}
         }
+        showStatus('');
         if (fam) {
           window.GuestAuth.signInFamily(fam);
           window.location.href = returnTarget();
           return;
         }
+        // Only complain if we actually checked; a live failure already
+        // leaves the gate usable for a manual retry below.
+        if (storedLive) showError("We couldn't find your saved invite. Please enter your invite code again.");
       }
       // Warm the local guest-list cache in the background (used as the
       // offline fallback and by later pages); login checks above and on
