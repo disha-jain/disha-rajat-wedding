@@ -15,7 +15,7 @@
 
   <link rel="stylesheet" href="styles.css?v=20261101a">
   <link rel="stylesheet" href="css/home.css?v=20261101a">
-  <link rel="stylesheet" href="css/schedule.css?v=20261030a">
+  <link rel="stylesheet" href="css/schedule.css?v=20261102a">
   <link rel="stylesheet" href="css/rsvp.css?v=20261030a">
   <link rel="stylesheet" href="css/travel.css?v=20261030b">
 
@@ -599,6 +599,14 @@ function updateCountdown() {
 }
 
 /* ----- schedule ----- */
+    // Lookbook chapter anchors (element ids in lookbook.html) per event —
+    // the schedule's dress-code line links to the event's own chapter.
+    const LOOKBOOK_ANCHORS = { 'welcome-lunch': 'mehendi', 'sangeet': 'sangeet', 'phoolon-haldi': 'haldi', 'shaadi': 'shaadi', 'virginia-reception': 'reception' };
+    function lookbookHref(e) {
+      const a = LOOKBOOK_ANCHORS[e.id];
+      return a ? `lookbook.html#${a}` : 'lookbook.html';
+    }
+
     function renderSchedule() {
       const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
       const events = eventsForTags(tags);
@@ -621,7 +629,7 @@ function updateCountdown() {
                   <div class="timeline-label">${esc(e.title)}</div>
                   <div class="timeline-meta">
                     ${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}
-                    ${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}${renderPalette(e)}` : ''}
+                    ${e.dressCode ? `<br><a class="dresscode-link" href="${lookbookHref(e)}" target="_blank" rel="noopener"><strong>Dress code:</strong> ${esc(e.dressCode)}</a>${renderPalette(e)}` : ''}
                     ${e.notes ? `<br>${esc(e.notes)}` : ''}
                   </div>
                   ${e.parts ? `<div class="timeline-parts">${e.parts.map(p => `
