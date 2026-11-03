@@ -629,7 +629,7 @@ function updateCountdown() {
                   <div class="timeline-label">${esc(e.title)}</div>
                   <div class="timeline-meta">
                     ${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}
-                    ${e.dressCode ? `<br><a class="dresscode-link" href="${lookbookHref(e)}" target="_blank" rel="noopener"><strong>Dress code:</strong> ${esc(e.dressCode)}</a>${renderPalette(e)}` : ''}
+                    ${e.dressCode ? `<br><a class="dresscode-link" href="${lookbookHref(e)}" target="_blank" rel="noopener"><strong>Dress code:</strong></a> ${esc(e.dressCode)}${renderPalette(e)}` : ''}
                     ${e.notes ? `<br>${esc(e.notes)}` : ''}
                   </div>
                   ${e.parts ? `<div class="timeline-parts">${e.parts.map(p => `
