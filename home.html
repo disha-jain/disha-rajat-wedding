@@ -607,6 +607,19 @@ function updateCountdown() {
       return a ? `lookbook.html#${a}` : 'lookbook.html';
     }
 
+    // The counterpart ceremonies carry the couple's names only for guests
+    // invited to both sides, who see both events and need to tell them
+    // apart. A single-side guest sees just their own ceremony's plain
+    // name. (The canonical title in events.js is unchanged — it is what
+    // RSVP records store.)
+    function displayTitle(e, tags) {
+      const set = new Set(tags || []);
+      if (set.has('bride-side') && set.has('groom-side')) return e.title;
+      if (e.id === 'tel-baan') return 'Tel Baan';
+      if (e.id === 'tel-haldi') return 'Tel Haldi';
+      return e.title;
+    }
+
     function renderSchedule() {
       const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
       const events = eventsForTags(tags);
@@ -626,7 +639,7 @@ function updateCountdown() {
                 <div class="timeline-icon">${e.icon || '✦'}</div>
                 <div>
                   <div class="timeline-time">${esc(e.time)}</div>
-                  <div class="timeline-label">${esc(e.title)}</div>
+                  <div class="timeline-label">${esc(displayTitle(e, tags))}</div>
                   <div class="timeline-meta">
                     ${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}
                     ${e.dressCode ? `<br><a class="dresscode-link" href="${lookbookHref(e)}" target="_blank" rel="noopener"><strong>Dress code:</strong></a> ${esc(e.dressCode)}${renderPalette(e)}` : ''}
@@ -830,6 +843,7 @@ function updateCountdown() {
 
     function renderEvents() {
       renderPhones();
+      const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
       const wrap = document.getElementById('events-list');
       if (!familyEvents.length) {
         wrap.innerHTML = `<div class="section-card"><p class="limit-note" style="margin:0;">No events to RSVP for yet — check back soon.</p></div>`;
@@ -854,7 +868,7 @@ function updateCountdown() {
             <div class="event-head">
               <div class="event-icon">${e.icon || '✦'}</div>
               <div>
-                <div class="event-title">${esc(e.title)}</div>
+                <div class="event-title">${esc(displayTitle(e, tags))}</div>
                 <div class="event-sub">${esc(e.dateLabel)} · ${esc(e.time)}<br>${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}${renderPalette(e)}` : ''}</div>
               </div>
             </div>
