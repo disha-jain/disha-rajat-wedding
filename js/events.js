@@ -9,11 +9,15 @@
    the event's tags matches ANY of the guest's (or family's) tags.
    Set `rsvp: false` on an event to keep it on the schedule while
    hiding it from the RSVP form.
+   Set `hideForTags: [...]` on an event to hide it from guests who
+   carry any of those tags, even if another tag would show it — e.g.
+   hotel check-in/out is hidden from Jaipur locals.
    Tag vocabulary (keep it consistent, no apostrophes):
      india-guest  – invited to the India celebrations
      us-guest     – invited to the Virginia reception
      bride-side   – Disha-specific events
      groom-side   – Rajat-specific events
+     jaipur-local – lives in Jaipur; hidden from hotel check-in/out
    Add your own (e.g. family-only, wedding-only) and assign them to
    guests via the admin CSV upload.
    ============================================================ */
@@ -47,6 +51,21 @@ const WEDDING_EVENTS = [
     tags: ['bride-side'],
     rsvp: false,                // shown on the schedule, hidden from the RSVP form
     icon: '🌻'
+  },
+  {
+    id: 'hotel-check-in',
+    title: 'Hotel Check-in',
+    date: '2027-03-13',
+    dateLabel: 'Day 1 — March 13, 2027',
+    time: '4:00 PM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    rsvp: false,                // shown on the schedule, hidden from the RSVP form
+    hideForTags: ['jaipur-local'], // Jaipur locals don't need a hotel room
+    icon: '🛎️'
   },
   {
     id: 'high-tea',
@@ -180,6 +199,23 @@ const WEDDING_EVENTS = [
     ]
   },
 
+  // ---------------- March 15 — Check-out, Chomu Palace ----------------
+  {
+    id: 'hotel-check-out',
+    title: 'Hotel Check-out',
+    date: '2027-03-15',
+    dateLabel: 'March 15, 2027',
+    time: '10:00 AM',
+    venue: 'Chomu Palace',
+    venueDetail: '',            // EDIT ME
+    dressCode: '',              // EDIT ME
+    notes: '',
+    tags: ['india-guest'],
+    rsvp: false,                // shown on the schedule, hidden from the RSVP form
+    hideForTags: ['jaipur-local'], // Jaipur locals don't need a hotel room
+    icon: '🔑'
+  },
+
   // ---------------- March 27 — Virginia ----------------
   {
     id: 'virginia-reception',
@@ -219,9 +255,11 @@ function renderPalette(e) {
 }
 
 /* Events visible to a guest with the given tags (any tag overlap),
-   with one guardrail: a side-specific event (tagged bride-side or
+   with two guardrails: a side-specific event (tagged bride-side or
    groom-side) is never shown to a guest who carries no side tag at all —
-   even if some other tag would overlap. */
+   even if some other tag would overlap — and an event's hideForTags
+   hides it from a guest carrying any of those tags, even if another
+   tag would show it. */
 function eventsForTags(tags) {
   const set = new Set((tags || []).map(t => String(t).toLowerCase()));
   const guestSide = set.has('bride-side') || set.has('groom-side');
@@ -229,6 +267,8 @@ function eventsForTags(tags) {
     const eTags = (e.tags || []).map(t => String(t).toLowerCase());
     const eventSide = eTags.includes('bride-side') || eTags.includes('groom-side');
     if (eventSide && !guestSide) return false;
+    const hiddenFor = (e.hideForTags || []).map(t => String(t).toLowerCase());
+    if (hiddenFor.some(t => set.has(t))) return false;
     return eTags.some(t => set.has(t));
   });
 }
