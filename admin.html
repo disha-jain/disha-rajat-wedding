@@ -21,7 +21,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=20261101b"></script>
-  <script src="js/events.js?v=20261030b"></script>
+  <script src="js/events.js?v=20261122a"></script>
 </head>
 <body>
   <script src="js/guest-auth.js?v=20261101b"></script>
@@ -365,6 +365,8 @@
       const eventSide = eTags.includes('bride-side') || eTags.includes('groom-side');
       const guestSide = tagSet.has('bride-side') || tagSet.has('groom-side');
       if (eventSide && !guestSide) return false;
+      const hiddenFor = (ev.hideForTags || []).map(t => String(t).toLowerCase());
+      if (hiddenFor.some(t => tagSet.has(t))) return false;
       return eTags.some(t => tagSet.has(t));
     }
 
@@ -546,7 +548,7 @@
     }
 
     // ---------- Tag autocomplete: suggest existing tags, or add a new one ----------
-    const CANONICAL_TAGS = ['india-guest', 'bride-side', 'groom-side', 'us-guest', 'bride-family'];
+    const CANONICAL_TAGS = ['india-guest', 'bride-side', 'groom-side', 'us-guest', 'bride-family', 'jaipur-local'];
 
     function collectExistingTags() {
       const set = new Set(CANONICAL_TAGS);

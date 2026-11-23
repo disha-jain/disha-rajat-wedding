@@ -17,7 +17,7 @@
 </head>
 <body>
   <script src="js/guest-auth.js?v=20261101b"></script>
-  <script src="js/events.js?v=20261030b"></script>
+  <script src="js/events.js?v=20261122a"></script>
   <script>
     if (!window.GuestAuth.requireUnlock('lookbook.html')) {
       // redirecting to the invite gate; it will send the guest back here
@@ -141,17 +141,6 @@
         // mirror the parenthesized wording in events.js.
         if (visible) shown++;
       });
-
-      // Arriving from a schedule dress-code link (lookbook.html#chapter):
-      // now that filtering has settled, scroll the named chapter into view.
-      try {
-        if (location.hash) {
-          var target = document.querySelector(location.hash);
-          if (target && target.classList.contains('lb-chapter') && target.style.display !== 'none') {
-            target.scrollIntoView();
-          }
-        }
-      } catch (e) {}
 
       document.getElementById('lb-empty').hidden = shown > 0;
 
