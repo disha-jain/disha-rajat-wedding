@@ -15,7 +15,7 @@
 
   <link rel="stylesheet" href="styles.css?v=20261101a">
   <link rel="stylesheet" href="css/home.css?v=20261101a">
-  <link rel="stylesheet" href="css/schedule.css?v=20261030a">
+  <link rel="stylesheet" href="css/schedule.css?v=20261102a">
   <link rel="stylesheet" href="css/rsvp.css?v=20261030a">
   <link rel="stylesheet" href="css/travel.css?v=20261030b">
 
@@ -599,6 +599,27 @@ function updateCountdown() {
 }
 
 /* ----- schedule ----- */
+    // Lookbook chapter anchors (element ids in lookbook.html) per event —
+    // the schedule's dress-code line links to the event's own chapter.
+    const LOOKBOOK_ANCHORS = { 'welcome-lunch': 'mehendi', 'sangeet': 'sangeet', 'phoolon-haldi': 'haldi', 'shaadi': 'shaadi', 'virginia-reception': 'reception' };
+    function lookbookHref(e) {
+      const a = LOOKBOOK_ANCHORS[e.id];
+      return a ? `lookbook.html#${a}` : 'lookbook.html';
+    }
+
+    // The counterpart ceremonies carry the couple's names only for guests
+    // invited to both sides, who see both events and need to tell them
+    // apart. A single-side guest sees just their own ceremony's plain
+    // name. (The canonical title in events.js is unchanged — it is what
+    // RSVP records store.)
+    function displayTitle(e, tags) {
+      const set = new Set(tags || []);
+      if (set.has('bride-side') && set.has('groom-side')) return e.title;
+      if (e.id === 'tel-baan') return 'Tel Baan';
+      if (e.id === 'tel-haldi') return 'Tel Haldi';
+      return e.title;
+    }
+
     function renderSchedule() {
       const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
       const events = eventsForTags(tags);
@@ -618,10 +639,10 @@ function updateCountdown() {
                 <div class="timeline-icon">${e.icon || '✦'}</div>
                 <div>
                   <div class="timeline-time">${esc(e.time)}</div>
-                  <div class="timeline-label">${esc(e.title)}</div>
+                  <div class="timeline-label">${esc(displayTitle(e, tags))}</div>
                   <div class="timeline-meta">
                     ${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}
-                    ${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}${renderPalette(e)}` : ''}
+                    ${e.dressCode ? `<br><a class="dresscode-link" href="${lookbookHref(e)}" target="_blank" rel="noopener"><strong>Dress code:</strong></a> ${esc(e.dressCode)}${renderPalette(e)}` : ''}
                     ${e.notes ? `<br>${esc(e.notes)}` : ''}
                   </div>
                   ${e.parts ? `<div class="timeline-parts">${e.parts.map(p => `
@@ -822,6 +843,7 @@ function updateCountdown() {
 
     function renderEvents() {
       renderPhones();
+      const tags = JSON.parse(sessionStorage.getItem('guest_tags') || '[]');
       const wrap = document.getElementById('events-list');
       if (!familyEvents.length) {
         wrap.innerHTML = `<div class="section-card"><p class="limit-note" style="margin:0;">No events to RSVP for yet — check back soon.</p></div>`;
@@ -846,7 +868,7 @@ function updateCountdown() {
             <div class="event-head">
               <div class="event-icon">${e.icon || '✦'}</div>
               <div>
-                <div class="event-title">${esc(e.title)}</div>
+                <div class="event-title">${esc(displayTitle(e, tags))}</div>
                 <div class="event-sub">${esc(e.dateLabel)} · ${esc(e.time)}<br>${esc(e.venue)}${e.venueDetail ? ' · ' + esc(e.venueDetail) : ''}${e.dressCode ? `<br><strong>Dress code:</strong> ${esc(e.dressCode)}${renderPalette(e)}` : ''}</div>
               </div>
             </div>
@@ -1229,6 +1251,11 @@ async function initPage() {
 }
 
 async function initRsvpWhenReady() {
+  // The deadline depends only on the guest's tags (already in session), so
+  // render it immediately — initRsvp() re-renders it later, but if the
+  // family lookup below fails, a US-only guest must not be left with the
+  // default January 2 date instead of their February 1 deadline.
+  renderRsvpDeadline();
   const memberList = document.getElementById('member-list');
   if (memberList) memberList.innerHTML = '<p class="limit-note">Loading your party…</p>';
   try { if (window.GuestAuth.ensureGuestDatabase) await window.GuestAuth.ensureGuestDatabase(); } catch (e) {}
