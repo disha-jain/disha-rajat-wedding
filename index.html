@@ -64,7 +64,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=20261101b"></script>
-  <script src="js/guest-auth.js?v=20261101b"></script>
+  <script src="js/guest-auth.js?v=20261123a"></script>
   <script>
     function showError(msg) {
       const el = document.getElementById('invite-error');
@@ -217,14 +217,30 @@
         const input = document.getElementById('invite-code-input');
         if (input) input.value = code;
       }
-      // Already unlocked
-      if (window.GuestAuth.isUnlocked()) {
+      // Already unlocked in THIS session — home.html will pass its
+      // requireUnlock() check at once, so redirect straight away.
+      // Do NOT redirect on the persistent local flag alone. In a new
+      // session (browser restart / fresh tab) the session flag is gone
+      // while the local flag is still set, and home can only restore the
+      // session from the stored code using the local guest list — if
+      // that family isn't in the local cache, home bounces straight back
+      // here, this check redirected straight back to home, and the two
+      // pages ping-ponged ~20x/second (loop caught 2026-11-23). A
+      // local-only unlock falls through to the stored-code check below,
+      // which verifies the family — live against Firestore if the local
+      // list doesn't have it — before any redirect.
+      if (window.GuestAuth.isSessionUnlocked()) {
         window.location.href = returnTarget();
         return;
       }
       // Returning guest on this device: restore from the stored code,
       // checking the local list first and Firestore if it isn't there.
       const stored = window.GuestAuth.getStoredCode();
+      if (!stored && window.GuestAuth.isUnlocked()) {
+        // Local unlock flag with no stored code to restore from: stale
+        // state, clear it so the gate below is the honest state.
+        window.GuestAuth.signOut();
+      }
       if (stored) {
         showStatus('Welcome back — checking your saved invite…');
         let fam = window.GuestAuth.findFamilyByCode(stored);
@@ -240,7 +256,12 @@
         }
         // Only complain if we actually checked; a live failure already
         // leaves the gate usable for a manual retry below.
-        if (storedLive) showError("We couldn't find your saved invite. Please enter your invite code again.");
+        if (storedLive) {
+          // Firestore confirmed the saved code is not on the list: drop
+          // the stale unlock so a later visit doesn't bounce again.
+          window.GuestAuth.signOut();
+          showError("We couldn't find your saved invite. Please enter your invite code again.");
+        }
       }
       // Warm the local guest-list cache in the background (used as the
       // offline fallback and by later pages); login checks above and on
