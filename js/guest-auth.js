@@ -151,6 +151,17 @@
       _safeGet('local', 'site_unlocked') === 'true';
   }
 
+  // Unlocked in THIS session only (sessionStorage flag). The persistent
+  // local flag alone is not proof home.html can restore the session: in a
+  // new session home's requireUnlock() has to rebuild it from the stored
+  // code using only the local guest list, and that can fail (family not
+  // in the local cache). The gate must not treat a local-only unlock as
+  // a green light to redirect — that was the index<->home loop of
+  // 2026-11-23. Callers that redirect on unlock should use this.
+  function isSessionUnlocked() {
+    return _safeGet('session', 'site_unlocked') === 'true';
+  }
+
   function getStoredCode() {
     return _safeGet('local', 'inviteCode') || null;
   }
@@ -366,7 +377,7 @@
   window.GuestAuth = {
     getGuestDatabase, findFamilyByCode, findFamilyByName, findFamilyMember,
     findFamilyByCodeLive, findFamilyByNameLive,
-    signInFamily, signOut, isUnlocked, getStoredCode, storageAvailable,
+    signInFamily, signOut, isUnlocked, isSessionUnlocked, getStoredCode, storageAvailable,
     requireUnlock, renderNav, ensureGuestDatabase
   };
 })();
