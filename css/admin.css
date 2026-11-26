@@ -205,6 +205,8 @@
   color: var(--gold-dark); border: 1px solid var(--border-gold); border-radius: 999px;
   padding: 1px 8px; margin-top: 4px; white-space: nowrap;
 }
+/* Member first names under the family code on the By Family grid */
+.fam-names { display: block; font-size: 0.76rem; color: var(--dark-gray); font-weight: 400; margin-top: 2px; }
 .count-yes { color: #2e7d32; font-weight: 700; }
 .count-no { color: #999; font-weight: 700; }
 .count-pending { color: #a86e00; font-weight: 700; }
