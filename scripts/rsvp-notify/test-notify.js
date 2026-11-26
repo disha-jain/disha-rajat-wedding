@@ -1,11 +1,12 @@
 // Mock-data tests for notify-rsvps.js grouping, notification planning
-// (marker docs) and email text. No Firestore or SMTP needed: exercises
-// the pure functions only.
+// (marker docs), email text and the SendGrid payload. No Firestore or
+// SendGrid needed: exercises the pure functions only.
 const assert = require("assert");
 const {
   groupSubmissions,
   planNotifications,
   buildEmailText,
+  buildSendGridPayload,
 } = require("./notify-rsvps");
 
 const T0 = "2026-11-25T05:00:00.000Z";
@@ -91,4 +92,27 @@ assert.ok(email2.text.includes("Sangeet: declining"), "edit shows new status");
 const email3 = buildEmailText(famB, false);
 assert.ok(email3.text.includes("No nuts"), "family B dietary shown");
 
-console.log("All mock tests pass: grouping, marker planning (new / updated / skip), email contents correct.");
+// SendGrid payload: one personalization with both recipients, verified
+// sender as `from`, subject and plain-text body from the email text.
+const payload = buildSendGridPayload(
+  famA1,
+  false,
+  "dishajain2016@gmail.com",
+  ["khanna.rjt@gmail.com", "dishajain2016@gmail.com"]
+);
+assert.deepStrictEqual(payload.personalizations, [
+  { to: [{ email: "khanna.rjt@gmail.com" }, { email: "dishajain2016@gmail.com" }] },
+]);
+assert.deepStrictEqual(payload.from, {
+  email: "dishajain2016@gmail.com",
+  name: "Disha & Rajat Wedding",
+});
+assert.strictEqual(payload.subject, "New RSVP — Khanna Family");
+assert.strictEqual(payload.content.length, 1);
+assert.strictEqual(payload.content[0].type, "text/plain");
+assert.ok(payload.content[0].value.includes("Rajat Khanna (555-1)"));
+
+const payloadUpdate = buildSendGridPayload(famA2, true, "dishajain2016@gmail.com", ["khanna.rjt@gmail.com"]);
+assert.strictEqual(payloadUpdate.subject, "RSVP updated — Khanna Family");
+
+console.log("All mock tests pass: grouping, marker planning (new / updated / skip), email contents, SendGrid payload correct.");
