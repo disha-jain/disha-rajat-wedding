@@ -6,10 +6,16 @@
 // and unlimited on public repos; SendGrid's free tier is 100 emails/day).
 // Tradeoff: emails arrive up to ~15 minutes after the RSVP, not instantly.
 //
+// What it sends: ONE digest email per run, subject "Wedding Guest RSVP
+// Updates", summarising every submission that arrived since the last run
+// (one section per family). Each section is headed "New RSVP: {family}
+// ({code}) — {side}" or "RSVP updated: ..." where {side} is the family's
+// bride-side / groom-side tag (or both), read from the `families` doc.
+//
 // How it detects a submission: the site writes one `rsvps` doc per
 // guest+event, all sharing the same `timestamp` for one submit
 // (home.html builds one timestamp per submit). Un-notified groups are
-// found by (family_code, timestamp); each group = one email.
+// found by (family_code, timestamp); each group = one digest section.
 //
 // Why notification state lives OUTSIDE the rsvps docs: the site re-saves
 // every RSVP doc on each submit with batch.set (full overwrite), which
@@ -22,7 +28,9 @@
 // family has any earlier notified timestamp, "New RSVP" otherwise.
 //
 // Only docs from the last WINDOW_HOURS are considered, so the first run
-// does not email about months of old RSVPs.
+// does not email about months of old RSVPs. In normal operation the
+// digest covers roughly the last 15 minutes (the cron interval); if a
+// run fails, the next run's digest includes the backlog.
 //
 // Env (set as GitHub repo secrets — never commit them):
 //   FIREBASE_SERVICE_ACCOUNT_JSON — service-account JSON for project
@@ -50,6 +58,7 @@ const ADMIN_URL =
   "https://disha-jain.github.io/disha-rajat-wedding/admin.html";
 const MARKER_COLLECTION = "rsvp_notify";
 const SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send";
+const DIGEST_SUBJECT = "Wedding Guest RSVP Updates";
 
 // Pure helpers (exported for test-notify.js) -------------------------------
 
@@ -99,7 +108,26 @@ function planNotifications(groups, markers) {
   });
 }
 
-function buildEmailText(group, isUpdate) {
+// Side label for a family's tag list: "bride-side", "groom-side",
+// "bride-side + groom-side", or "" when the family has neither side tag.
+function sideLabel(tags) {
+  const sides = ["bride-side", "groom-side"].filter((s) =>
+    (tags || []).includes(s)
+  );
+  return sides.join(" + ");
+}
+
+// Side label for a `families` doc: tags live on the members, so the
+// family's side is the union of its members' tags (same as the site's
+// session tags). A missing doc has no side.
+function familySideFromDoc(familyDoc) {
+  if (!familyDoc) return "";
+  const tags = [...new Set((familyDoc.members || []).flatMap((m) => m.tags || []))];
+  return sideLabel(tags);
+}
+
+// One digest section for one family's submission.
+function buildFamilySection(group, isUpdate, side) {
   const verb = isUpdate ? "RSVP updated" : "New RSVP";
   const byGuest = {};
   for (const r of group.docs) {
@@ -123,20 +151,31 @@ function buildEmailText(group, isUpdate) {
       .join("\n");
     return `${g.guest_name}${g.phone ? ` (${g.phone})` : ""}\n${perEvent}`;
   });
+  const heading =
+    `${verb}: ${group.family_name} (${group.family_code})` +
+    (side ? ` — ${side}` : "");
+  return (
+    `${heading}\n` +
+    `Submitted: ${group.timestamp}\n\n` +
+    lines.join("\n\n") +
+    (dietary ? `\n\nDietary / wishes: ${dietary}` : "")
+  );
+}
+
+// The whole digest: one section per family, admin link once at the end.
+// sections: [{ group, isUpdate, side }] in the order they should appear.
+function buildDigestText(sections) {
+  const body = sections
+    .map((s) => buildFamilySection(s.group, s.isUpdate, s.side))
+    .join("\n\n---\n\n");
   return {
-    subject: `${verb} — ${group.family_name}`,
-    text:
-      `${verb}: ${group.family_name} (${group.family_code})\n` +
-      `Submitted: ${group.timestamp}\n\n` +
-      lines.join("\n\n") +
-      (dietary ? `\n\nDietary / wishes: ${dietary}` : "") +
-      `\n\nView in admin: ${ADMIN_URL}`,
+    subject: DIGEST_SUBJECT,
+    text: body + `\n\nView in admin: ${ADMIN_URL}`,
   };
 }
 
-// Build the SendGrid v3 /mail/send request body for one group.
-function buildSendGridPayload(group, isUpdate, from, recipients) {
-  const { subject, text } = buildEmailText(group, isUpdate);
+// Build the SendGrid v3 /mail/send request body for the digest.
+function buildSendGridPayload(subject, text, from, recipients) {
   return {
     personalizations: [
       { to: recipients.map((email) => ({ email })) },
@@ -211,32 +250,47 @@ async function main() {
     return;
   }
 
-  const recipients = NOTIFY_EMAILS.split(",").map((s) => s.trim());
-  for (const { group, isUpdate } of toEmail) {
-    const payload = buildSendGridPayload(
-      group,
-      isUpdate,
-      process.env.SENDGRID_FROM,
-      recipients
-    );
-    await sendViaSendGrid(payload, process.env.SENDGRID_API_KEY);
-    console.log(`Emailed: ${payload.subject} (${group.docs.length} docs)`);
-    // Record the timestamp in the family's marker so this group is never
-    // emailed twice. The marker lives outside the rsvps docs precisely
-    // because the site's re-save would wipe a flag on those docs.
-    await db
-      .collection(MARKER_COLLECTION)
-      .doc(group.family_code)
-      .set(
-        {
-          notified_timestamps: admin.firestore.FieldValue.arrayUnion(
-            group.timestamp
-          ),
-          updated_at: new Date().toISOString(),
-        },
-        { merge: true }
-      );
+  // Side tags come from the `families` doc (union of member tags).
+  const sides = new Map();
+  for (const code of new Set(toEmail.map((p) => p.group.family_code))) {
+    const f = await db.collection("families").doc(code).get();
+    sides.set(code, familySideFromDoc(f.exists ? f.data() : null));
   }
+
+  const sections = toEmail.map((p) => ({
+    group: p.group,
+    isUpdate: p.isUpdate,
+    side: sides.get(p.group.family_code) || "",
+  }));
+  const { subject, text } = buildDigestText(sections);
+  const recipients = NOTIFY_EMAILS.split(",").map((s) => s.trim());
+  await sendViaSendGrid(
+    buildSendGridPayload(subject, text, process.env.SENDGRID_FROM, recipients),
+    process.env.SENDGRID_API_KEY
+  );
+  console.log(
+    `Emailed digest: ${subject} (${sections.length} famil${
+      sections.length === 1 ? "y" : "ies"
+    }, ${toEmail.reduce((n, p) => n + p.group.docs.length, 0)} docs)`
+  );
+
+  // Record every emailed timestamp in its family's marker so no group is
+  // ever emailed twice. The markers live outside the rsvps docs precisely
+  // because the site's re-save would wipe a flag on those docs.
+  const batch = db.batch();
+  for (const { group } of toEmail) {
+    batch.set(
+      db.collection(MARKER_COLLECTION).doc(group.family_code),
+      {
+        notified_timestamps: admin.firestore.FieldValue.arrayUnion(
+          group.timestamp
+        ),
+        updated_at: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+  }
+  await batch.commit();
   console.log("Done.");
 }
 
@@ -250,6 +304,9 @@ if (require.main === module) {
 module.exports = {
   groupSubmissions,
   planNotifications,
-  buildEmailText,
+  sideLabel,
+  familySideFromDoc,
+  buildFamilySection,
+  buildDigestText,
   buildSendGridPayload,
 };
