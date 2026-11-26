@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css?v=20261101a">
-  <link rel="stylesheet" href="css/admin.css?v=20261126b">
+  <link rel="stylesheet" href="css/admin.css?v=20261126c">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -385,11 +385,37 @@
       return isNaN(d) ? '' : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
+    // Wishes are stored appended to dietary_notes as " | Wishes: <text>"
+    function splitWishes(notes) {
+      const raw = String(notes || '');
+      const m = raw.match(/ \| Wishes: ([\s\S]*)$/);
+      return { diet: m ? raw.slice(0, m.index).trim() : raw.trim(), wish: m ? m[1].trim() : '' };
+    }
+    function toggleWish(el) {
+      const w = el.parentElement && el.parentElement.querySelector('.wish-text');
+      if (!w) return;
+      w.classList.toggle('open');
+      const c = el.querySelector('.wish-caret');
+      if (c) c.textContent = w.classList.contains('open') ? '▾' : '▸';
+      el.classList.toggle('open', w.classList.contains('open'));
+    }
+    // Dietary-notes cell for the All Responses table: wishes hidden behind a click
+    function dietCell(notes) {
+      const { diet, wish } = splitWishes(notes);
+      const dietHtml = diet ? esc(diet) : '';
+      if (!wish) return dietHtml;
+      return `${dietHtml}${dietHtml ? '<br>' : ''}<button type="button" class="wish-btn" onclick="toggleWish(this)">Wishes <span class="wish-caret">▸</span></button><span class="wish-text">${esc(wish)}</span>`;
+    }
     function rsvpNameRow(r, cls) {
       const plus = (r.guest_type === 'plus-one') ? '<span class="plusone-badge">+1</span>' : '';
-      const diet = (r.dietary_notes && String(r.dietary_notes).trim()) ? `<span class="diet-note">${esc(r.dietary_notes)}</span>` : '';
+      const { diet, wish } = splitWishes(r.dietary_notes);
+      const dietHtml = diet ? `<span class="diet-note">${esc(diet)}</span>` : '';
       const phone = (r.phone && String(r.phone).trim()) ? ` <span class="fam">· ${esc(r.phone)}</span>` : '';
-      return `<li class="${cls}">${esc(r.guest_name)}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${phone}${diet}</li>`;
+      const nameHtml = wish
+        ? `<button type="button" class="guest-name-btn" title="Show wishes" onclick="toggleWish(this)">${esc(r.guest_name)} <span class="wish-caret">▸</span></button>`
+        : esc(r.guest_name);
+      const wishHtml = wish ? `<span class="wish-text">💬 ${esc(wish)}</span>` : '';
+      return `<li class="${cls}">${nameHtml}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${phone}${dietHtml}${wishHtml}</li>`;
     }
 
     function shortEventTitle(t) {
@@ -507,6 +533,7 @@
             <option value="all"${rsvpTabFilters.status === 'all' ? ' selected' : ''}>Attending + declining</option>
             <option value="attending"${rsvpTabFilters.status === 'attending' ? ' selected' : ''}>Attending only</option>
             <option value="declining"${rsvpTabFilters.status === 'declining' ? ' selected' : ''}>Declining only</option>
+            <option value="awaiting"${rsvpTabFilters.status === 'awaiting' ? ' selected' : ''}>Awaiting response</option>
           </select>
           <input type="search" id="rsvp-filter-q" placeholder="Search guest or family…" value="${esc(rsvpTabFilters.q)}"
             oninput="rsvpTabFilters.q=this.value; renderRsvpAllRows(getStoredRSVPs())">
@@ -528,6 +555,42 @@
       const events = rsvpAbleEvents();
       const evIndex = new Map(events.map((e, i) => [e.id, i]));
       const q = (rsvpTabFilters.q || '').toLowerCase().trim();
+      // "Awaiting response": invited members with no RSVP record for the event(s)
+      if (rsvpTabFilters.status === 'awaiting') {
+        const families = getStoredGuestList();
+        const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const answered = new Set(rsvps.map(r => `${r.family_code}__${norm(r.guest_name)}__${r.event_id}`));
+        const awaitRows = [];
+        families.forEach(f => {
+          const tags = familyTagSet(f);
+          (f.members || []).forEach(m => {
+            const name = `${m.first_name || ''} ${m.last_name || ''}`.trim();
+            if (q && !`${name} ${f.family_name || ''} ${f.family_code || ''}`.toLowerCase().includes(q)) return;
+            const awaited = events.filter(ev =>
+              eventInvitesFamily(ev, tags) &&
+              !answered.has(`${f.family_code}__${norm(name)}__${ev.id}`) &&
+              (rsvpTabFilters.event === 'all' || ev.id === rsvpTabFilters.event));
+            if (!awaited.length) return;
+            const shown = awaited.map(ev => shortEventTitle(ev.title));
+            const evLabel = shown.length > 5 ? shown.slice(0, 5).join(', ') + ` +${shown.length - 5} more` : shown.join(', ');
+            awaitRows.push({ name, fam: f, phone: m.phone || '', evLabel });
+          });
+        });
+        awaitRows.sort((a, b) => String(a.fam.family_name || '').localeCompare(String(b.fam.family_name || '')) || String(a.name).localeCompare(String(b.name)));
+        body.innerHTML = awaitRows.map(x => `<tr>
+          <td>${esc(x.name)}</td>
+          <td>${esc(x.fam.family_name || '')} <span style="color:var(--taupe);font-size:0.74rem;">${esc(x.fam.family_code || '')}</span></td>
+          <td>${esc(x.evLabel)}</td>
+          <td><span class="status-badge pending">Awaiting</span></td>
+          <td>guest</td>
+          <td style="white-space:nowrap;font-size:0.8rem;">${esc(x.phone)}</td>
+          <td style="font-size:0.8rem;">—</td>
+          <td style="white-space:nowrap;font-size:0.8rem;">—</td>
+        </tr>`).join('') ||
+        `<tr><td colspan="8" style="text-align:center;color:var(--taupe);padding:18px;">No guests are awaiting a response for these filters.</td></tr>`;
+        if (countEl) countEl.textContent = `${awaitRows.length} awaiting`;
+        return;
+      }
       const rows = rsvps.filter(r => {
         if (rsvpTabFilters.event !== 'all' && r.event_id !== rsvpTabFilters.event) return false;
         if (rsvpTabFilters.status !== 'all' && r.status !== rsvpTabFilters.status) return false;
@@ -548,7 +611,7 @@
           <td><span class="status-badge ${r.status === 'attending' ? 'attending' : 'declining'}">${esc(r.status)}</span></td>
           <td>${r.guest_type === 'plus-one' ? '<span class="plusone-badge">+1</span>' : esc(r.guest_type || 'guest')}</td>
           <td style="white-space:nowrap;font-size:0.8rem;">${esc(r.phone || '')}</td>
-          <td style="font-size:0.8rem;max-width:220px;">${esc(r.dietary_notes || '')}</td>
+          <td style="font-size:0.8rem;max-width:220px;">${dietCell(r.dietary_notes)}</td>
           <td style="white-space:nowrap;font-size:0.8rem;">${esc(fmtRsvpDate(r.timestamp))}</td>
         </tr>`).join('') ||
         `<tr><td colspan="8" style="text-align:center;color:var(--taupe);padding:18px;">No responses match these filters.</td></tr>`;
