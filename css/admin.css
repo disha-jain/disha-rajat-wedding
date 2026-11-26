@@ -138,20 +138,32 @@
 }
 .rsvp-tab-panel[hidden] { display: none; }
 
-/* Tab 1: per-event cards */
-.rsvp-event-card {
-  border: 1px solid var(--line); border-radius: 12px;
-  margin-bottom: 14px; overflow: hidden; background: var(--white);
+/* Tab 1: one event at a time, picked from tabs on top */
+.rsvp-event-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 16px; }
+.rsvp-event-tab {
+  padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--line);
+  background: var(--white); color: var(--dark-gray);
+  font-family: var(--font-serif); font-size: 0.74rem; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s ease;
 }
-.rsvp-event-head {
+.rsvp-event-tab:hover { border-color: var(--gold-primary); }
+.rsvp-event-tab.active { background: var(--ink); border-color: var(--ink); color: var(--white); }
+.rsvp-event-tab .tab-count {
+  display: inline-block; min-width: 22px; text-align: center;
+  background: var(--gold-primary); color: #fff; border-radius: 999px;
+  font-size: 0.68rem; padding: 1px 6px; margin-left: 6px; letter-spacing: 0;
+}
+.rsvp-event-panel {
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--white); padding: 6px 16px 14px;
+}
+.rsvp-event-panel-head {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px;
-  padding: 14px 16px; background: var(--ivory); border-bottom: 1px solid var(--line);
-  cursor: pointer;
+  padding: 14px 0 10px; border-bottom: 1px solid var(--line);
 }
 .rsvp-event-title { font-family: var(--font-serif); font-size: 1.02rem; color: var(--gold-dark); }
 .rsvp-event-when { font-size: 0.8rem; color: var(--taupe); }
 .rsvp-event-counts { margin-left: auto; display: flex; gap: 12px; font-size: 0.82rem; white-space: nowrap; }
-.rsvp-event-body { padding: 6px 16px 14px; }
 .rsvp-name-list { list-style: none; margin: 8px 0; padding: 0; columns: 2; column-gap: 24px; font-size: 0.88rem; }
 @media (max-width: 640px) { .rsvp-name-list { columns: 1; } }
 .rsvp-name-list li { padding: 3px 0; break-inside: avoid; }
