@@ -1,0 +1,64 @@
+# Free RSVP email notifications — GitHub Actions poller (no Blaze, $0)
+#
+# How it works: every 15 minutes a GitHub-hosted runner polls the
+# `rsvps` Firestore collection for un-notified docs, groups one family's
+# submit (all its docs share one timestamp) into a single email, sends it
+# via Gmail SMTP, and marks those docs notified: true. An edit re-saves
+# the same docs with a new timestamp, so it notifies again as
+# "RSVP updated". No change to the site and no Firestore rules change.
+#
+# Cost: $0. GitHub Actions is free and unlimited on public repos
+# (disha-rajat-wedding is public). Each run takes ~1 minute.
+#
+# Limits, stated plainly:
+# - Delayed, not instant: emails arrive up to ~15 min after the RSVP,
+#   plus GitHub cron can slip 5-30 min under load.
+# - Scheduled workflows only run on the default branch (main), so this
+#   must be merged — a PR alone does not start it.
+# - GitHub auto-disables a schedule after 60 days with no repo activity;
+#   any commit (including the notifier's own, if added later) resets it.
+# - Secrets live in repo Settings > Secrets and variables > Actions.
+#   Only a repo admin can add them — Rajat currently has Write access,
+#   so Disha (repo owner) adds them, or makes Rajat an admin.
+#
+# Secrets needed (names must match exactly):
+#   FIREBASE_SERVICE_ACCOUNT_JSON — service-account key JSON for project
+#       disha-rajat-wedding (Firebase console > Project settings >
+#       Service accounts > Generate new private key). Paste the whole
+#       JSON file contents as the secret value.
+#   SMTP_USER  — Gmail address mail is sent from (khanna.rjt@gmail.com)
+#   SMTP_PASS  — Gmail app password for that account, NOT the login
+#       password (Google Account > Security > 2-Step Verification >
+#       App passwords > create one named e.g. "Wedding RSVP notifier")
+#   NOTIFY_EMAILS — recipients, e.g.
+#       khanna.rjt@gmail.com,dishajain2016@gmail.com
+
+name: RSVP email notifications
+
+on:
+  schedule:
+    # Every 15 minutes, off the top of the hour (less cron congestion).
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch: # manual test run from the Actions tab
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+        working-directory: scripts/rsvp-notify
+      - run: node notify-rsvps.js
+        working-directory: scripts/rsvp-notify
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          NOTIFY_EMAILS: ${{ secrets.NOTIFY_EMAILS }}
