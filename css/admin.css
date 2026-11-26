@@ -138,23 +138,31 @@
 }
 .rsvp-tab-panel[hidden] { display: none; }
 
-/* Tab 1: one event at a time, picked from tabs on top */
-.rsvp-event-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 16px; }
-.rsvp-event-tab {
-  padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--line);
-  background: var(--white); color: var(--dark-gray);
-  font-family: var(--font-serif); font-size: 0.74rem; letter-spacing: 1px; text-transform: uppercase;
-  cursor: pointer; transition: all 0.2s ease;
+/* Tab 1: event tabs integrated as the panel's header strip */
+.rsvp-event-tabs {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--line); border-bottom: none;
+  border-radius: 12px 12px 0 0; background: var(--ivory);
+  overflow: hidden;
 }
-.rsvp-event-tab:hover { border-color: var(--gold-primary); }
-.rsvp-event-tab.active { background: var(--ink); border-color: var(--ink); color: var(--white); }
+.rsvp-event-tab {
+  padding: 11px 16px; border: none; border-right: 1px solid var(--line); border-radius: 0;
+  background: transparent; color: var(--dark-gray);
+  font-family: var(--font-serif); font-size: 0.74rem; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s ease, color 0.2s ease;
+}
+.rsvp-event-tab:hover { color: var(--gold-dark); }
+.rsvp-event-tab.active {
+  background: var(--white); color: var(--gold-dark); font-weight: 700;
+  box-shadow: inset 0 2px 0 var(--gold-primary);
+}
 .rsvp-event-tab .tab-count {
   display: inline-block; min-width: 22px; text-align: center;
   background: var(--gold-primary); color: #fff; border-radius: 999px;
   font-size: 0.68rem; padding: 1px 6px; margin-left: 6px; letter-spacing: 0;
 }
 .rsvp-event-panel {
-  border: 1px solid var(--line); border-radius: 12px;
+  border: 1px solid var(--line); border-top: none; border-radius: 0 0 12px 12px;
   background: var(--white); padding: 6px 16px 14px;
 }
 .rsvp-event-panel-head {
