@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css?v=20261101a">
-  <link rel="stylesheet" href="css/admin.css?v=20261004b">
+  <link rel="stylesheet" href="css/admin.css?v=20261126a">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -399,44 +399,60 @@
         .replace('Virginia Reception', 'VA Reception');
     }
 
-    // Tab 1: per-event headcounts + guest lists
+    // Tab 1: one event at a time, picked from tabs on top (no awaiting list)
+    let byEventSelectedId = null;
+    function selectByEvent(evId) {
+      byEventSelectedId = evId;
+      renderRsvpTabs();
+    }
     function renderRsvpByEvent(families, rsvps) {
       const host = document.getElementById('rsvp-tab-by-event');
       if (!host) return;
       const events = rsvpAbleEvents();
+      if (!events.length) {
+        host.innerHTML = '<p style="color:var(--text-sub);">No RSVP-able events found.</p>';
+        return;
+      }
+      if (!byEventSelectedId || !events.some(e => e.id === byEventSelectedId)) {
+        byEventSelectedId = events[0].id;
+      }
       const respondedFams = new Set(rsvps.map(r => r.family_code));
-      let html = '';
+      const counts = new Map();
       events.forEach(ev => {
         const recs = rsvps.filter(r => r.event_id === ev.id);
-        const att = recs.filter(r => r.status === 'attending');
-        const dec = recs.filter(r => r.status !== 'attending');
-        const pendingFams = families.filter(f => !respondedFams.has(f.family_code) && eventInvitesFamily(ev, familyTagSet(f)));
-        const pendingCount = pendingFams.reduce((n, f) => n + ((f.members || []).length), 0);
-        const when = [ev.dateLabel, ev.time].filter(Boolean).join(' · ');
-        html += `<div class="rsvp-event-card">
-          <div class="rsvp-event-head" onclick="this.nextElementSibling.hidden = !this.nextElementSibling.hidden" title="Click to expand/collapse">
-            <span class="rsvp-event-title">${esc(ev.icon || '')} ${esc(ev.title)}</span>
-            ${when ? `<span class="rsvp-event-when">${esc(when)}</span>` : ''}
-            <span class="rsvp-event-counts">
-              <span class="count-yes">${att.length} attending</span>
-              <span class="count-no">${dec.length} declining</span>
-              <span class="count-pending">${pendingCount} awaiting</span>
-            </span>
-          </div>
-          <div class="rsvp-event-body">
-            ${att.length
-              ? `<ul class="rsvp-name-list">${att.map(r => rsvpNameRow(r, 'attending')).join('')}</ul>`
-              : '<p style="font-size:0.85rem;color:var(--taupe);">No confirmed guests yet.</p>'}
-            ${dec.length
-              ? `<p style="font-size:0.74rem;color:var(--taupe);margin:12px 0 4px;letter-spacing:1px;text-transform:uppercase;">Declining (${dec.length})</p><ul class="rsvp-name-list">${dec.map(r => rsvpNameRow(r, 'declining')).join('')}</ul>`
-              : ''}
-            ${pendingCount
-              ? `<p style="font-size:0.74rem;color:#a86e00;margin:12px 0 4px;letter-spacing:1px;text-transform:uppercase;">Awaiting response (${pendingCount})</p><ul class="rsvp-name-list">${pendingFams.map(f => (f.members || []).map(m => `<li class="pending">${esc(m.first_name + ' ' + m.last_name)} <span class="fam">· ${esc(f.family_name)}</span></li>`).join('')).join('')}</ul>`
-              : ''}
-          </div>
-        </div>`;
+        counts.set(ev.id, {
+          att: recs.filter(r => r.status === 'attending').length,
+          dec: recs.filter(r => r.status !== 'attending').length,
+        });
       });
-      host.innerHTML = html || '<p style="color:var(--text-sub);">No RSVP-able events found.</p>';
+      const ev = events.find(e => e.id === byEventSelectedId);
+      const recs = rsvps.filter(r => r.event_id === ev.id);
+      const att = recs.filter(r => r.status === 'attending');
+      const dec = recs.filter(r => r.status !== 'attending');
+      const pendingFams = families.filter(f => !respondedFams.has(f.family_code) && eventInvitesFamily(ev, familyTagSet(f)));
+      const pendingCount = pendingFams.reduce((n, f) => n + ((f.members || []).length), 0);
+      const when = [ev.dateLabel, ev.time].filter(Boolean).join(' · ');
+      host.innerHTML = `<div class="rsvp-event-tabs" role="tablist" aria-label="Events">${events.map(e => {
+        const c = counts.get(e.id);
+        return `<button type="button" class="rsvp-event-tab${e.id === byEventSelectedId ? ' active' : ''}" data-ev="${esc(e.id)}" role="tab" aria-selected="${e.id === byEventSelectedId ? 'true' : 'false'}" onclick="selectByEvent('${esc(e.id)}')">${esc(shortEventTitle(e.title))}<span class="tab-count">${c.att}</span></button>`;
+      }).join('')}</div>
+      <div class="rsvp-event-panel">
+        <div class="rsvp-event-panel-head">
+          <span class="rsvp-event-title">${esc(ev.icon || '')} ${esc(ev.title)}</span>
+          ${when ? `<span class="rsvp-event-when">${esc(when)}</span>` : ''}
+          <span class="rsvp-event-counts">
+            <span class="count-yes">${att.length} attending</span>
+            <span class="count-no">${dec.length} declining</span>
+            <span class="count-pending">${pendingCount} awaiting</span>
+          </span>
+        </div>
+        ${att.length
+          ? `<ul class="rsvp-name-list">${att.map(r => rsvpNameRow(r, 'attending')).join('')}</ul>`
+          : '<p style="font-size:0.85rem;color:var(--taupe);">No confirmed guests yet.</p>'}
+        ${dec.length
+          ? `<p style="font-size:0.74rem;color:var(--taupe);margin:12px 0 4px;letter-spacing:1px;text-transform:uppercase;">Declining (${dec.length})</p><ul class="rsvp-name-list">${dec.map(r => rsvpNameRow(r, 'declining')).join('')}</ul>`
+          : ''}
+      </div>`;
     }
 
     // Tab 2: family x event grid
