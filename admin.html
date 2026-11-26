@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css?v=20261101a">
-  <link rel="stylesheet" href="css/admin.css?v=20261126c">
+  <link rel="stylesheet" href="css/admin.css?v=20261126d">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -338,7 +338,7 @@
     }
 
     // ---------- RSVP response tabs: By Event / By Family / All Responses ----------
-    const rsvpTabFilters = { event: 'all', status: 'all', q: '' };
+    const rsvpTabFilters = { event: 'all', status: 'all', q: '', side: 'all' };
 
     function rsvpAbleEvents() {
       if (typeof WEDDING_EVENTS !== 'undefined' && Array.isArray(WEDDING_EVENTS)) {
@@ -357,6 +357,28 @@
 
     function familyTagSet(fam) {
       return new Set(((fam.members || []).flatMap(m => m.tags || [])).map(t => String(t).toLowerCase()));
+    }
+
+    // Side of a family from its members' tags: 'bride-side', 'groom-side', 'both', or 'neither'
+    function familySide(fam) {
+      const tags = familyTagSet(fam);
+      const b = tags.has('bride-side'), g = tags.has('groom-side');
+      return b && g ? 'both' : b ? 'bride-side' : g ? 'groom-side' : 'neither';
+    }
+    function sideLabel(side) {
+      return side === 'bride-side' ? 'Bride' : side === 'groom-side' ? 'Groom' : side === 'both' ? 'Both' : '—';
+    }
+    // A 'both' family counts as bride-side and as groom-side; 'both' filter = only both-tagged
+    function sideMatches(side, filter) {
+      if (filter === 'all') return true;
+      if (filter === 'both') return side === 'both';
+      return side === filter || side === 'both';
+    }
+    function sideFilterOptions() {
+      return `<option value="all"${rsvpTabFilters.side === 'all' ? ' selected' : ''}>All sides</option>
+            <option value="bride-side"${rsvpTabFilters.side === 'bride-side' ? ' selected' : ''}>Bride-side</option>
+            <option value="groom-side"${rsvpTabFilters.side === 'groom-side' ? ' selected' : ''}>Groom-side</option>
+            <option value="both"${rsvpTabFilters.side === 'both' ? ' selected' : ''}>Both sides</option>`;
     }
 
     // Mirrors eventsForTags() for a single event: is this family invited?
@@ -492,16 +514,22 @@
         byFam.get(r.family_code).push(r);
       });
       const sorted = [...families].sort((a, b) => String(a.family_name || '').localeCompare(String(b.family_name || '')));
+      const visible = sorted.filter(f => sideMatches(familySide(f), rsvpTabFilters.side));
       let pendingCount = 0;
-      let html = `<div class="rsvp-grid-wrap"><table class="rsvp-grid"><thead><tr><th>Family</th>`;
+      let html = `<div class="rsvp-filters">
+          <select id="rsvp-filter-side-family" aria-label="Filter by side"
+            onchange="rsvpTabFilters.side=this.value; renderRsvpTabs()">
+            ${sideFilterOptions()}
+          </select>
+        </div><div class="rsvp-grid-wrap"><table class="rsvp-grid"><thead><tr><th>Family</th>`;
       events.forEach(ev => { html += `<th title="${esc(ev.title)}">${esc(shortEventTitle(ev.title))}</th>`; });
       html += `<th>Status</th></tr></thead><tbody>`;
-      sorted.forEach(fam => {
+      visible.forEach(fam => {
         const recs = byFam.get(fam.family_code) || [];
         const responded = recs.length > 0;
         if (!responded) pendingCount++;
         const tags = familyTagSet(fam);
-        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length} guests</span></th>`;
+        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length} guests</span><span class="side-badge">${sideLabel(familySide(fam))}</span></th>`;
         events.forEach(ev => {
           if (!eventInvitesFamily(ev, tags)) { html += `<td><span class="cell-na">—</span></td>`; return; }
           if (!responded) { html += `<td><span class="cell-pending">···</span></td>`; return; }
@@ -511,7 +539,7 @@
         html += `<td>${responded ? '<span class="status-badge attending">Responded</span>' : '<span class="status-badge pending">Pending</span>'}</td></tr>`;
       });
       html += `</tbody></table></div>
-        <p style="font-size:0.82rem;color:var(--taupe);margin:10px 2px 0;">${pendingCount} of ${sorted.length} families have not responded yet.</p>`;
+        <p style="font-size:0.82rem;color:var(--taupe);margin:10px 2px 0;">${pendingCount} of ${visible.length} families have not responded yet.</p>`;
       host.innerHTML = html;
       const tabBtn = document.querySelector('.rsvp-tab[data-tab="by-family"]');
       if (tabBtn) tabBtn.innerHTML = `By Family <span class="tab-count">${pendingCount}</span>`;
@@ -535,12 +563,16 @@
             <option value="declining"${rsvpTabFilters.status === 'declining' ? ' selected' : ''}>Declining only</option>
             <option value="awaiting"${rsvpTabFilters.status === 'awaiting' ? ' selected' : ''}>Awaiting response</option>
           </select>
+          <select id="rsvp-filter-side" aria-label="Filter by side"
+            onchange="rsvpTabFilters.side=this.value; renderRsvpAllRows(getStoredRSVPs())">
+            ${sideFilterOptions()}
+          </select>
           <input type="search" id="rsvp-filter-q" placeholder="Search guest or family…" value="${esc(rsvpTabFilters.q)}"
             oninput="rsvpTabFilters.q=this.value; renderRsvpAllRows(getStoredRSVPs())">
           <span class="result-count" id="rsvp-result-count"></span>
         </div>
         <div class="rsvp-grid-wrap"><table class="roster-table" id="rsvp-all-table">
-          <thead><tr><th>Guest</th><th>Family</th><th>Event</th><th>Status</th><th>Type</th><th>Phone</th><th>Dietary notes</th><th>Submitted</th></tr></thead>
+          <thead><tr><th>Guest</th><th>Family</th><th>Side</th><th>Event</th><th>Status</th><th>Type</th><th>Phone</th><th>Dietary notes</th><th>Submitted</th></tr></thead>
           <tbody id="rsvp-all-body"></tbody>
         </table></div>`;
       renderRsvpAllRows(rsvps);
@@ -555,6 +587,7 @@
       const events = rsvpAbleEvents();
       const evIndex = new Map(events.map((e, i) => [e.id, i]));
       const q = (rsvpTabFilters.q || '').toLowerCase().trim();
+      const famSide = new Map(getStoredGuestList().map(f => [f.family_code, familySide(f)]));
       // "Awaiting response": invited members with no RSVP record for the event(s)
       if (rsvpTabFilters.status === 'awaiting') {
         const families = getStoredGuestList();
@@ -562,6 +595,7 @@
         const answered = new Set(rsvps.map(r => `${r.family_code}__${norm(r.guest_name)}__${r.event_id}`));
         const awaitRows = [];
         families.forEach(f => {
+          if (!sideMatches(familySide(f), rsvpTabFilters.side)) return;
           const tags = familyTagSet(f);
           (f.members || []).forEach(m => {
             const name = `${m.first_name || ''} ${m.last_name || ''}`.trim();
@@ -580,6 +614,7 @@
         body.innerHTML = awaitRows.map(x => `<tr>
           <td>${esc(x.name)}</td>
           <td>${esc(x.fam.family_name || '')} <span style="color:var(--taupe);font-size:0.74rem;">${esc(x.fam.family_code || '')}</span></td>
+          <td><span class="side-badge">${sideLabel(familySide(x.fam))}</span></td>
           <td>${esc(x.evLabel)}</td>
           <td><span class="status-badge pending">Awaiting</span></td>
           <td>guest</td>
@@ -587,13 +622,14 @@
           <td style="font-size:0.8rem;">—</td>
           <td style="white-space:nowrap;font-size:0.8rem;">—</td>
         </tr>`).join('') ||
-        `<tr><td colspan="8" style="text-align:center;color:var(--taupe);padding:18px;">No guests are awaiting a response for these filters.</td></tr>`;
+        `<tr><td colspan="9" style="text-align:center;color:var(--taupe);padding:18px;">No guests are awaiting a response for these filters.</td></tr>`;
         if (countEl) countEl.textContent = `${awaitRows.length} awaiting`;
         return;
       }
       const rows = rsvps.filter(r => {
         if (rsvpTabFilters.event !== 'all' && r.event_id !== rsvpTabFilters.event) return false;
         if (rsvpTabFilters.status !== 'all' && r.status !== rsvpTabFilters.status) return false;
+        if (!sideMatches(famSide.get(r.family_code) || 'neither', rsvpTabFilters.side)) return false;
         if (q) {
           const hay = `${r.guest_name} ${r.family_name} ${r.family_code}`.toLowerCase();
           if (!hay.includes(q)) return false;
@@ -607,6 +643,7 @@
       body.innerHTML = rows.map(r => `<tr>
           <td>${esc(r.guest_name)}</td>
           <td>${esc(r.family_name || '')} <span style="color:var(--taupe);font-size:0.74rem;">${esc(r.family_code || '')}</span></td>
+          <td><span class="side-badge">${sideLabel(famSide.get(r.family_code) || 'neither')}</span></td>
           <td>${esc(r.event_title || r.event_id)}</td>
           <td><span class="status-badge ${r.status === 'attending' ? 'attending' : 'declining'}">${esc(r.status)}</span></td>
           <td>${r.guest_type === 'plus-one' ? '<span class="plusone-badge">+1</span>' : esc(r.guest_type || 'guest')}</td>
@@ -614,7 +651,7 @@
           <td style="font-size:0.8rem;max-width:220px;">${dietCell(r.dietary_notes)}</td>
           <td style="white-space:nowrap;font-size:0.8rem;">${esc(fmtRsvpDate(r.timestamp))}</td>
         </tr>`).join('') ||
-        `<tr><td colspan="8" style="text-align:center;color:var(--taupe);padding:18px;">No responses match these filters.</td></tr>`;
+        `<tr><td colspan="9" style="text-align:center;color:var(--taupe);padding:18px;">No responses match these filters.</td></tr>`;
       if (countEl) countEl.textContent = `${rows.length} of ${rsvps.length} responses`;
     }
 
