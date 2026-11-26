@@ -111,12 +111,12 @@
       <h3 class="gold-title">RSVP Responses</h3>
       <p style="font-size:0.82rem;color:var(--taupe);margin:-4px 0 10px;">Who has responded for which event, built from the shared RSVP records. Refreshes with the dashboard.</p>
       <div class="rsvp-tabs" role="tablist" aria-label="RSVP views">
-        <button type="button" class="rsvp-tab active" data-tab="by-event" role="tab" aria-selected="true" onclick="switchRsvpTab('by-event')">By Event</button>
-        <button type="button" class="rsvp-tab" data-tab="by-family" role="tab" aria-selected="false" onclick="switchRsvpTab('by-family')">By Family</button>
+        <button type="button" class="rsvp-tab active" data-tab="by-family" role="tab" aria-selected="true" onclick="switchRsvpTab('by-family')">By Family</button>
+        <button type="button" class="rsvp-tab" data-tab="by-event" role="tab" aria-selected="false" onclick="switchRsvpTab('by-event')">By Event</button>
         <button type="button" class="rsvp-tab" data-tab="all" role="tab" aria-selected="false" onclick="switchRsvpTab('all')">All Responses</button>
       </div>
-      <div class="rsvp-tab-panel" id="rsvp-tab-by-event" role="tabpanel"></div>
-      <div class="rsvp-tab-panel" id="rsvp-tab-by-family" role="tabpanel" hidden></div>
+      <div class="rsvp-tab-panel" id="rsvp-tab-by-family" role="tabpanel"></div>
+      <div class="rsvp-tab-panel" id="rsvp-tab-by-event" role="tabpanel" hidden></div>
       <div class="rsvp-tab-panel" id="rsvp-tab-all" role="tabpanel" hidden></div>
     </div>
 
@@ -338,7 +338,7 @@
     }
 
     // ---------- RSVP response tabs: By Event / By Family / All Responses ----------
-    const rsvpTabFilters = { event: 'all', status: 'all', q: '', side: 'all' };
+    const rsvpTabFilters = { event: 'all', status: 'all', q: '', side: 'all', sort: 'name-asc' };
 
     function rsvpAbleEvents() {
       if (typeof WEDDING_EVENTS !== 'undefined' && Array.isArray(WEDDING_EVENTS)) {
@@ -514,20 +514,35 @@
         if (!byFam.has(r.family_code)) byFam.set(r.family_code, []);
         byFam.get(r.family_code).push(r);
       });
-      const sorted = [...families].sort((a, b) => String(a.family_name || '').localeCompare(String(b.family_name || '')));
-      const visible = sorted.filter(f => sideMatches(familySide(f), rsvpTabFilters.side));
+      const nameCmp = (a, b) => String(a.family_name || '').localeCompare(String(b.family_name || ''));
+      const rows = [...families]
+        .filter(f => sideMatches(familySide(f), rsvpTabFilters.side))
+        .map(fam => ({ fam, responded: (byFam.get(fam.family_code) || []).length > 0 }));
+      const sortKey = rsvpTabFilters.sort || 'name-asc';
+      rows.sort((a, b) => {
+        if (sortKey === 'name-desc') return nameCmp(b.fam, a.fam);
+        if (sortKey === 'status-responded') return a.responded === b.responded ? nameCmp(a.fam, b.fam) : (a.responded ? -1 : 1);
+        if (sortKey === 'status-pending') return a.responded === b.responded ? nameCmp(a.fam, b.fam) : (a.responded ? 1 : -1);
+        return nameCmp(a.fam, b.fam);
+      });
       let pendingCount = 0;
       let html = `<div class="rsvp-filters">
           <select id="rsvp-filter-side-family" aria-label="Filter by side"
             onchange="rsvpTabFilters.side=this.value; renderRsvpTabs()">
             ${sideFilterOptions()}
           </select>
+          <select id="rsvp-sort-family" aria-label="Sort families"
+            onchange="rsvpTabFilters.sort=this.value; renderRsvpTabs()">
+            <option value="name-asc"${sortKey === 'name-asc' ? ' selected' : ''}>Family name A–Z</option>
+            <option value="name-desc"${sortKey === 'name-desc' ? ' selected' : ''}>Family name Z–A</option>
+            <option value="status-responded"${sortKey === 'status-responded' ? ' selected' : ''}>Responded first</option>
+            <option value="status-pending"${sortKey === 'status-pending' ? ' selected' : ''}>Pending first</option>
+          </select>
         </div><div class="rsvp-grid-wrap"><table class="rsvp-grid"><thead><tr><th>Family</th>`;
       events.forEach(ev => { html += `<th title="${esc(ev.title)}">${esc(shortEventTitle(ev.title))}</th>`; });
       html += `<th>Status</th></tr></thead><tbody>`;
-      visible.forEach(fam => {
+      rows.forEach(({ fam, responded }) => {
         const recs = byFam.get(fam.family_code) || [];
-        const responded = recs.length > 0;
         if (!responded) pendingCount++;
         const tags = familyTagSet(fam);
         const namesHtml = ((fam.members || []).map(m => (m.first_name || '').trim()).filter(Boolean).map(n => esc(n)).join(', '));
@@ -541,7 +556,7 @@
         html += `<td>${responded ? '<span class="status-badge attending">Responded</span>' : '<span class="status-badge pending">Pending</span>'}</td></tr>`;
       });
       html += `</tbody></table></div>
-        <p style="font-size:0.82rem;color:var(--taupe);margin:10px 2px 0;">${pendingCount} of ${visible.length} families have not responded yet.</p>`;
+        <p style="font-size:0.82rem;color:var(--taupe);margin:10px 2px 0;">${pendingCount} of ${rows.length} families have not responded yet.</p>`;
       host.innerHTML = html;
       const tabBtn = document.querySelector('.rsvp-tab[data-tab="by-family"]');
       if (tabBtn) tabBtn.innerHTML = `By Family <span class="tab-count">${pendingCount}</span>`;
