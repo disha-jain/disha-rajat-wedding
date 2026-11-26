@@ -192,6 +192,12 @@
 .wish-btn:hover { text-decoration: underline; }
 .wish-text { display: none; font-size: 0.76rem; color: var(--gold-dark); font-style: italic; margin-top: 2px; }
 .wish-text.open { display: block; }
+/* Side badge: Bride / Groom / Both on family rows and response rows */
+.side-badge {
+  display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--gold-dark); border: 1px solid var(--border-gold); border-radius: 999px;
+  padding: 1px 8px; margin-top: 4px; white-space: nowrap;
+}
 .count-yes { color: #2e7d32; font-weight: 700; }
 .count-no { color: #999; font-weight: 700; }
 .count-pending { color: #a86e00; font-weight: 700; }
