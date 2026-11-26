@@ -36,6 +36,11 @@
 .btn-sm { padding: 9px 20px !important; font-size: 0.78rem !important; white-space: nowrap; }
 
 .roster-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left; }
+/* Fixed-height tables: headers stay pinned while the body scrolls */
+.roster-table thead th { position: sticky; top: 0; z-index: 2; }
+.rsvp-grid thead th { position: sticky; top: 0; z-index: 2; }
+.rsvp-grid thead th:first-child { z-index: 3; }
+#guest-roster-table { max-height: 480px; overflow-y: auto; }
 .roster-table thead th {
   padding: 10px 8px; border-bottom: 2px solid var(--border-gold);
   color: var(--gold-dark); font-family: var(--font-serif);
@@ -203,7 +208,7 @@
 .count-pending { color: #a86e00; font-weight: 700; }
 
 /* Tab 2: family x event grid */
-.rsvp-grid-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+.rsvp-grid-wrap { overflow-x: auto; overflow-y: auto; max-height: 480px; border: 1px solid var(--line); border-radius: 12px; }
 .rsvp-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; min-width: 720px; }
 .rsvp-grid thead th {
   padding: 10px 8px; border-bottom: 2px solid var(--border-gold); background: var(--ivory);
