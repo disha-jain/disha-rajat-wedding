@@ -428,16 +428,17 @@
       if (!wish) return dietHtml;
       return `${dietHtml}${dietHtml ? '<br>' : ''}<button type="button" class="wish-btn" onclick="toggleWish(this)">Wishes <span class="wish-caret">▸</span></button><span class="wish-text">${esc(wish)}</span>`;
     }
-    function rsvpNameRow(r, cls) {
+    function rsvpNameRow(r, cls, famSide) {
       const plus = (r.guest_type === 'plus-one') ? '<span class="plusone-badge">+1</span>' : '';
       const { diet, wish } = splitWishes(r.dietary_notes);
       const dietHtml = diet ? `<span class="diet-note">${esc(diet)}</span>` : '';
       const phone = (r.phone && String(r.phone).trim()) ? ` <span class="fam">· ${esc(r.phone)}</span>` : '';
+      const sideHtml = famSide ? ` <span class="side-badge">${sideLabel(famSide.get(r.family_code) || 'neither')}</span>` : '';
       const nameHtml = wish
         ? `<button type="button" class="guest-name-btn" title="Show wishes" onclick="toggleWish(this)">${esc(r.guest_name)} <span class="wish-caret">▸</span></button>`
         : esc(r.guest_name);
       const wishHtml = wish ? `<span class="wish-text">💬 ${esc(wish)}</span>` : '';
-      return `<li class="${cls}">${nameHtml}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${phone}${dietHtml}${wishHtml}</li>`;
+      return `<li class="${cls}">${nameHtml}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${sideHtml}${phone}${dietHtml}${wishHtml}</li>`;
     }
 
     function shortEventTitle(t) {
@@ -465,6 +466,7 @@
         byEventSelectedId = events[0].id;
       }
       const respondedFams = new Set(rsvps.map(r => r.family_code));
+      const famSide = new Map(families.map(f => [f.family_code, familySide(f)]));
       const counts = new Map();
       events.forEach(ev => {
         const recs = rsvps.filter(r => r.event_id === ev.id);
@@ -495,10 +497,10 @@
           </span>
         </div>
         ${att.length
-          ? `<ul class="rsvp-name-list">${att.map(r => rsvpNameRow(r, 'attending')).join('')}</ul>`
+          ? `<ul class="rsvp-name-list">${att.map(r => rsvpNameRow(r, 'attending', famSide)).join('')}</ul>`
           : '<p style="font-size:0.85rem;color:var(--taupe);">No confirmed guests yet.</p>'}
         ${dec.length
-          ? `<p style="font-size:0.74rem;color:var(--taupe);margin:12px 0 4px;letter-spacing:1px;text-transform:uppercase;">Declining (${dec.length})</p><ul class="rsvp-name-list">${dec.map(r => rsvpNameRow(r, 'declining')).join('')}</ul>`
+          ? `<p style="font-size:0.74rem;color:var(--taupe);margin:12px 0 4px;letter-spacing:1px;text-transform:uppercase;">Declining (${dec.length})</p><ul class="rsvp-name-list">${dec.map(r => rsvpNameRow(r, 'declining', famSide)).join('')}</ul>`
           : ''}
       </div>`;
     }
