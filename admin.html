@@ -366,7 +366,7 @@
       return b && g ? 'both' : b ? 'bride-side' : g ? 'groom-side' : 'neither';
     }
     function sideLabel(side) {
-      return side === 'bride-side' ? 'Bride' : side === 'groom-side' ? 'Groom' : side === 'both' ? 'Both' : '—';
+      return side === 'bride-side' ? 'Bride' : side === 'groom-side' ? 'Groom' : side === 'both' ? 'Couple' : '—';
     }
     // A 'both' family counts as bride-side and as groom-side; 'both' filter = only both-tagged
     function sideMatches(side, filter) {
@@ -432,13 +432,12 @@
       const plus = (r.guest_type === 'plus-one') ? '<span class="plusone-badge">+1</span>' : '';
       const { diet, wish } = splitWishes(r.dietary_notes);
       const dietHtml = diet ? `<span class="diet-note">${esc(diet)}</span>` : '';
-      const phone = (r.phone && String(r.phone).trim()) ? ` <span class="fam">· ${esc(r.phone)}</span>` : '';
       const sideHtml = famSide ? ` <span class="side-badge">${sideLabel(famSide.get(r.family_code) || 'neither')}</span>` : '';
       const nameHtml = wish
         ? `<button type="button" class="guest-name-btn" title="Show wishes" onclick="toggleWish(this)">${esc(r.guest_name)} <span class="wish-caret">▸</span></button>`
         : esc(r.guest_name);
       const wishHtml = wish ? `<span class="wish-text">💬 ${esc(wish)}</span>` : '';
-      return `<li class="${cls}">${nameHtml}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${sideHtml}${phone}${dietHtml}${wishHtml}</li>`;
+      return `<li class="${cls}">${nameHtml}${plus} <span class="fam">· ${esc(r.family_name || '')}</span>${sideHtml}${dietHtml}${wishHtml}</li>`;
     }
 
     function shortEventTitle(t) {
