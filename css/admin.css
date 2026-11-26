@@ -168,11 +168,13 @@
 }
 .rsvp-event-panel {
   border: 1px solid var(--line); border-top: none; border-radius: 0 0 12px 12px;
-  background: var(--white); padding: 6px 16px 14px;
+  background: var(--white); padding: 0 16px 14px;
+  max-height: 480px; overflow-y: auto;
 }
 .rsvp-event-panel-head {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px;
   padding: 14px 0 10px; border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; background: var(--white); z-index: 1;
 }
 .rsvp-event-title { font-family: var(--font-serif); font-size: 1.02rem; color: var(--gold-dark); }
 .rsvp-event-when { font-size: 0.8rem; color: var(--taupe); }
