@@ -3,8 +3,8 @@
 // Why this exists: the Cloud Function and Trigger Email extension routes
 // both need the Firebase Blaze (pay-as-you-go) plan, so this uses a
 // scheduled GitHub Actions workflow instead. Cost is $0 (Actions is free
-// and unlimited on public repos). Tradeoff: emails arrive up to ~15
-// minutes after the RSVP, not instantly.
+// and unlimited on public repos; SendGrid's free tier is 100 emails/day).
+// Tradeoff: emails arrive up to ~15 minutes after the RSVP, not instantly.
 //
 // How it detects a submission: the site writes one `rsvps` doc per
 // guest+event, all sharing the same `timestamp` for one submit
@@ -29,18 +29,18 @@
 //       disha-rajat-wedding (Firebase console > Project settings >
 //       Service accounts > Generate new private key). Admin SDK bypasses
 //       Firestore rules, so no rules change is needed.
-//   SMTP_USER — Gmail address the mail is sent from
-//       (e.g. khanna.rjt@gmail.com)
-//   SMTP_PASS — Gmail app password for that account (Google Account >
-//       Security > 2-Step Verification > App passwords). NOT your login
-//       password.
+//   SENDGRID_API_KEY — SendGrid API key with Mail Send permission
+//       (SendGrid dashboard > Settings > API Keys > Create API Key).
+//       Shown once — copy it immediately. Starts with "SG.".
+//   SENDGRID_FROM — the sender address, which must be a verified
+//       Single Sender in SendGrid (Settings > Sender Authentication >
+//       Verify a Single Sender) — e.g. dishajain2016@gmail.com.
 //   NOTIFY_EMAILS — comma-separated recipients, e.g.
 //       "khanna.rjt@gmail.com,dishajain2016@gmail.com"
 //       (Default: both Rajat and Disha.)
 //   WINDOW_HOURS — how far back to look each run (default 24).
 
 const admin = require("firebase-admin");
-const nodemailer = require("nodemailer");
 
 const WINDOW_HOURS = Number(process.env.WINDOW_HOURS || 24);
 const NOTIFY_EMAILS =
@@ -49,6 +49,7 @@ const NOTIFY_EMAILS =
 const ADMIN_URL =
   "https://disha-jain.github.io/disha-rajat-wedding/admin.html";
 const MARKER_COLLECTION = "rsvp_notify";
+const SENDGRID_URL = "https://api.sendgrid.com/v3/mail/send";
 
 // Pure helpers (exported for test-notify.js) -------------------------------
 
@@ -133,7 +134,36 @@ function buildEmailText(group, isUpdate) {
   };
 }
 
+// Build the SendGrid v3 /mail/send request body for one group.
+function buildSendGridPayload(group, isUpdate, from, recipients) {
+  const { subject, text } = buildEmailText(group, isUpdate);
+  return {
+    personalizations: [
+      { to: recipients.map((email) => ({ email })) },
+    ],
+    from: { email: from, name: "Disha & Rajat Wedding" },
+    subject,
+    content: [{ type: "text/plain", value: text }],
+  };
+}
+
 // Live run -----------------------------------------------------------------
+
+async function sendViaSendGrid(payload, apiKey) {
+  const res = await fetch(SENDGRID_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  // 202 Accepted with an empty body = queued for delivery.
+  if (res.status !== 202) {
+    const body = await res.text();
+    throw new Error(`SendGrid ${res.status}: ${body.slice(0, 500)}`);
+  }
+}
 
 async function main() {
   const serviceAccount = JSON.parse(
@@ -144,8 +174,8 @@ async function main() {
       "FIREBASE_SERVICE_ACCOUNT_JSON secret is missing or not valid JSON"
     );
   }
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    throw new Error("SMTP_USER / SMTP_PASS secrets are missing");
+  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM) {
+    throw new Error("SENDGRID_API_KEY / SENDGRID_FROM secrets are missing");
   }
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -181,22 +211,16 @@ async function main() {
     return;
   }
 
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  });
-
+  const recipients = NOTIFY_EMAILS.split(",").map((s) => s.trim());
   for (const { group, isUpdate } of toEmail) {
-    const { subject, text } = buildEmailText(group, isUpdate);
-    await transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to: NOTIFY_EMAILS.split(",").map((s) => s.trim()).join(", "),
-      subject,
-      text,
-    });
-    console.log(`Emailed: ${subject} (${group.docs.length} docs)`);
+    const payload = buildSendGridPayload(
+      group,
+      isUpdate,
+      process.env.SENDGRID_FROM,
+      recipients
+    );
+    await sendViaSendGrid(payload, process.env.SENDGRID_API_KEY);
+    console.log(`Emailed: ${payload.subject} (${group.docs.length} docs)`);
     // Record the timestamp in the family's marker so this group is never
     // emailed twice. The marker lives outside the rsvps docs precisely
     // because the site's re-save would wipe a flag on those docs.
@@ -223,4 +247,9 @@ if (require.main === module) {
   });
 }
 
-module.exports = { groupSubmissions, planNotifications, buildEmailText };
+module.exports = {
+  groupSubmissions,
+  planNotifications,
+  buildEmailText,
+  buildSendGridPayload,
+};
