@@ -67,10 +67,21 @@ change. The Admin SDK reads/writes Firestore directly, bypassing rules.
 - Each run queries `rsvps` docs with `timestamp` in the last 24 hours
   (`WINDOW_HOURS`, default 24) — so the first run never emails about
   months of old RSVPs, while an Actions outage of a few hours does not
-  silently skip any.
+  silently skip any. In normal operation the digest covers roughly the
+  last 15 minutes (the cron interval); if a run fails, the next run's
+  digest includes the backlog.
 - Un-notified docs are grouped by `(family_code, timestamp)`: one
   submit writes all its docs with one shared timestamp, so one group =
-  one email, not ~20.
+  one digest section, not ~20.
+- One email per run, subject **"Wedding Guest RSVP Updates"**, with a
+  section per family: "New RSVP: {family} ({code}) — {side}" or
+  "RSVP updated: ..." for an edit, then each guest with their events
+  and statuses, dietary notes, and the admin link once at the end.
+  `{side}` is the family's bride-side / groom-side tag (or both),
+  taken from the `families` doc — tags live on the members, so the
+  family's side is the union of its members' tags, exactly as the
+  site computes session tags. Families with neither side tag show no
+  side.
 - Notification state lives in a separate `rsvp_notify` collection, one
   doc per family: `{ notified_timestamps: [...], updated_at }`. A group
   whose timestamp is already in the marker was emailed before and is
@@ -81,10 +92,11 @@ change. The Admin SDK reads/writes Firestore directly, bypassing rules.
   wipes such a flag — so after an edit no notified doc would survive
   and every edit would be mislabelled "New RSVP". The marker doc is
   never touched by the site, so it survives re-saves.
-- After emailing a group, its timestamp is added to the family's
-  marker with `arrayUnion`, so it is never emailed twice. If sending
-  fails (e.g. SendGrid returns anything other than 202), the marker is
-  untouched and the next run retries.
+- After the digest is sent, every emailed timestamp is added to its
+  family's marker with `arrayUnion` (one batch write), so no group is
+  ever emailed twice. If sending fails (e.g. SendGrid returns anything
+  other than 202), no marker is written and the next run retries the
+  whole digest.
 - Logs: every run prints how many docs/groups it found and what it
   emailed; failures show red in the Actions tab.
 
