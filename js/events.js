@@ -163,7 +163,8 @@ const WEDDING_EVENTS = [
     dressCode: '',              // EDIT ME
     notes: '',
     tags: ['groom-side'],
-    icon: '👳🏽'
+    icon: '👳🏽',
+    rsvp: false               // No RSVP needed for Sehra Bandi (2026-11-26)
   },
   {
     id: 'baarat',
