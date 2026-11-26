@@ -1,11 +1,14 @@
 // Mock-data tests for notify-rsvps.js grouping, notification planning
-// (marker docs), email text and the SendGrid payload. No Firestore or
-// SendGrid needed: exercises the pure functions only.
+// (marker docs), side tags, digest text and the SendGrid payload. No
+// Firestore or SendGrid needed: exercises the pure functions only.
 const assert = require("assert");
 const {
   groupSubmissions,
   planNotifications,
-  buildEmailText,
+  sideLabel,
+  familySideFromDoc,
+  buildFamilySection,
+  buildDigestText,
   buildSendGridPayload,
 } = require("./notify-rsvps");
 
@@ -76,27 +79,75 @@ assert.strictEqual(editCase.length, 1);
 assert.strictEqual(editCase[0].action, "email");
 assert.strictEqual(editCase[0].isUpdate, true, "edit after notify = RSVP updated");
 
-const email1 = buildEmailText(famA1, false);
-assert.strictEqual(email1.subject, "New RSVP — Khanna Family");
-assert.ok(email1.text.includes("Rajat Khanna (555-1)"), "phone shown");
-assert.ok(email1.text.includes("Sangeet: attending"), "event status listed");
-assert.ok(email1.text.includes("Shaadi: attending"), "second event listed");
-assert.ok(email1.text.includes("Disha Jain"), "second guest listed");
-assert.ok(email1.text.includes("Dietary / wishes: Veg"), "dietary shown");
-assert.ok(email1.text.includes("admin.html"), "admin link present");
+// Side labels from tag lists.
+assert.strictEqual(sideLabel(["bride-side"]), "bride-side");
+assert.strictEqual(sideLabel(["groom-side"]), "groom-side");
+assert.strictEqual(
+  sideLabel(["india-guest", "groom-side", "us-guest", "bride-side"]),
+  "bride-side + groom-side",
+  "both sides, bride first, other tags ignored"
+);
+assert.strictEqual(sideLabel(["india-guest", "us-guest"]), "");
+assert.strictEqual(sideLabel([]), "");
+assert.strictEqual(sideLabel(null), "");
 
-const email2 = buildEmailText(famA2, true);
-assert.strictEqual(email2.subject, "RSVP updated — Khanna Family");
-assert.ok(email2.text.includes("Sangeet: declining"), "edit shows new status");
+// Side from a families doc: union of member tags (same as the site's
+// session tags). Missing doc / no members -> no side.
+assert.strictEqual(
+  familySideFromDoc({ members: [
+    { tags: ["india-guest", "bride-side"] },
+    { tags: ["us-guest"] },
+  ] }),
+  "bride-side"
+);
+assert.strictEqual(
+  familySideFromDoc({ members: [
+    { tags: ["bride-side"] },
+    { tags: ["groom-side"] },
+  ] }),
+  "bride-side + groom-side",
+  "members on different sides -> both"
+);
+assert.strictEqual(familySideFromDoc(null), "");
+assert.strictEqual(familySideFromDoc({ members: [] }), "");
 
-const email3 = buildEmailText(famB, false);
-assert.ok(email3.text.includes("No nuts"), "family B dietary shown");
+// One family's digest section.
+const section1 = buildFamilySection(famA1, false, "bride-side");
+assert.ok(section1.startsWith("New RSVP: Khanna Family (FAM01) — bride-side"), "heading has side");
+assert.ok(section1.includes("Submitted: " + T1), "submitted line kept");
+assert.ok(section1.includes("Rajat Khanna (555-1)"), "phone shown");
+assert.ok(section1.includes("Sangeet: attending"), "event status listed");
+assert.ok(section1.includes("Shaadi: attending"), "second event listed");
+assert.ok(section1.includes("Disha Jain"), "second guest listed");
+assert.ok(section1.includes("Dietary / wishes: Veg"), "dietary shown");
+assert.ok(!section1.includes("admin.html"), "admin link is digest-level, not per section");
 
-// SendGrid payload: one personalization with both recipients, verified
-// sender as `from`, subject and plain-text body from the email text.
+const section2 = buildFamilySection(famA2, true, "bride-side + groom-side");
+assert.ok(section2.startsWith("RSVP updated: Khanna Family (FAM01) — bride-side + groom-side"));
+assert.ok(section2.includes("Sangeet: declining"), "edit shows new status");
+
+const sectionNoSide = buildFamilySection(famB, false, "");
+assert.ok(sectionNoSide.startsWith("New RSVP: Sharma Family (FAM02)\n"), "no side -> no dash");
+
+// The digest: fixed subject, sections joined, admin link once at the end.
+const digest = buildDigestText([
+  { group: famA1, isUpdate: false, side: "bride-side" },
+  { group: famB, isUpdate: false, side: "groom-side" },
+]);
+assert.strictEqual(digest.subject, "Wedding Guest RSVP Updates");
+assert.ok(digest.text.includes("New RSVP: Khanna Family (FAM01) — bride-side"));
+assert.ok(digest.text.includes("New RSVP: Sharma Family (FAM02) — groom-side"));
+assert.ok(digest.text.includes("\n\n---\n\n"), "sections separated");
+assert.strictEqual(
+  (digest.text.match(/admin\.html/g) || []).length,
+  1,
+  "admin link appears exactly once"
+);
+
+// SendGrid payload for the digest.
 const payload = buildSendGridPayload(
-  famA1,
-  false,
+  digest.subject,
+  digest.text,
   "dishajain2016@gmail.com",
   ["khanna.rjt@gmail.com", "dishajain2016@gmail.com"]
 );
@@ -107,12 +158,9 @@ assert.deepStrictEqual(payload.from, {
   email: "dishajain2016@gmail.com",
   name: "Disha & Rajat Wedding",
 });
-assert.strictEqual(payload.subject, "New RSVP — Khanna Family");
+assert.strictEqual(payload.subject, "Wedding Guest RSVP Updates");
 assert.strictEqual(payload.content.length, 1);
 assert.strictEqual(payload.content[0].type, "text/plain");
 assert.ok(payload.content[0].value.includes("Rajat Khanna (555-1)"));
 
-const payloadUpdate = buildSendGridPayload(famA2, true, "dishajain2016@gmail.com", ["khanna.rjt@gmail.com"]);
-assert.strictEqual(payloadUpdate.subject, "RSVP updated — Khanna Family");
-
-console.log("All mock tests pass: grouping, marker planning (new / updated / skip), email contents, SendGrid payload correct.");
+console.log("All mock tests pass: grouping, marker planning (new / updated / skip), side tags, digest sections, SendGrid payload correct.");
