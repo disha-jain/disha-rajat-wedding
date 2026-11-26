@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css?v=20261101a">
-  <link rel="stylesheet" href="css/admin.css?v=20261126f">
+  <link rel="stylesheet" href="css/admin.css?v=20261126g">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -530,7 +530,8 @@
         const responded = recs.length > 0;
         if (!responded) pendingCount++;
         const tags = familyTagSet(fam);
-        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length} guests</span><span class="side-badge">${sideLabel(familySide(fam))}</span></th>`;
+        const namesHtml = ((fam.members || []).map(m => (m.first_name || '').trim()).filter(Boolean).map(n => esc(n)).join(', '));
+        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length} guests</span>${namesHtml ? `<span class="fam-names">${namesHtml}</span>` : ''}<span class="side-badge">${sideLabel(familySide(fam))}</span></th>`;
         events.forEach(ev => {
           if (!eventInvitesFamily(ev, tags)) { html += `<td><span class="cell-na">—</span></td>`; return; }
           if (!responded) { html += `<td><span class="cell-pending">···</span></td>`; return; }
