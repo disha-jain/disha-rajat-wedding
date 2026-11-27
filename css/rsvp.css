@@ -39,6 +39,35 @@ body {
       color: var(--gold-dark); font-size: 0.8rem; font-weight: 700; text-decoration: underline;
       font-family: var(--font-sans);
     }
+    /* Accept all / Decline all, above the event cards */
+    .rsvp-bulk {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: var(--white); border: 1px solid var(--line); border-radius: 16px;
+      box-shadow: var(--shadow-soft); padding: 14px 18px; margin-bottom: 18px;
+    }
+    .rsvp-bulk-label { font-family: var(--font-serif); letter-spacing: 1px; color: var(--ink); font-size: 0.95rem; }
+    .rsvp-bulk .btn-gold-outline { padding: 8px 18px; font-size: 0.85rem; }
+    /* RSVP person rows: name + Attending / Not attending toggle buttons.
+       Nothing is pre-selected — an untouched row is not a decline. */
+    .rsvp-choice {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      padding: 10px 12px; border-bottom: 1px solid var(--line); border-radius: 10px;
+    }
+    .rsvp-choice:last-child { border-bottom: none; }
+    .rsvp-choice.choice-missing { background: #fbeeea; border: 1px solid #f0c9bd; }
+    .choice-btns { display: flex; gap: 8px; flex-shrink: 0; }
+    .choice-btn {
+      position: relative; cursor: pointer; font-size: 0.8rem; font-weight: 700; white-space: nowrap;
+      padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line);
+      background: var(--white); color: var(--taupe); font-family: var(--font-sans);
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .choice-btn input[type="radio"] {
+      position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0;
+    }
+    .choice-btn:has(input:checked).choice-attending { background: var(--ink); border-color: var(--ink); color: var(--white); }
+    .choice-btn:has(input:checked).choice-declining { background: var(--taupe); border-color: var(--taupe); color: var(--white); }
+    .choice-btn:has(input:focus-visible) { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
     .person-label { display: flex; align-items: center; gap: 4px; }
     .person-kind {
       font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
