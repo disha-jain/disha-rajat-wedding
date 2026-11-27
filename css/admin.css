@@ -73,6 +73,7 @@
 .delete-icon-btn:hover { background: #c44; border-color: #c44; color: #fff; }
 .delete-icon-btn svg { display: block; }
 
+.modal-card-wide { max-width: 680px; }
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(27, 26, 23, 0.55);
   display: flex; align-items: center; justify-content: center;
@@ -86,6 +87,31 @@
 .modal-sub { color: var(--taupe); font-size: 0.88rem; margin: 4px 0 18px; }
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
 .modal-actions .btn-primary, .modal-actions .btn-gold-outline { flex: 1; }
+
+/* ---------- By Family RSVP editor ---------- */
+.rsvp-edit-btn {
+  display: block; margin-top: 6px; background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--gold-dark); font-size: 0.75rem; font-weight: 700; text-decoration: underline; font-family: var(--font-sans);
+}
+.rsvp-edit-person { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+.rsvp-edit-person-name { font-family: var(--font-serif); font-size: 1rem; color: var(--ink); letter-spacing: 0.5px; margin-bottom: 6px; }
+.rsvp-edit-event { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.rsvp-edit-event:last-child { border-bottom: none; }
+.rsvp-edit-event-title { font-size: 0.85rem; color: var(--dark-gray); }
+.rsvp-edit-toggle { display: flex; gap: 6px; flex-shrink: 0; }
+.rsvp-edit-toggle button {
+  cursor: pointer; font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+  padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--line);
+  background: var(--white); color: var(--taupe); font-family: var(--font-sans);
+}
+.rsvp-edit-toggle button.on-attending { background: var(--ink); border-color: var(--ink); color: var(--white); }
+.rsvp-edit-toggle button.on-declining { background: var(--taupe); border-color: var(--taupe); color: var(--white); }
+.rsvp-edit-error {
+  display: none; background: #fbeeea; border: 1px solid #f0c9bd; color: #b3402e;
+  border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; margin: 12px 0 0;
+}
+.extra-row { display: flex; gap: 8px; }
+.extra-row input { flex: 1; }
 
 /* ---------- Roster table: delineation, selection, checkbox alignment ---------- */
 .roster-table thead th {
