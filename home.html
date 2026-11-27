@@ -505,7 +505,7 @@
 
       <div class="section-card" id="phone-card">
         <h3>Phone numbers</h3>
-        <p class="limit-note">One phone number is required for your party; numbers for everyone else are optional. Please include the country code (+1 US, +91 India, +65 Singapore, +44 UK). We'll only use these numbers to reach you on WhatsApp about the wedding.</p>
+        <p class="limit-note" id="phone-note">One phone number is required for your party; numbers for everyone else are optional. Please include the country code (+1 US, +91 India, +65 Singapore, +44 UK). We'll only use these numbers to reach you on WhatsApp about the wedding.</p>
         <div id="phone-list"></div>
       </div>
 
@@ -819,6 +819,15 @@ function updateCountdown() {
         ...family.members.map(m => ({ key: memberKey(m), name: fullName(m) })),
         ...additional.map(x => ({ key: extraKey(x), name: `${x.first} ${x.last}`.trim() || 'Additional guest' }))
       ];
+      // A one-person party doesn't need the "one number for your party;
+      // everyone else optional" framing — just ask for their number.
+      const note = document.getElementById('phone-note');
+      if (note) {
+        const partySize = family.members.length + additional.filter(x => x.first.trim() && x.last.trim()).length;
+        note.textContent = partySize <= 1
+          ? 'Please include the country code (+1 US, +91 India, +65 Singapore, +44 UK). We\'ll only use this number to reach you on WhatsApp about the wedding.'
+          : 'One phone number is required for your party; numbers for everyone else are optional. Please include the country code (+1 US, +91 India, +65 Singapore, +44 UK). We\'ll only use these numbers to reach you on WhatsApp about the wedding.';
+      }
       const wanted = new Set(people.map(p => p.key));
       [...wrap.querySelectorAll('.phone-row')].forEach(row => {
         if (!wanted.has(row.dataset.key)) row.remove();
