@@ -567,8 +567,22 @@
         const recs = byFam.get(fam.family_code) || [];
         if (!responded) pendingCount++;
         const tags = familyTagSet(fam);
-        const namesHtml = ((fam.members || []).map(m => (m.first_name || '').trim()).filter(Boolean).map(n => esc(n)).join(', '));
-        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length} guests</span>${namesHtml ? `<span class="fam-names">${namesHtml}</span>` : ''}<span class="side-badge">${sideLabel(familySide(fam))}</span>${adminReadOnly ? '' : `<button class="rsvp-edit-btn" onclick="openRsvpEditModal('${esc(fam.family_code)}')">Edit RSVPs</button>`}</th>`;
+        // Plus-ones live only in RSVP records (not family members), so list
+        // them here too or a family added through the RSVP editor looks empty.
+        const plusOnes = new Set();
+        const memberNameSet = new Set((fam.members || []).map(m => `${m.first_name} ${m.last_name}`.trim().toLowerCase()));
+        (rsvps || []).forEach(r => {
+          if (r.family_code === fam.family_code && r.guest_type === 'plus-one') {
+            const nm = (r.guest_name || '').trim();
+            if (nm && !memberNameSet.has(nm.toLowerCase())) plusOnes.add(nm);
+          }
+        });
+        const namesList = [
+          ...((fam.members || []).map(m => (m.first_name || '').trim()).filter(Boolean)),
+          ...[...plusOnes].map(n => n.split(/\s+/)[0] + ' (+1)')
+        ];
+        const namesHtml = namesList.map(n => esc(n)).join(', ');
+        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length + plusOnes.size} guests</span>${namesHtml ? `<span class="fam-names">${namesHtml}</span>` : ''}<span class="side-badge">${sideLabel(familySide(fam))}</span>${adminReadOnly ? '' : `<button class="rsvp-edit-btn" onclick="openRsvpEditModal('${esc(fam.family_code)}')">Edit RSVPs</button>`}</th>`;
         events.forEach(ev => {
           if (!eventInvitesFamily(ev, tags)) { html += `<td><span class="cell-na">—</span></td>`; return; }
           if (!responded) { html += `<td><span class="cell-pending">···</span></td>`; return; }
