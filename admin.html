@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="styles.css?v=20261101a">
-  <link rel="stylesheet" href="css/admin.css?v=20261126g">
+  <link rel="stylesheet" href="css/admin.css?v=20261127a">
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -182,6 +182,28 @@
       <div class="modal-actions">
         <button class="btn-primary" onclick="saveAddModal()">Add guest</button>
         <button class="btn-gold-outline" onclick="closeAddModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="rsvp-edit-modal" style="display:none;">
+    <div class="modal-card modal-card-wide" role="dialog" aria-label="Edit RSVPs">
+      <h3 class="gold-title">Edit RSVPs</h3>
+      <p class="modal-sub" id="rsvp-edit-modal-sub"></p>
+      <div id="rsvp-edit-body"></div>
+      <div class="form-group" style="margin-top:16px;">
+        <label>Add a person to this family</label>
+        <div class="extra-row">
+          <input type="text" id="rsvp-edit-new-first" placeholder="First name" autocomplete="off">
+          <input type="text" id="rsvp-edit-new-last" placeholder="Last name" autocomplete="off">
+          <button class="btn-gold-outline" type="button" onclick="addRsvpEditPerson()">Add person</button>
+        </div>
+        <p class="limit-note" style="margin:8px 0 0;">Added people join as additional guests (plus-ones) of this family.</p>
+      </div>
+      <p class="rsvp-edit-error" id="rsvp-edit-error"></p>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="saveRsvpEditModal()">Save RSVPs</button>
+        <button class="btn-gold-outline" onclick="closeRsvpEditModal()">Cancel</button>
       </div>
     </div>
   </div>
@@ -546,7 +568,7 @@
         if (!responded) pendingCount++;
         const tags = familyTagSet(fam);
         const namesHtml = ((fam.members || []).map(m => (m.first_name || '').trim()).filter(Boolean).map(n => esc(n)).join(', '));
-        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length} guests</span>${namesHtml ? `<span class="fam-names">${namesHtml}</span>` : ''}<span class="side-badge">${sideLabel(familySide(fam))}</span></th>`;
+        html += `<tr class="${responded ? '' : 'row-pending'}"><th>${esc(fam.family_name)}<span class="fam-code">${esc(fam.family_code)} · ${(fam.members || []).length} guests</span>${namesHtml ? `<span class="fam-names">${namesHtml}</span>` : ''}<span class="side-badge">${sideLabel(familySide(fam))}</span>${adminReadOnly ? '' : `<button class="rsvp-edit-btn" onclick="openRsvpEditModal('${esc(fam.family_code)}')">Edit RSVPs</button>`}</th>`;
         events.forEach(ev => {
           if (!eventInvitesFamily(ev, tags)) { html += `<td><span class="cell-na">—</span></td>`; return; }
           if (!responded) { html += `<td><span class="cell-pending">···</span></td>`; return; }
@@ -561,6 +583,167 @@
       const tabBtn = document.querySelector('.rsvp-tab[data-tab="by-family"]');
       if (tabBtn) tabBtn.innerHTML = `By Family <span class="tab-count">${pendingCount}</span>`;
     }
+
+    // ---------- By Family RSVP editor: change statuses + add people ----------
+    // Deterministic RSVP document IDs, same shape as the guest form uses, so
+    // an admin save overwrites the same documents instead of duplicating them.
+    function slugName(name) {
+      return String(name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    function rsvpDocId(r) {
+      return `${r.family_code}__${slugName(r.guest_name)}__${r.event_id}`;
+    }
+
+    let rsvpEdit = null; // {famCode, famName, events, people: [{name, isMember, phone, choices}]}
+
+    function openRsvpEditModal(famCode) {
+      if (adminReadOnly) return;
+      const fam = getStoredGuestList().find(f => f.family_code === famCode);
+      if (!fam) return;
+      const events = rsvpAbleEvents().filter(ev => eventInvitesFamily(ev, familyTagSet(fam)));
+      const recs = getStoredRSVPs().filter(r => r.family_code === famCode);
+      const memberNames = new Set((fam.members || []).map(m => `${m.first_name} ${m.last_name}`.trim().toLowerCase()));
+      const people = (fam.members || []).map(m => ({
+        name: `${m.first_name} ${m.last_name}`.trim(), isMember: true, phone: m.phone || '', choices: {}
+      }));
+      const seenPlus = new Set();
+      recs.forEach(r => {
+        const nm = (r.guest_name || '').trim();
+        if (!nm || memberNames.has(nm.toLowerCase()) || seenPlus.has(nm.toLowerCase())) return;
+        seenPlus.add(nm.toLowerCase());
+        people.push({ name: nm, isMember: false, phone: r.phone || '', choices: {} });
+      });
+      people.forEach(p => {
+        recs.forEach(r => {
+          if ((r.guest_name || '').trim().toLowerCase() === p.name.toLowerCase() &&
+              (r.status === 'attending' || r.status === 'declining')) {
+            p.choices[r.event_id] = r.status;
+          }
+        });
+      });
+      rsvpEdit = { famCode, famName: fam.family_name, events, people };
+      document.getElementById('rsvp-edit-modal-sub').textContent = fam.family_name + ' · ' + famCode;
+      document.getElementById('rsvp-edit-new-first').value = '';
+      document.getElementById('rsvp-edit-new-last').value = '';
+      document.getElementById('rsvp-edit-error').style.display = 'none';
+      renderRsvpEditBody();
+      document.getElementById('rsvp-edit-modal').style.display = 'flex';
+    }
+
+    function renderRsvpEditBody() {
+      const host = document.getElementById('rsvp-edit-body');
+      if (!host || !rsvpEdit) return;
+      if (!rsvpEdit.events.length) {
+        host.innerHTML = '<p class="limit-note">No RSVP-able events for this family.</p>';
+        return;
+      }
+      host.innerHTML = rsvpEdit.people.map((p, pi) => `
+        <div class="rsvp-edit-person">
+          <div class="rsvp-edit-person-name">${esc(p.name)}${p.isMember ? '' : ' <span class="tag-chip">plus-one</span>'}</div>
+          ${rsvpEdit.events.map(e => {
+            const c = p.choices[e.id];
+            return `<div class="rsvp-edit-event">
+              <span class="rsvp-edit-event-title">${esc(shortEventTitle(e.title))}</span>
+              <span class="rsvp-edit-toggle">
+                <button type="button" class="${c === 'attending' ? 'on-attending' : ''}" data-pi="${pi}" data-ev="${esc(e.id)}" data-val="attending">Attending</button>
+                <button type="button" class="${c === 'declining' ? 'on-declining' : ''}" data-pi="${pi}" data-ev="${esc(e.id)}" data-val="declining">Not attending</button>
+              </span>
+            </div>`;
+          }).join('')}
+        </div>`).join('');
+      host.querySelectorAll('.rsvp-edit-toggle button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const p = rsvpEdit.people[Number(btn.dataset.pi)];
+          if (!p) return;
+          p.choices[btn.dataset.ev] = btn.dataset.val;
+          renderRsvpEditBody();
+        });
+      });
+    }
+
+    function showRsvpEditError(msg) {
+      const el = document.getElementById('rsvp-edit-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function addRsvpEditPerson() {
+      if (!rsvpEdit) return;
+      const first = document.getElementById('rsvp-edit-new-first').value.trim();
+      const last = document.getElementById('rsvp-edit-new-last').value.trim();
+      if (!first || !last) { showRsvpEditError('Please give both a first and last name for the new person.'); return; }
+      const name = `${first} ${last}`;
+      if (rsvpEdit.people.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+        showRsvpEditError(`${name} is already in this family.`); return;
+      }
+      rsvpEdit.people.push({ name, isMember: false, phone: '', choices: {} });
+      document.getElementById('rsvp-edit-new-first').value = '';
+      document.getElementById('rsvp-edit-new-last').value = '';
+      document.getElementById('rsvp-edit-error').style.display = 'none';
+      renderRsvpEditBody();
+    }
+
+    async function saveRsvpEditModal() {
+      if (!rsvpEdit || adminReadOnly) return;
+      const families = getStoredGuestList();
+      const fam = families.find(f => f.family_code === rsvpEdit.famCode);
+      if (!fam) return;
+      const existing = getStoredRSVPs().filter(r => r.family_code === rsvpEdit.famCode);
+      const byGuestEvent = new Map();
+      existing.forEach(r => byGuestEvent.set((r.guest_name || '').trim().toLowerCase() + '|' + r.event_id, r));
+      const timestamp = new Date().toISOString();
+      const newRecords = [];
+      rsvpEdit.people.forEach(p => {
+        rsvpEdit.events.forEach(e => {
+          const choice = p.choices[e.id];
+          if (!choice) return; // no choice = no record (stays "awaiting")
+          const prev = byGuestEvent.get(p.name.toLowerCase() + '|' + e.id);
+          newRecords.push({
+            family_code: fam.family_code,
+            family_name: fam.family_name,
+            guest_name: p.name,
+            guest_type: p.isMember ? 'family' : 'plus-one',
+            event_id: e.id,
+            event_title: e.title,
+            status: choice,
+            dietary_notes: prev ? (prev.dietary_notes || '') : '',
+            phone: prev ? (prev.phone || '') : (p.phone || ''),
+            timestamp
+          });
+        });
+      });
+      // Mirror locally: drop the records this save covers, then add the new ones.
+      const covered = new Set(newRecords.map(r => (r.guest_name || '').trim().toLowerCase() + '|' + r.event_id));
+      const kept = getStoredRSVPs().filter(r => !(r.family_code === fam.family_code && covered.has((r.guest_name || '').trim().toLowerCase() + '|' + r.event_id)));
+      try { localStorage.setItem('wedding_rsvps_database', JSON.stringify([...kept, ...newRecords])); } catch (e) {}
+      if (typeof db !== 'undefined' && db !== null) {
+        newRecords.forEach(rec => {
+          try { db.collection('rsvps').doc(rsvpDocId(rec)).set(rec).catch(() => {}); } catch (e) {}
+        });
+      }
+      // If the family gained additional guests beyond its allowance, grant
+      // room so the guest's own form shows them (its plus-one list is capped).
+      const extras = new Set();
+      newRecords.forEach(r => { if (r.guest_type === 'plus-one') extras.add((r.guest_name || '').trim().toLowerCase()); });
+      const cap = (fam.members || []).reduce((n, m) => n + (parseInt(m.max_plus_ones) || 0), 0);
+      if (extras.size > cap && fam.members.length) {
+        fam.members[0].max_plus_ones = (parseInt(fam.members[0].max_plus_ones) || 0) + (extras.size - cap);
+        persistFamilies(families);
+      }
+      closeRsvpEditModal();
+      loadDashboardData();
+      setAdminStatus(`Saved RSVPs for ${fam.family_name} — ${newRecords.length} record${newRecords.length === 1 ? '' : 's'} updated.`, false);
+    }
+
+    function closeRsvpEditModal() {
+      document.getElementById('rsvp-edit-modal').style.display = 'none';
+      rsvpEdit = null;
+    }
+
+    document.getElementById('rsvp-edit-modal').addEventListener('click', e => {
+      if (e.target.id === 'rsvp-edit-modal') closeRsvpEditModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRsvpEditModal(); });
 
     // Tab 3: master filterable table
     function renderRsvpAll(families, rsvps) {
