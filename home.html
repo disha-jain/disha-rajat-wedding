@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="styles.css?v=20261101a">
   <link rel="stylesheet" href="css/home.css?v=20261101a">
   <link rel="stylesheet" href="css/schedule.css?v=20261102a">
-  <link rel="stylesheet" href="css/rsvp.css?v=20261030a">
+  <link rel="stylesheet" href="css/rsvp.css?v=20261127a">
   <link rel="stylesheet" href="css/travel.css?v=20261030b">
 
 </head>
@@ -492,7 +492,7 @@
     <div id="rsvp-body">
       <div class="section-card" id="party-card">
         <h3>Your party</h3>
-        <p class="limit-note">Everyone below can be RSVP'd for each event. Tick who's attending.</p>
+        <p class="limit-note">Choose Attending or Not attending for each person at each event below.</p>
         <div id="member-list"></div>
       </div>
 
@@ -507,6 +507,12 @@
         <h3>Phone numbers</h3>
         <p class="limit-note">One phone number is required for your party; numbers for everyone else are optional. Please include the country code (+1 US, +91 India, +65 Singapore, +44 UK). We'll only use these numbers to reach you on WhatsApp about the wedding.</p>
         <div id="phone-list"></div>
+      </div>
+
+      <div class="rsvp-bulk">
+        <span class="rsvp-bulk-label">For every event:</span>
+        <button class="btn-gold-outline" type="button" id="accept-all-btn" onclick="setAllAttendance('attending')">Accept all</button>
+        <button class="btn-gold-outline" type="button" id="decline-all-btn" onclick="setAllAttendance('declining')">Decline all</button>
       </div>
 
       <div id="events-list"></div>
@@ -527,7 +533,7 @@
       </div>
 
       <div class="submit-wrap">
-        <button class="submit-btn" type="button" id="submit-rsvp" onclick="handleSubmit()">Send RSVP</button>
+        <button class="submit-btn" type="button" id="submit-rsvp" onclick="handleSubmit()">RSVP Now</button>
       </div>
     </div>
 
@@ -659,7 +665,8 @@ function updateCountdown() {
     let family = null;
     let familyEvents = [];
     let additional = [];          // [{id, first, last}]
-    let attendance = {};          // {eventId: {personKey: true}}
+    let attendance = {};          // {eventId: {personKey: 'attending' | 'declining'}}
+    let missingChoices = new Set(); // 'eventId|personKey' rows still needing a choice
     let phones = {};              // {personKey: phone string}
     let plusOneLimit = 0;
     let extraSeq = 0;
@@ -855,13 +862,22 @@ function updateCountdown() {
         const rows = keys.map(k => {
           const p = personLabel(k);
           if (!p || !p.name) return '';
-          const checked = att[k] ? 'checked' : '';
+          const choice = att[k];
+          const missing = missingChoices.has(e.id + '|' + k) ? ' choice-missing' : '';
           return `
-            <label class="checkbox-pill">
-              <input type="checkbox" data-event="${esc(e.id)}" data-person="${esc(k)}" ${checked}>
-              <span class="checkbox-icon"></span>
+            <div class="rsvp-choice${missing}" data-event="${esc(e.id)}" data-person="${esc(k)}">
               <span class="person-label">${esc(p.name)}${p.kind === 'family' ? '' : `<span class="person-kind">${esc(p.kind)}</span>`}</span>
-            </label>`;
+              <div class="choice-btns">
+                <label class="choice-btn choice-attending">
+                  <input type="radio" name="rsvp-${esc(e.id)}-${esc(k)}" value="attending" data-event="${esc(e.id)}" data-person="${esc(k)}" ${choice === 'attending' ? 'checked' : ''}>
+                  <span>Attending</span>
+                </label>
+                <label class="choice-btn choice-declining">
+                  <input type="radio" name="rsvp-${esc(e.id)}-${esc(k)}" value="declining" data-event="${esc(e.id)}" data-person="${esc(k)}" ${choice === 'declining' ? 'checked' : ''}>
+                  <span>Not attending</span>
+                </label>
+              </div>
+            </div>`;
         }).join('');
         return `
           <div class="event-card">
@@ -874,27 +890,45 @@ function updateCountdown() {
             </div>
             <div class="quick-links">
               <button type="button" class="link-btn" data-all="1" data-event="${esc(e.id)}">Everyone attending</button>
-              <button type="button" class="link-btn" data-all="0" data-event="${esc(e.id)}">No one</button>
+              <button type="button" class="link-btn" data-all="0" data-event="${esc(e.id)}">Everyone declining</button>
             </div>
             ${rows || '<p class="limit-note">Add guests above to RSVP for them.</p>'}
           </div>`;
       }).join('');
 
-      wrap.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => {
-          const { event, person } = cb.dataset;
+      wrap.querySelectorAll('input[type="radio"]').forEach(r => {
+        r.addEventListener('change', () => {
+          const { event, person } = r.dataset;
           attendance[event] = attendance[event] || {};
-          attendance[event][person] = cb.checked;
+          attendance[event][person] = r.value;
+          missingChoices.delete(event + '|' + person);
+          r.closest('.rsvp-choice')?.classList.remove('choice-missing');
         });
       });
       wrap.querySelectorAll('.link-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const val = btn.dataset.all === '1';
+          const val = btn.dataset.all === '1' ? 'attending' : 'declining';
           attendance[btn.dataset.event] = attendance[btn.dataset.event] || {};
-          partyKeys().forEach(k => { attendance[btn.dataset.event][k] = val; });
+          partyKeys().forEach(k => {
+            attendance[btn.dataset.event][k] = val;
+            missingChoices.delete(btn.dataset.event + '|' + k);
+          });
           renderEvents();
         });
       });
+    }
+
+    // Accept all / Decline all: set the same explicit choice for every
+    // person at every event, then re-render.
+    function setAllAttendance(val) {
+      partyKeys().forEach(k => {
+        familyEvents.forEach(e => {
+          attendance[e.id] = attendance[e.id] || {};
+          attendance[e.id][k] = val;
+        });
+      });
+      missingChoices.clear();
+      renderEvents();
     }
 
     // Which deadline applies to this guest: US-only guests (us-guest
@@ -992,9 +1026,9 @@ function updateCountdown() {
           key = x.key;
         }
         if (r.phone && !state.phones[key]) state.phones[key] = prefillPhone(r.phone) || String(r.phone);
-        if (r.status === 'attending') {
+        if (r.status === 'attending' || r.status === 'declining') {
           state.attendance[r.event_id] = state.attendance[r.event_id] || {};
-          state.attendance[r.event_id][key] = true;
+          state.attendance[r.event_id][key] = r.status;
         }
       });
       state.extras = [...extrasSeen.values()];
@@ -1076,6 +1110,27 @@ function updateCountdown() {
       const keys = [...family.members.map(memberKey), ...namedExtras.map(extraKey)];
       if (!keys.length) { showError('Your party is empty.'); return; }
 
+      // Every person needs an explicit choice for every event — an
+      // untouched row is not a decline, so nothing submits until each
+      // person has picked Attending or Not attending at each event.
+      const missing = [];
+      familyEvents.forEach(e => {
+        keys.forEach(k => {
+          if (!attendance[e.id] || !attendance[e.id][k]) {
+            const p = personLabel(k);
+            missing.push({ event: e, key: k, name: p ? p.name : k });
+          }
+        });
+      });
+      if (missing.length) {
+        missingChoices = new Set(missing.map(m => m.event.id + '|' + m.key));
+        renderEvents();
+        const first = missing[0];
+        const more = missing.length - 1;
+        showError(`Please choose Attending or Not attending for everyone at every event — ${first.name} at ${displayTitle(first.event, currentGuestTags())} still needs a choice${more > 0 ? `, plus ${more} more choice${more === 1 ? '' : 's'}` : ''}. The rows that still need a choice are highlighted below.`);
+        return;
+      }
+
       // Phone numbers: optional per person, but at least one per party is
       // required, and every number given must carry a country code —
       // +1 (US), +91 (India), +65 (Singapore), +44 (UK). Numbers are only ever
@@ -1100,7 +1155,7 @@ function updateCountdown() {
       familyEvents.forEach(e => {
         keys.forEach(k => {
           const p = personLabel(k);
-          const attending = !!(attendance[e.id] && attendance[e.id][k]);
+          const attending = attendance[e.id][k] === 'attending';
           newRecords.push({
             family_code: family.family_code,
             family_name: family.family_name,
